@@ -1,0 +1,30 @@
+<resources>
+    <string name="app_name">Bvd Automate Pump</string>
+
+    <!--    labels-->
+    <string name="l_email">Email</string>
+    <string name="l_password">Password</string>
+    <string name="l_vin_number">Vin Number</string>
+
+
+    <!--    error messages-->
+    <string name="e_email">"Enter a valid email"</string>
+    <string name="e_password">"Enter a valid password"</string>
+    <string name="e_user_name">"Enter a valid username"</string>
+    <string name="title_activity_vin_number_compose">VinNumberActivityCompose</string>
+    <string name="e_vin_number">"Enter a valid vin number"</string>
+
+    <!--    info messages -->
+    <string name="i_vin_number_message">"Please agree that you are in your respective vehicle and verify all the above details"</string>
+
+    <!--    header labels-->
+    <string name="h_vin_number">"Enter your Vehicle VIN number"</string>
+    <string name="h_verify_vehicle_details">"Verify Vehicle Details"</string>
+    <string name="title_activity_fetching_site_location_compose">FetchingSiteLocationCompose
+    </string>
+    <string name="h_driver_location">"Your Location"</string>
+    <string name="title_activity_site_location_list_compose">SiteLocationListActivityCompose
+    </string>
+
+
+</resources>
