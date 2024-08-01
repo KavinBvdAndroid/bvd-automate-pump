@@ -155,7 +155,7 @@ fun VehicleDetails(showVehicleDetails: Boolean) {
     if (showVehicleDetails) {
         val context = LocalContext.current
 
-        var checked by rememberSaveable { mutableStateOf(true) }
+        var checked by rememberSaveable { mutableStateOf(false) }
         AnimatedVisibility(
             visible = showVehicleDetails,
             enter = fadeIn() + expandVertically(animationSpec = tween(durationMillis = 4000)),  // 1 second duration

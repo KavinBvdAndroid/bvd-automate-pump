@@ -25,6 +25,8 @@
     <string name="h_driver_location">"Your Location"</string>
     <string name="title_activity_site_location_list_compose">SiteLocationListActivityCompose
     </string>
+    <string name="title_activity_fuel_selection">FuelSelectionActivity</string>
+    <string name="title_activity_start_fueling">StartFuelingActivity</string>
 
 
 </resources>

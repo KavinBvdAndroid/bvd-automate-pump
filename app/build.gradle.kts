@@ -71,10 +71,12 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     //Retrofit
-    //Retrofit
     implementation (libs.retrofit)
     implementation (libs.converter.gson)
     implementation (libs.logging.interceptor)
     testImplementation(libs.okhttp.mockwebserver)
+
+    //maps
+    implementation(libs.google.maps.compose)
 
 }

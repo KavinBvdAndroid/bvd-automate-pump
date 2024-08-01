@@ -1,5 +1,6 @@
 package com.example.loginactivity.feature.automatefuel
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -22,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -57,6 +59,7 @@ fun MainContentDemo() {
 @Composable
 fun FetchLocationContent(innerPadding: PaddingValues) {
     val scrollState = rememberScrollState()
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -78,7 +81,10 @@ fun FetchLocationContent(innerPadding: PaddingValues) {
         )
 
         ElevatedButton(
-            onClick = {  },
+            onClick = {
+                context.startActivity(Intent(context, SiteLocationListActivityCompose::class.java))
+
+            },
             modifier = Modifier
                 .size(260.dp) // Adjust size as needed
                 .background(Color.Blue, shape = CircleShape), // Background color and shape
