@@ -12,7 +12,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -60,7 +59,6 @@ import androidx.core.content.ContextCompat
 import com.example.loginactivity.core.base.generics.ReusableElevatedButton
 import com.example.loginactivity.core.base.utils.AppUtils
 import com.example.loginactivity.core.base.utils.AppUtils.hideSystemUI
-import com.example.loginactivity.feature.auth.VinNumberActivityCompose
 import com.example.loginactivity.feature.automatefuel.data.model.SiteDetails
 import com.example.loginactivity.feature.automatefuel.data.model.driverLocation
 import com.example.loginactivity.feature.automatefuel.data.model.sortedListOfSites
@@ -114,7 +112,6 @@ fun SiteLocationListContent(innerPadding: PaddingValues) {
 fun MapsContent() {
 
     val context = LocalContext.current
-
 
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(driverLocation, 15f)
