@@ -1,4 +1,4 @@
-package com.example.loginactivity.feature.automatefuel
+package com.example.loginactivity.feature.automatefuel.presentation
 
 import android.content.Context
 import android.content.Intent
@@ -104,7 +104,6 @@ fun SiteLocationListDemo() {
 
 @Composable
 fun SiteLocationListContent(innerPadding: PaddingValues) {
-//    MainScreen()
     MapsBottomSheet()
 }
 
@@ -260,6 +259,8 @@ fun MapsBottomSheet() {
                     onInfoWindowClick = { driverMarkerState.showInfoWindow() },
 
                     )
+                driverMarkerState.showInfoWindow()
+
 
                 if (markerClicked) {
                     Column(

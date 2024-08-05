@@ -12,6 +12,9 @@
 
     <color name="colorError">#a6003d</color>
 
+    <color name="disabledStopButtonColor">#77a6003d</color>
+    <color name="disabledStartButtonColor">#77384bad</color>
+
     <!--    button color-->
     <color name="colorDisabled">#77F6AF2B</color>
     <color name="colorEnabled">@color/colorPrimaryVariant</color>

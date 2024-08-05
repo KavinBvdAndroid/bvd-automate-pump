@@ -16,6 +16,7 @@
 
     <!--    info messages -->
     <string name="i_vin_number_message">"Please agree that you are in your respective vehicle and verify all the above details"</string>
+    <string name="i_fuel_activate_verification">"I Verified the amount of transactions happened"</string>
 
     <!--    header labels-->
     <string name="h_vin_number">"Enter your Vehicle VIN number"</string>
@@ -27,6 +28,9 @@
     </string>
     <string name="title_activity_fuel_selection">FuelSelectionActivity</string>
     <string name="title_activity_start_fueling">StartFuelingActivity</string>
+    <string name="title_activity_transaction">TransactionActivity</string>
+    <string name="title_activity_test_composable">TestComposableActivity</string>
+    <string name="title_activity_splash_screen">SplashScreenActivity</string>
 
 
 </resources>

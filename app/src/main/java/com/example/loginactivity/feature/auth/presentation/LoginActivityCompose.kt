@@ -1,4 +1,4 @@
-package com.example.loginactivity.feature.auth
+package com.example.loginactivity.feature.auth.presentation
 
 import android.content.Intent
 import android.os.Bundle
@@ -16,7 +16,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -35,7 +34,6 @@ import com.example.loginactivity.core.base.generics.LoginLogo
 import com.example.loginactivity.core.base.generics.ReusableElevatedButton
 import com.example.loginactivity.core.base.generics.ReusableTextInput
 import com.example.loginactivity.core.base.generics.isValidEmail
-import com.example.loginactivity.core.base.generics.isValidPassword
 import com.example.loginactivity.core.base.utils.AppUtils
 import com.example.loginactivity.core.base.utils.AppUtils.hideSystemUI
 import com.example.loginactivity.ui.theme.LoginActivityTheme
@@ -74,6 +72,7 @@ private fun MainContent(innerPadding: PaddingValues) {
     var isEmailValid by rememberSaveable { mutableStateOf(false) }
     var loginPassword by rememberSaveable { mutableStateOf("") }
     var isPasswordValid by rememberSaveable { mutableStateOf(false) }
+    var isPasswordVisible by rememberSaveable { mutableStateOf(false) }
 
     val scrollState = rememberScrollState()
     val context = LocalContext.current
@@ -96,7 +95,7 @@ private fun MainContent(innerPadding: PaddingValues) {
 
             ReusableTextInput(
                 value = loginEmail,
-                keyboardType = KeyboardOptions(keyboardType = KeyboardType.Text),
+                keyboardType = KeyboardOptions(keyboardType = KeyboardType.Email),
                 onValueChange = { newValue ->
                     loginEmail = newValue
                     isEmailValid = newValue.isValidEmail()
@@ -107,23 +106,23 @@ private fun MainContent(innerPadding: PaddingValues) {
                 onClick = {
                 },
                 modifier = Modifier
-                    .fillMaxWidth()
-            )
+                    .fillMaxWidth())
 
             ReusableTextInput(
                 value = loginPassword,
-                keyboardType = KeyboardOptions(keyboardType = KeyboardType.Text),
+                keyboardType = KeyboardOptions(keyboardType = KeyboardType.Password),
                 onValueChange = { newValue ->
                     loginPassword = newValue
-                    isPasswordValid = newValue.isValidPassword()
+                    isPasswordValid = newValue.isNotEmpty() && newValue.isNotBlank()
                 },
                 label = stringResource(id = R.string.l_password),
-                isError = loginPassword.isNotBlank() && !isPasswordValid,
-                errorMessage = stringResource(id = R.string.e_password),
                 onClick = {
                 },
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxWidth(),
+                isPassword = true,
+                isPasswordVisible = isPasswordVisible,
+                onPasswordVisibilityChange = {isPasswordVisible = it}
             )
 
             ReusableElevatedButton(

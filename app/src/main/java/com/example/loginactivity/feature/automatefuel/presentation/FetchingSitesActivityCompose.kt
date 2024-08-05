@@ -1,4 +1,4 @@
-package com.example.loginactivity.feature.automatefuel
+package com.example.loginactivity.feature.automatefuel.presentation
 
 import android.content.Intent
 import android.os.Bundle
@@ -83,7 +83,6 @@ fun FetchLocationContent(innerPadding: PaddingValues) {
         ElevatedButton(
             onClick = {
                 context.startActivity(Intent(context, SiteLocationListActivityCompose::class.java))
-
             },
             modifier = Modifier
                 .size(260.dp) // Adjust size as needed

@@ -1,7 +1,11 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.parcelize)
+    alias(libs.plugins.hiltAndroid)
+    alias(libs.plugins.kotlinAndroidKsp)
 
 }
 
@@ -20,6 +24,18 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        defaultConfig {
+//load the values from .properties file
+            val keystoreFile = project.rootProject.file("local.properties")
+            val properties = Properties()
+            properties.load(keystoreFile.inputStream())
+
+            //return empty key in case something goes wrong
+            val apiKey = properties.getProperty("api_key") ?: ""
+            //inject the key dynamically into the manifest
+            manifestPlaceholders["GOOGLE_KEY"] = apiKey
+        }
     }
 
     buildTypes {
@@ -29,6 +45,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {
@@ -71,12 +88,21 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     //Retrofit
-    implementation (libs.retrofit)
-    implementation (libs.converter.gson)
-    implementation (libs.logging.interceptor)
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.logging.interceptor)
     testImplementation(libs.okhttp.mockwebserver)
 
     //maps
     implementation(libs.google.maps.compose)
+
+    //icons
+    implementation(libs.compose.material.icons.extended)
+
+    implementation(libs.core.splashscreen)
+
+    implementation(libs.hilt.android)
+    implementation(libs.androidx.hilt.navigation.compose)
+    ksp(libs.hilt.compiler)
 
 }

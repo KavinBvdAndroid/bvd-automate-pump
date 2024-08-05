@@ -1,4 +1,4 @@
-package com.example.loginactivity.feature.auth
+package com.example.loginactivity.feature.auth.presentation
 
 import android.content.Intent
 import android.os.Bundle
@@ -6,12 +6,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.background
+import androidx.compose.animation.slideInHorizontally
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -33,7 +34,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -45,10 +45,12 @@ import com.example.loginactivity.core.base.generics.GenericDetailRow
 import com.example.loginactivity.core.base.generics.ReusableElevatedButton
 import com.example.loginactivity.core.base.generics.ReusableTextInput
 import com.example.loginactivity.core.base.generics.customTextStyle
+import com.example.loginactivity.core.base.generics.isValidVinNumber
 import com.example.loginactivity.core.base.utils.AppUtils
+import com.example.loginactivity.core.base.utils.Constants
 import com.example.loginactivity.feature.auth.data.model.VehicleDetail
 import com.example.loginactivity.feature.auth.ui.theme.LoginActivityTheme
-import com.example.loginactivity.feature.automatefuel.FetchingSiteLocationCompose
+import com.example.loginactivity.feature.automatefuel.presentation.FetchingSiteLocationCompose
 
 class VinNumberActivityCompose : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -81,7 +83,6 @@ fun VinContent(innerPadding: PaddingValues) {
     var vinNumber by rememberSaveable { mutableStateOf("") }
     var isVinNumberValid by rememberSaveable { mutableStateOf(false) }
     var showVehicleDetails by rememberSaveable { mutableStateOf(false) }
-
     val scrollState = rememberScrollState()
 
     Column(
@@ -109,12 +110,17 @@ fun VinContent(innerPadding: PaddingValues) {
                 value = vinNumber,
                 keyboardType = KeyboardOptions(keyboardType = KeyboardType.Text),
                 onValueChange = { newValue ->
-                    vinNumber = newValue
-                    isVinNumberValid = newValue.isNotEmpty() && newValue.isNotBlank()
+                    if (newValue.length <= Constants.VIN_NUMBER_LENGTH) {
+                        vinNumber = newValue
+                    } else {
+                        vinNumber = newValue.take(Constants.VIN_NUMBER_LENGTH)
+                    }
+                    isVinNumberValid =
+                        newValue.isNotEmpty() && newValue.isNotBlank() && vinNumber.isValidVinNumber().second
                 },
                 label = stringResource(id = R.string.l_vin_number),
                 isError = vinNumber.isNotBlank() && !isVinNumberValid,
-                errorMessage = stringResource(id = R.string.e_vin_number),
+                errorMessage = vinNumber.isValidVinNumber().first,
                 onClick = {
                 },
                 modifier = Modifier
@@ -137,7 +143,7 @@ fun VinContent(innerPadding: PaddingValues) {
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(min = LocalConfiguration.current.screenHeightDp.dp * 0.7f)
-                .padding(16.dp),
+                .padding(start = 16.dp, end = 16.dp),
 
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -158,24 +164,24 @@ fun VehicleDetails(showVehicleDetails: Boolean) {
         var checked by rememberSaveable { mutableStateOf(false) }
         AnimatedVisibility(
             visible = showVehicleDetails,
-            enter = fadeIn() + expandVertically(animationSpec = tween(durationMillis = 4000)),  // 1 second duration
-            exit = fadeOut() + shrinkVertically(animationSpec = tween(durationMillis = 4000))
+            enter = slideInHorizontally() + expandVertically(animationSpec = tween(durationMillis = 2000)),  // 1 second duration
+            exit = fadeOut() + shrinkVertically(animationSpec = tween(durationMillis = 2000))
         ) {
 
 
             Column(
 
                 modifier = Modifier
+                    .animateContentSize()
                     .fillMaxSize()
-//                .padding(16.dp)
-                    .background(Color.White),
+                ,
 
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
                     style = customTextStyle.titleLarge,
                     text = stringResource(id = R.string.h_verify_vehicle_details),
-                    modifier = Modifier.padding(top = 16.dp, bottom = 16.dp),
+                    modifier = Modifier.padding( bottom = 16.dp),
                 )
                 Column(
                     modifier = Modifier
@@ -220,7 +226,7 @@ fun VehicleDetails(showVehicleDetails: Boolean) {
                     Checkbox(checked = checked, onCheckedChange = { checked = it })
 
                     Text(
-                        style = customTextStyle.titleLarge,
+                        style = customTextStyle.labelMedium,
                         text = stringResource(id = R.string.i_vin_number_message),
                         modifier = Modifier.padding(top = 16.dp, bottom = 16.dp),
                     )
@@ -229,7 +235,12 @@ fun VehicleDetails(showVehicleDetails: Boolean) {
                 ReusableElevatedButton(
                     onClick = {
                         AppUtils.showToastMessage("Validated...")
-                        context.startActivity(Intent(context, FetchingSiteLocationCompose::class.java))
+                        context.startActivity(
+                            Intent(
+                                context,
+                                FetchingSiteLocationCompose::class.java
+                            )
+                        )
                     },
                     text = "Agree",
                     isEnabled = checked,
@@ -243,7 +254,6 @@ fun VehicleDetails(showVehicleDetails: Boolean) {
         }
     }
 }
-
 
 
 @Preview(showBackground = true)
@@ -269,7 +279,8 @@ val testVehicleDetails = VehicleDetail(
     owner = "John",
     number = "T2W 777",
     fuelType = "Diesel",
-    vinNumber = "123456789"
+    vinNumber = "123456789",
+    mileage = "300000 kms"
 
 )
 
