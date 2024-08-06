@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -25,6 +27,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.Typography
@@ -46,9 +50,11 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.loginactivity.R
+import com.example.loginactivity.feature.automatefuel.data.model.PumpResponse
 
 @Composable
 fun GenericProgressBar(
@@ -89,11 +95,7 @@ fun GenericProgressBar(
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = message,
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontSize = (14.sp),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        textAlign = TextAlign.Center
-                    )
+                    style = customTextStyle.labelMedium
                 )
             }
         }
@@ -138,10 +140,54 @@ val customTextStyle = Typography(
         fontFamily = poppinsFontFamily,
         fontWeight = FontWeight.Medium,
         fontSize = 20.sp,
-        color = Color.Black
+        color = Color.Black,
+        textAlign = TextAlign.Center
     )
 
 )
+
+val startMockPumpResponse = PumpResponse(
+    msg = "Successfully started",
+    params = "SuccessParams"
+)
+
+val stopMockPumpResponse = PumpResponse(
+    msg = "Stopped successfully",
+    params = "SuccessParams"
+)
+
+
+@Composable
+fun CustomSwitch(
+    isChecked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    switchWidth: Dp = 80.dp,
+    switchHeight: Dp = 40.dp
+) {
+    Box(
+        modifier = modifier
+            .width(switchWidth)
+            .height(switchHeight)
+            .clip(CircleShape) // Ensures the switch maintains its rounded appearance
+            .background(if (isChecked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary)
+    ) {
+        Switch(
+            checked = isChecked,
+            onCheckedChange = onCheckedChange,
+            modifier = Modifier
+                .size(switchWidth, switchHeight)
+                .align(Alignment.Center),
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                uncheckedThumbColor = MaterialTheme.colorScheme.onSecondary
+            )
+        )
+    }
+}
+
+
+
 
 @Composable
 fun ReusableTextInput(

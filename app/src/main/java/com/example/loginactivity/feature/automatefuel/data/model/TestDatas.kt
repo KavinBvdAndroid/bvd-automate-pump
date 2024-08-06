@@ -39,7 +39,7 @@ val SiteDetails1 = SiteDetails(
         TankSite(tankId = "T3", fuelType = "CNG", tankCapacity = 4000.0),
         TankSite(tankId = "T4", fuelType = "LPG", tankCapacity = 4500.0)
     ),
-    distanceToLocation = 10.5
+    distanceToLocation = 15.5
 )
 
 val SiteDetails2 = SiteDetails(
@@ -54,7 +54,7 @@ val SiteDetails2 = SiteDetails(
         TankSite(tankId = "T7", fuelType = "CNG", tankCapacity = 4300.0),
         TankSite(tankId = "T8", fuelType = "LPG", tankCapacity = 4700.0)
     ),
-    distanceToLocation = 15.0
+    distanceToLocation = 10.0
 )
 
 val SiteDetails3 = SiteDetails(

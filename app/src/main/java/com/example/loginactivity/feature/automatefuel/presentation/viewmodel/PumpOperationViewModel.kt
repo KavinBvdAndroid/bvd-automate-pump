@@ -5,10 +5,13 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.loginactivity.core.base.generics.Resource
+import com.example.loginactivity.core.base.generics.startMockPumpResponse
+import com.example.loginactivity.core.base.generics.stopMockPumpResponse
 import com.example.loginactivity.feature.automatefuel.data.model.PumpResponse
 import com.example.loginactivity.feature.automatefuel.domain.usecase.StartPumpUseCase
 import com.example.loginactivity.feature.automatefuel.domain.usecase.StopPumpUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -18,22 +21,32 @@ class PumpOperationViewModel @Inject constructor(
     private val pumpStopUseCase: StopPumpUseCase
 ) : ViewModel() {
 
-    private val _pumpResponseLivedata = MutableLiveData<Resource<PumpResponse>>()
-    val pumpResponseLivedata: LiveData<Resource<PumpResponse>> = _pumpResponseLivedata
+    private val _pumpStartLivedata = MutableLiveData<Resource<PumpResponse>>()
+    val pumpStartLivedata: LiveData<Resource<PumpResponse>> = _pumpStartLivedata
 
-    fun  startPump(cmd: String,params:String){
+    private val _pumpStopLivedata = MutableLiveData<Resource<PumpResponse>>()
+    val pumpStopLivedata: LiveData<Resource<PumpResponse>> = _pumpStopLivedata
+
+    fun startPump(cmd: String, params: String) {
         viewModelScope.launch {
-            _pumpResponseLivedata.value = Resource.Loading
-           val result = pumpStartUseCase.startActivatingPump(cmd,params)
-            _pumpResponseLivedata.value= result
+            _pumpStartLivedata.value = Resource.Loading
+//           val actualResult = pumpStartUseCase.startActivatingPump(cmd,params)
+            delay(5000)
+            val result = Resource.Success(startMockPumpResponse)
+            val Fresult = Resource.Failure("Pump Failed to turn on")
+
+            _pumpStartLivedata.value = result
         }
     }
 
-    fun stopPump(cmd: String,params:String){
+    fun stopPump(cmd: String, params: String) {
         viewModelScope.launch {
-            _pumpResponseLivedata.value = Resource.Loading
-            val result = pumpStopUseCase.stopActivatingPump(cmd,params)
-            _pumpResponseLivedata.value= result
+            _pumpStopLivedata.value = Resource.Loading
+            delay(5000)
+//            val actualResult = pumpStopUseCase.stopActivatingPump(cmd,params)
+            val result = Resource.Success(stopMockPumpResponse)
+            val Fresult = Resource.Failure("Pump Failed to turn off")
+            _pumpStopLivedata.value = result
         }
     }
 

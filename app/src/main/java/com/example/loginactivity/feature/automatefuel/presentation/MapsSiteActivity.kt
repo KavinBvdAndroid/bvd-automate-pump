@@ -1,5 +1,6 @@
 package com.example.loginactivity.feature.automatefuel.presentation
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -29,6 +30,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.BottomSheetScaffold
@@ -56,6 +58,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import com.example.loginactivity.R
 import com.example.loginactivity.core.base.generics.ReusableElevatedButton
 import com.example.loginactivity.core.base.utils.AppUtils
 import com.example.loginactivity.core.base.utils.AppUtils.hideSystemUI
@@ -104,7 +107,7 @@ fun SiteLocationListDemo() {
 
 @Composable
 fun SiteLocationListContent(innerPadding: PaddingValues) {
-    MapsBottomSheet()
+    ModalBottomSheetDemo()
 }
 
 @Composable
@@ -204,24 +207,132 @@ fun openGoogleMapsWithDirections(context: Context, latitude: Double, longitude: 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MapsBottomSheet() {
-    val context = LocalContext.current
-
-
-    val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(driverLocation, 15f)
-    }
-    val markerClicked by rememberSaveable { mutableStateOf(false) }
-    var selectedSite by rememberSaveable { mutableStateOf(sortedListOfSites.first()) }
-    var showInfoWindow by remember { mutableStateOf(false) }
-
-    var selectedSiteId by rememberSaveable { mutableStateOf(sortedListOfSites.first().siteId) }
-
+fun ModalBottomSheetDemo() {
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState()
     val coroutineScope = rememberCoroutineScope()
 
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
     val initialHeight = screenHeight * 0.1f
+    val fullHeight = screenHeight //
+    val selectedSite by rememberSaveable { mutableStateOf(sortedListOfSites.first()) }
+    var showInfoWindow by remember { mutableStateOf(false) }
+
+    BottomSheetScaffold(
+        scaffoldState = bottomSheetScaffoldState,
+        sheetContent = {
+            LocationListBottomSheet(locations = sortedListOfSites, selectedSite = selectedSite) {
+                showInfoWindow = true
+            }
+        },
+        sheetSwipeEnabled = true,
+                sheetPeekHeight = initialHeight,
+        sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+        sheetShadowElevation = 12.dp,
+        sheetContainerColor = MaterialTheme.colorScheme.outline,
+
+    ) {
+
+        ShowDriverLocationMap()
+    }
+}
+
+
+@Composable
+fun ShowDriverLocationMap() {
+    val context = LocalContext.current
+    val driverMarkerState = rememberMarkerState(position = driverLocation)
+    val customBitmap = getBitmapFromVectorDrawable(context, R.drawable.pin)
+    val cameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(driverLocation, 15f)
+    }
+    val showInfoWindow = remember { mutableStateOf(true) }
+
+    GoogleMap(
+        modifier = Modifier.fillMaxSize(),
+        cameraPositionState = cameraPositionState,
+        properties = MapProperties(mapType = MapType.TERRAIN),
+        uiSettings = MapUiSettings(zoomControlsEnabled = true)
+    ) {
+        Marker(
+            state = driverMarkerState,
+            title = "Driver location",
+            snippet = "BVD Group",
+            icon = BitmapDescriptorFactory.fromBitmap(customBitmap),
+        )
+            LaunchedEffect(showInfoWindow.value) {
+                driverMarkerState.showInfoWindow()
+            }
+        ShowFuelSitesLocation()
+    }
+
+    }
+
+
+
+@Composable
+fun ShowFuelSitesLocation() {
+
+    val markerStates = remember(sortedListOfSites) {
+        sortedListOfSites.associateWith { site ->
+            MarkerState(position = LatLng(site.latitude, site.longitude))
+        }
+    }
+
+    var selectedSite by rememberSaveable { mutableStateOf(sortedListOfSites.first()) }
+    var showInfoWindow by remember { mutableStateOf(true) }
+
+    sortedListOfSites.forEach { site ->
+        val markerState = markerStates[site]!!
+
+        Marker(
+            state = markerState,
+            title = site.name,
+            snippet = "${site.distanceToLocation} km away",
+
+        )
+        if (selectedSite == site && showInfoWindow) {
+            LaunchedEffect(site.name) {
+                markerState.showInfoWindow()
+                showInfoWindow = false
+            }
+        }
+    }
+}
+
+@SuppressLint("UseCompatLoadingForDrawables")
+fun getBitmapFromVectorDrawable(context: Context, drawableId: Int): Bitmap {
+    val vectorDrawable = context.getDrawable(drawableId)
+    vectorDrawable?.setBounds(0, 0, vectorDrawable.intrinsicWidth, vectorDrawable.intrinsicHeight)
+    val bitmap = Bitmap.createBitmap(
+        vectorDrawable!!.intrinsicWidth,
+        vectorDrawable.intrinsicHeight,
+        Bitmap.Config.ARGB_8888
+    )
+    val canvas = android.graphics.Canvas(bitmap)
+    vectorDrawable.draw(canvas)
+    return Bitmap.createScaledBitmap(bitmap, 100, 100, false)
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MapsBottomSheet() {
+    val context = LocalContext.current
+    val markerClicked by rememberSaveable { mutableStateOf(false) }
+    var selectedSite by rememberSaveable { mutableStateOf(sortedListOfSites.first()) }
+    var showInfoWindow by remember { mutableStateOf(false) }
+    var selectedSiteId by rememberSaveable { mutableStateOf(sortedListOfSites.first().siteId) }
+
+    val cameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(driverLocation, 15f)
+    }
+
+
+    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState()
+    val coroutineScope = rememberCoroutineScope()
+
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+    val initialHeight = screenHeight * 0.2f
     val fullHeight = screenHeight // Full screen height
 
     BottomSheetScaffold(

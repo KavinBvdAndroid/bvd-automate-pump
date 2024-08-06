@@ -95,6 +95,7 @@ dependencies {
 
     //maps
     implementation(libs.google.maps.compose)
+    implementation(libs.compose.livedata)
 
     //icons
     implementation(libs.compose.material.icons.extended)

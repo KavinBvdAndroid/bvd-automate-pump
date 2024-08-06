@@ -7,6 +7,8 @@ import com.example.loginactivity.data.retrofit.PumpApiService
 import com.example.loginactivity.data.retrofit.RetrofitClient
 import com.example.loginactivity.feature.automatefuel.data.reposiotryimpl.PumpOperationRepositoryImpl
 import com.example.loginactivity.feature.automatefuel.domain.usecase.PumpOperationRepository
+import com.example.loginactivity.feature.automatefuel.domain.usecase.StartPumpUseCase
+import com.example.loginactivity.feature.automatefuel.domain.usecase.StopPumpUseCase
 
 import com.google.gson.Gson
 import dagger.Module
@@ -48,6 +50,15 @@ object NetworkDatabaseModule {
     @Provides
     fun providePumpOperationRepository(gson: Gson, pumpApiService: PumpApiService): PumpOperationRepository {
         return PumpOperationRepositoryImpl(gson, pumpApiService)
+    }
+
+    @Provides
+    fun provideStartUseCase(pumpOperationRepository: PumpOperationRepository): StartPumpUseCase{
+        return StartPumpUseCase((pumpOperationRepository))
+    }
+    @Provides
+    fun provideStopUseCase(pumpOperationRepository: PumpOperationRepository): StopPumpUseCase{
+        return StopPumpUseCase((pumpOperationRepository))
     }
 
     @Provides

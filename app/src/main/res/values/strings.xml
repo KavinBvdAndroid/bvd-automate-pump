@@ -16,7 +16,7 @@
 
     <!--    info messages -->
     <string name="i_vin_number_message">"Please agree that you are in your respective vehicle and verify all the above details"</string>
-    <string name="i_fuel_activate_verification">"I Verified the amount of transactions happened"</string>
+    <string name="i_fuel_activate_verification">"Hereby, I agree &amp; Verify the amount of transactions happened"</string>
 
     <!--    header labels-->
     <string name="h_vin_number">"Enter your Vehicle VIN number"</string>
