@@ -20,6 +20,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
@@ -36,6 +38,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
@@ -53,6 +56,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogProperties
 import com.example.loginactivity.R
 import com.example.loginactivity.feature.automatefuel.data.model.PumpResponse
 
@@ -134,6 +138,12 @@ val customTextStyle = Typography(
         fontFamily = poppinsFontFamily,
         fontWeight = FontWeight.ExtraBold,
         fontSize = 26.sp,
+        color = Color.Black
+    ),
+    displayLarge = TextStyle(
+        fontFamily = poppinsFontFamily,
+        fontWeight = FontWeight.ExtraBold,
+        fontSize = 30.sp,
         color = Color.Black
     ),
     labelMedium = TextStyle(
@@ -319,6 +329,50 @@ fun LoginLogo() {
         )
     }
 }
+
+@Composable
+fun ErrorAlertDialog(
+    title: String,
+    message: String,
+    buttonText: String,
+    onDismiss: () -> Unit,
+    titleBackgroundColor: Color = MaterialTheme.colorScheme.errorContainer,
+    titleCornerRadius: Int = 16 // Default rounded corner radius
+) {
+    AlertDialog(
+        onDismissRequest = { onDismiss() },
+        title = {
+            Box(
+                modifier = Modifier
+                    .background(
+                        titleBackgroundColor,
+                        shape = RoundedCornerShape(topStartPercent = 50, topEndPercent = 50)
+                    )
+                    .padding(16.dp)
+                    .shadow(8.dp)
+            ) {
+                Text(
+                    text = title,
+                    style = customTextStyle.titleLarge
+                )
+            }
+        },
+        text = {
+            Text(
+                text = message,
+                style = customTextStyle.labelMedium,
+                modifier = Modifier.padding(16.dp)
+            )
+        },
+        confirmButton = {
+            Button(onClick = { onDismiss() }) {
+                Text(text = buttonText)
+            }
+        },
+        properties = DialogProperties(dismissOnClickOutside = false)
+    )
+}
+
 
 @Composable
 fun GenericDetailRow(label: String, value: String) {

@@ -1,5 +1,6 @@
 package com.example.loginactivity.core.base
 
+import android.util.Log
 import com.example.loginactivity.core.base.generics.GenericErrorResponse
 import com.example.loginactivity.core.base.generics.Resource
 import com.google.gson.Gson
@@ -42,6 +43,7 @@ abstract class BaseRepository(private val gson: Gson) {
 
                 } ?: Resource.Failure("Response Body is Empty")
             } else {
+                Log.d("Error body",""+response.errorBody().toString())
                 Resource.Failure(response.message())
             }
         } catch (e: Exception) {

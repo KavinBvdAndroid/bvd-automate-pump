@@ -1,4 +1,4 @@
-package com.example.loginactivity.feature.automatefuel.presentation
+package com.example.loginactivity.feature.locationsites
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -65,6 +65,7 @@ import com.example.loginactivity.core.base.utils.AppUtils.hideSystemUI
 import com.example.loginactivity.feature.automatefuel.data.model.SiteDetails
 import com.example.loginactivity.feature.automatefuel.data.model.driverLocation
 import com.example.loginactivity.feature.automatefuel.data.model.sortedListOfSites
+import com.example.loginactivity.feature.automatefuel.presentation.FuelSelectionActivity
 import com.example.loginactivity.feature.automatefuel.ui.theme.LoginActivityTheme
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
@@ -225,13 +226,12 @@ fun ModalBottomSheetDemo() {
             }
         },
         sheetSwipeEnabled = true,
-                sheetPeekHeight = initialHeight,
+        sheetPeekHeight = initialHeight,
         sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
         sheetShadowElevation = 12.dp,
         sheetContainerColor = MaterialTheme.colorScheme.outline,
 
-    ) {
-
+        ) {
         ShowDriverLocationMap()
     }
 }
@@ -259,14 +259,13 @@ fun ShowDriverLocationMap() {
             snippet = "BVD Group",
             icon = BitmapDescriptorFactory.fromBitmap(customBitmap),
         )
-            LaunchedEffect(showInfoWindow.value) {
-                driverMarkerState.showInfoWindow()
-            }
+        LaunchedEffect(showInfoWindow.value) {
+            driverMarkerState.showInfoWindow()
+        }
         ShowFuelSitesLocation()
     }
 
-    }
-
+}
 
 
 @Composable
@@ -289,7 +288,7 @@ fun ShowFuelSitesLocation() {
             title = site.name,
             snippet = "${site.distanceToLocation} km away",
 
-        )
+            )
         if (selectedSite == site && showInfoWindow) {
             LaunchedEffect(site.name) {
                 markerState.showInfoWindow()

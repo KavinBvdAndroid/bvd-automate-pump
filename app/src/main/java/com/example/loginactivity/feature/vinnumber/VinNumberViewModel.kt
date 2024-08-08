@@ -1,4 +1,4 @@
-package com.example.loginactivity.feature.auth.presentation.viewmodel
+package com.example.loginactivity.feature.vinnumber
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -13,22 +13,20 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class LoginViewModel @Inject constructor(
-    private val useCase: ValidateUserEmailUseCase
+class VinNumberViewModel @Inject constructor(
+    private val useCase: ValidateVinNumberUseCase
 ) : ViewModel() {
 
-    private val _userDetails = MutableLiveData<Resource<LoginResponse>>()
-    val userDetails: LiveData<Resource<LoginResponse>> = _userDetails
+    private val _vehicleDetails = MutableLiveData<Resource<VinNumberResponse>>()
+    val vehicleDetails: LiveData<Resource<VinNumberResponse>> = _vehicleDetails
 
-    fun validateEmail(email: String): Boolean {
-        return email.isValidEmail()
-    }
 
-    fun loginUserEmail(email: String,password:String) {
+
+    fun verifyVinNumber(vinNumber: String) {
         viewModelScope.launch {
-            _userDetails.value = Resource.Loading
-            val result = useCase.verifyUserEmail(email, password)
-            _userDetails.value = result
+            _vehicleDetails.value = Resource.Loading
+            val result = useCase.verifyVinNumber(vinNumber)
+            _vehicleDetails.value = result
         }
     }
 

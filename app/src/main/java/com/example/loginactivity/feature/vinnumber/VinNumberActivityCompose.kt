@@ -29,6 +29,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -40,18 +41,23 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.loginactivity.R
 import com.example.loginactivity.core.base.generics.GenericDetailRow
+import com.example.loginactivity.core.base.generics.GenericProgressBar
+import com.example.loginactivity.core.base.generics.Resource
 import com.example.loginactivity.core.base.generics.ReusableElevatedButton
 import com.example.loginactivity.core.base.generics.ReusableTextInput
 import com.example.loginactivity.core.base.generics.customTextStyle
 import com.example.loginactivity.core.base.generics.isValidVinNumber
 import com.example.loginactivity.core.base.utils.AppUtils
 import com.example.loginactivity.core.base.utils.Constants
-import com.example.loginactivity.feature.automatefuel.data.model.VehicleDetail
 import com.example.loginactivity.feature.auth.ui.theme.LoginActivityTheme
+import com.example.loginactivity.feature.automatefuel.data.model.VehicleDetail
 import com.example.loginactivity.feature.automatefuel.presentation.FetchingSiteLocationCompose
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class VinNumberActivityCompose : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,9 +85,14 @@ fun VinDemo() {
 
 @Composable
 fun VinContent(innerPadding: PaddingValues) {
+    val viewModel: VinNumberViewModel = hiltViewModel()
+
     var vinNumber by rememberSaveable { mutableStateOf("") }
     var isVinNumberValid by rememberSaveable { mutableStateOf(false) }
     var showVehicleDetails by rememberSaveable { mutableStateOf(false) }
+    val vehicleDetail by viewModel.vehicleDetails.observeAsState(null)
+    var vehicleDetails by rememberSaveable { mutableStateOf<VinNumberResponse?>(null) }
+
     val scrollState = rememberScrollState()
 
     Column(
@@ -128,8 +139,7 @@ fun VinContent(innerPadding: PaddingValues) {
 
             ReusableElevatedButton(
                 onClick = {
-                    AppUtils.showToastMessage("Validated...")
-                    showVehicleDetails = true
+                    viewModel.verifyVinNumber("123")
                 },
                 text = "Submit",
                 isEnabled = isVinNumberValid,
@@ -146,17 +156,46 @@ fun VinContent(innerPadding: PaddingValues) {
 
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
-            VehicleDetails(showVehicleDetails)
-
+            VehicleDetails(showVehicleDetails, vehicleDetails)
         }
+    }
+    vehicleDetail?.let {
+        GenericProgressBar(isLoading = false)
+        ObserverLiveData(it, callback = { value, data ->
+
+            if (value == 1) {
+                showVehicleDetails = true
+                vehicleDetails = data as VinNumberResponse
+            } else {
+                showVehicleDetails = false
+            }
+        })
     }
 
 
 }
 
 @Composable
-fun VehicleDetails(showVehicleDetails: Boolean) {
+fun ObserverLiveData(vehicleDetail: Resource<VinNumberResponse>, callback: (Int, Any?) -> Unit) {
+
+    when (vehicleDetail) {
+        is Resource.Loading -> {
+            GenericProgressBar(isLoading = true)
+        }
+
+        is Resource.Success -> {
+            callback(1, vehicleDetail.data)
+        }
+
+        is Resource.Failure -> {
+            callback(0, vehicleDetail.message)
+
+        }
+    }
+}
+
+@Composable
+fun VehicleDetails(showVehicleDetails: Boolean, VinNumberResponse: VinNumberResponse?) {
     if (showVehicleDetails) {
         val context = LocalContext.current
 
@@ -172,15 +211,14 @@ fun VehicleDetails(showVehicleDetails: Boolean) {
 
                 modifier = Modifier
                     .animateContentSize()
-                    .fillMaxSize()
-                ,
+                    .fillMaxSize(),
 
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
                     style = customTextStyle.titleLarge,
                     text = stringResource(id = R.string.h_verify_vehicle_details),
-                    modifier = Modifier.padding( bottom = 16.dp),
+                    modifier = Modifier.padding(bottom = 16.dp),
                 )
                 Column(
                     modifier = Modifier

@@ -1,4 +1,4 @@
-package com.example.loginactivity.feature.auth.data.model
+package com.example.loginactivity.feature.automatefuel.data.model
 
 data class VehicleDetail(
     val name: String? = null,

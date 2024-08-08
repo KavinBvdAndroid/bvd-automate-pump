@@ -1,4 +1,4 @@
-package com.example.bvddriverfleetapp.data.retrofit
+package com.example.loginactivity.data.retrofit
 
 import okhttp3.ResponseBody
 import retrofit2.Response

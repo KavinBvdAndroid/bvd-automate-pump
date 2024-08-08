@@ -74,6 +74,7 @@ fun FetchLocationContent(innerPadding: PaddingValues) {
             text = stringResource(id = R.string.h_driver_location),
             modifier = Modifier.padding(top = 16.dp, bottom = 16.dp),
         )
+
         Text(
             style = customTextStyle.titleLarge,
             text = "2345 steels avenue, Brampton, ON",

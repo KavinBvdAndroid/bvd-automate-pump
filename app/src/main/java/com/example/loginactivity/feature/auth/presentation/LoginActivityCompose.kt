@@ -16,12 +16,15 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
@@ -29,15 +32,23 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.loginactivity.R
+import com.example.loginactivity.core.base.generics.ErrorAlertDialog
+import com.example.loginactivity.core.base.generics.GenericProgressBar
 import com.example.loginactivity.core.base.generics.LoginLogo
+import com.example.loginactivity.core.base.generics.Resource
 import com.example.loginactivity.core.base.generics.ReusableElevatedButton
 import com.example.loginactivity.core.base.generics.ReusableTextInput
-import com.example.loginactivity.core.base.generics.isValidEmail
-import com.example.loginactivity.core.base.utils.AppUtils
+import com.example.loginactivity.core.base.generics.isValidUsername
 import com.example.loginactivity.core.base.utils.AppUtils.hideSystemUI
+import com.example.loginactivity.feature.auth.data.model.LoginResponse
+import com.example.loginactivity.feature.auth.presentation.viewmodel.LoginViewModel
+import com.example.loginactivity.feature.vinnumber.VinNumberActivityCompose
 import com.example.loginactivity.ui.theme.LoginActivityTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class LoginActivityCompose : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,7 +58,7 @@ class LoginActivityCompose : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     containerColor = colorResource(id = R.color.white)
                 ) { innerPadding ->
-                    MainContent(innerPadding)
+                    LoginContent(innerPadding)
                 }
             }
         }
@@ -55,27 +66,30 @@ class LoginActivityCompose : ComponentActivity() {
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, showSystemUi = false)
 @Composable
-fun MainContentDemo() {
+fun LoginContentDemo() {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
     ) { innerPadding ->
-        MainContent(innerPadding)
+        LoginContent(innerPadding)
     }
 
 }
 
 @Composable
-private fun MainContent(innerPadding: PaddingValues) {
+private fun LoginContent(innerPadding: PaddingValues) {
+    val viewModel: LoginViewModel = hiltViewModel()
+
     var loginEmail by rememberSaveable { mutableStateOf("") }
     var isEmailValid by rememberSaveable { mutableStateOf(false) }
     var loginPassword by rememberSaveable { mutableStateOf("") }
     var isPasswordValid by rememberSaveable { mutableStateOf(false) }
     var isPasswordVisible by rememberSaveable { mutableStateOf(false) }
+    val loginResult by viewModel.userDetails.observeAsState(null)
+    var showDialog by rememberSaveable { mutableStateOf(false) }
 
     val scrollState = rememberScrollState()
-    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -98,11 +112,11 @@ private fun MainContent(innerPadding: PaddingValues) {
                 keyboardType = KeyboardOptions(keyboardType = KeyboardType.Email),
                 onValueChange = { newValue ->
                     loginEmail = newValue
-                    isEmailValid = newValue.isValidEmail()
+                    isEmailValid = newValue.isValidUsername()
                 },
-                label = stringResource(id = R.string.l_email),
+                label = stringResource(id = R.string.l_userName),
                 isError = loginEmail.isNotBlank() && !isEmailValid,
-                errorMessage = stringResource(id = R.string.e_email),
+                errorMessage = stringResource(id = R.string.e_user_name),
                 onClick = {
                 },
                 modifier = Modifier
@@ -127,8 +141,7 @@ private fun MainContent(innerPadding: PaddingValues) {
 
             ReusableElevatedButton(
                 onClick = {
-                    AppUtils.showToastMessage("Validated...")
-                        context.startActivity(Intent(context, VinNumberActivityCompose::class.java))
+                    viewModel.loginUserEmail(loginEmail,loginPassword)
                 },
                 text = "Login",
                 isEnabled = isEmailValid && isPasswordValid,
@@ -140,8 +153,46 @@ private fun MainContent(innerPadding: PaddingValues) {
         }
 
     }
+    loginResult?.let { ObserveLoginResult(it) }
+}
+@Composable
+fun ObserveLoginResult(loginResult: Resource<LoginResponse> ) {
+    val context = LocalContext.current
+
+    when (loginResult) {
+        is Resource.Loading -> {
+            GenericProgressBar(true)
+        }
+
+        is Resource.Failure -> {
+            GenericProgressBar(false)
+           CustomErrorAlertDialog(showDg = true ){}
+        }
+
+        is Resource.Success -> {
+            GenericProgressBar(false)
+            LaunchedEffect(Unit) {
+                context.startActivity(Intent(context, VinNumberActivityCompose::class.java))
+            }
+        }
+    }
 }
 
+@Composable
+fun CustomErrorAlertDialog(showDg: Boolean, dismissDialogCallback:() -> Unit)  {
+    var showDialog by rememberSaveable { mutableStateOf(showDg) }
+
+    if (showDialog) {
+        ErrorAlertDialog(
+            title = "Error",
+            message = "An unexpected error occurred. Please try again later.",
+            buttonText = "OK",
+            onDismiss = { showDialog = false},
+            titleBackgroundColor = Color.Red, // Custom title background color
+            titleCornerRadius = 16 // Rounded corner radius
+        )
+    }
+}
 
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {

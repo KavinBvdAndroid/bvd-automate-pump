@@ -4,7 +4,7 @@ import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-data class Response(
+data class VinNumberResponse(
 	val code: Int? = null,
 	val data: List<DataItem?>? = null,
 	val message: String? = null,
@@ -21,5 +21,5 @@ data class DataItem(
 	val model: String? = null,
 	val id: Int? = null,
 	val make: String? = null,
-	val deletedAt: Any? = null
+	val deletedAt: String? = null
 ) : Parcelable

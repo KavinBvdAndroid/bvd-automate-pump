@@ -1,24 +1,31 @@
-package com.example.bvddriverfleetapp.feature.auth.data.RepositoryImpls
+package com.example.loginactivity.feature.auth.data.model
 
-import com.example.bvddriverfleetapp.core.base.BaseRepository
-import com.example.bvddriverfleetapp.data.retrofit.LoginApiService
-import com.example.bvddriverfleetapp.data.retrofit.Resource
-import com.example.bvddriverfleetapp.feature.auth.data.model.LoginResponse
-import com.example.bvddriverfleetapp.feature.auth.domain.repository.LoginRepository
+import android.util.Log
+import com.example.bvddriverfleetapp.data.sharedpref.SessionManager
+import com.example.loginactivity.core.base.BaseRepository
+import com.example.loginactivity.core.base.generics.Resource
+import com.example.loginactivity.data.retrofit.LoginApiService
+import com.example.loginactivity.feature.auth.domain.LoginRepository
 import com.google.gson.Gson
 import javax.inject.Inject
 
-class LoginRepositoryImpl @Inject constructor(private val gson:Gson,private val apiService: LoginApiService) :
+class LoginRepositoryImpl @Inject constructor(private val gson:Gson,private val apiService: LoginApiService, private val sessionManager: SessionManager) :
     LoginRepository, BaseRepository(gson) {
 
-    override suspend fun loginUser(email:String): Resource<LoginResponse> {
+    override suspend fun loginUser(email:String, password:String): Resource<LoginResponse> {
 
         return safeApiCall<LoginResponse>(
             apiCall = {
-                apiService.loginUser("testapp1", "Testapp1@123")
+                apiService.loginUser(email, password = password)
             },
             successType = LoginResponse::class.java,
-            handleSuccess = {}
+            handleSuccess = { it->
+                Log.d("auth token",""+it.toString())
+                if (it.has("access_token")){
+                    sessionManager.saveAuthToken(it.get("access_token").toString())
+                }
+
+            }
         )
     }
 }

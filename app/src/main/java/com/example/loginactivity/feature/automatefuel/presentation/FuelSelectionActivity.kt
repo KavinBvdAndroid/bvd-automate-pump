@@ -50,7 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.loginactivity.R
 import com.example.loginactivity.core.base.generics.ReusableElevatedButton
-import com.example.loginactivity.core.base.utils.AppUtils
+import com.example.loginactivity.core.base.generics.poppinsFontFamily
 import com.example.loginactivity.feature.automatefuel.data.model.InyardTanksItem
 import com.example.loginactivity.feature.automatefuel.data.model.listOfInYardItems
 import com.example.loginactivity.feature.automatefuel.ui.theme.LoginActivityTheme
@@ -83,7 +83,6 @@ fun SelectFuelDemo() {
     ) { innerPadding ->
         SelectFuel(innerPadding)
     }
-
 }
 
 
@@ -103,10 +102,11 @@ fun SelectFuel(innerPadding: PaddingValues) {
             textAlign = TextAlign.Center,
             color = colorResource(id = R.color.colorSecondary),
             style = TextStyle(
-                fontSize = 34.sp,
+                fontSize = 30.sp,
                 shadow = Shadow(
                     color = Color.LightGray, offset = offset, blurRadius = 3f
                 ),
+                fontFamily = poppinsFontFamily,
                 fontWeight = FontWeight.Bold
             )
         )
@@ -146,7 +146,6 @@ fun SelectFuel(innerPadding: PaddingValues) {
         Column {
             if (showYardDetails) {
                 ShowYardDetails()
-
             }
 
         }
@@ -163,12 +162,28 @@ fun ShowYardDetails() {
     val filteredItems = listOfInYardItems.filter {
         it.productCode?.contains(query, ignoreCase = true) ?: false
     }
+    val offset = Offset(15.0f, 10.0f)
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Transparent)
     ) {
-        Text("Select your Yard to proceed", style = MaterialTheme.typography.titleLarge)
+        Text(
+            "Select your Yard to proceed", modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            textAlign = TextAlign.Center,
+            color = colorResource(id = R.color.colorSecondary),
+            fontFamily = poppinsFontFamily,
+            style = TextStyle(
+                fontSize = 24.sp,
+                shadow = Shadow(
+                    color = Color.LightGray, offset = offset, blurRadius = 3f
+                ),
+                fontWeight = FontWeight.Bold
+            )
+        )
 
         Box(
             modifier = Modifier
@@ -201,6 +216,9 @@ fun ShowYardDetails() {
                             .padding(top = 8.dp, bottom = 8.dp)
                             .fillMaxWidth(),
                         shape = RoundedCornerShape(16.dp),
+                        onClick = {
+                            newSelectedSite = it
+                        },
                         colors = CardDefaults.cardColors(containerColor = Color.LightGray),
                         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
                     ) {
@@ -282,7 +300,6 @@ fun ShowYardDetails() {
             }
             ReusableElevatedButton(
                 onClick = {
-                    AppUtils.showToastMessage("Validated...")
                     context.startActivity(Intent(context, StartFuelingActivity::class.java))
                 },
                 text = "Continue",

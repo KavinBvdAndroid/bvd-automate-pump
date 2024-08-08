@@ -1,4 +1,4 @@
-package com.example.bvddriverfleetapp.feature.auth.data.model
+package com.example.loginactivity.feature.auth.data.model
 
 import android.os.Parcel
 import android.os.Parcelable

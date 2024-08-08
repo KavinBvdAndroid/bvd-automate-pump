@@ -1,23 +1,31 @@
-package com.example.loginactivity.feature.auth.data.model
+package com.example.loginactivity.feature.vinnumber
 
+import android.util.Log
 import com.example.loginactivity.core.base.BaseRepository
+import com.example.loginactivity.core.base.generics.LoginLogo
 import com.example.loginactivity.core.base.generics.Resource
 import com.example.loginactivity.data.retrofit.LoginApiService
-import com.example.loginactivity.feature.auth.domain.LoginRepository
+import com.example.loginactivity.data.retrofit.VinNumberApiService
 import com.google.gson.Gson
 import javax.inject.Inject
 
-class LoginRepositoryImpl @Inject constructor(private val gson:Gson,private val apiService: LoginApiService) :
-    LoginRepository, BaseRepository(gson) {
+class VinNumberRepositoryImpl @Inject constructor(
+    private val gson: Gson,
+    private val apiService: VinNumberApiService
+) :
+    VinNumberRepository, BaseRepository(gson) {
 
-    override suspend fun loginUser(email:String, password:String): Resource<LoginResponse> {
-
-        return safeApiCall<LoginResponse>(
+    override suspend fun verifyVinNumber(vinNumber: String): Resource<VinNumberResponse> {
+        return safeApiCall(
             apiCall = {
-                apiService.loginUser(email, password = password)
+                apiService.validateVinNumber(vinNumber)
             },
-            successType = LoginResponse::class.java,
-            handleSuccess = {}
+            successType = VinNumberResponse::class.java,
+            handleSuccess = {
+                Log.d("vin number",""+it.toString())
+            }
         )
     }
+
+
 }

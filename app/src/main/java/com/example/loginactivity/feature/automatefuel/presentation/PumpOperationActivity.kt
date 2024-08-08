@@ -73,6 +73,7 @@ import com.example.loginactivity.R
 import com.example.loginactivity.core.base.generics.GenericProgressBar
 import com.example.loginactivity.core.base.generics.Resource
 import com.example.loginactivity.core.base.generics.ReusableElevatedButton
+import com.example.loginactivity.core.base.generics.arsenalFontFamily
 import com.example.loginactivity.core.base.generics.customTextStyle
 import com.example.loginactivity.core.base.utils.AppUtils
 import com.example.loginactivity.feature.automatefuel.data.model.PumpParams
@@ -120,6 +121,9 @@ fun StartFuel(innerPadding: PaddingValues) {
     val pumpStopLivedata by viewModel.pumpStopLivedata.observeAsState(null)
     var checked by rememberSaveable { mutableStateOf(false) }
     var isStartEnabled by rememberSaveable { mutableStateOf(false) }
+    var isTransactionComplete by rememberSaveable { mutableStateOf(false) }
+
+
 //    var isStopEnabled by rememberSaveable { mutableStateOf(false) }
     var processStatus by rememberSaveable { mutableIntStateOf(-1) }
     var result by rememberSaveable {
@@ -203,7 +207,7 @@ fun StartFuel(innerPadding: PaddingValues) {
         Column(modifier = Modifier.fillMaxSize()) {
             ResultSection(result)
 
-            AgreementSection(checked = checked, { checked = it }, context)
+            AgreementSection(isTransactionComplete, checked = checked, { checked = it }, context)
         }
 
 
@@ -229,6 +233,7 @@ fun StartFuel(innerPadding: PaddingValues) {
         ObservePumpData(pumpResponseData = it) { code, data, message ->
             if (code == 1) {
                 isStartEnabled = false
+                isTransactionComplete = true
                 result = data.toString()
             } else {
                 isStartEnabled = true
@@ -269,7 +274,10 @@ fun ObservePumpData(
 
 @Composable
 fun AgreementSection(
-    checked: Boolean, onCheckedChange: (Boolean) -> Unit, context: Context
+    isTransactionComplete: Boolean,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    context: Context
 ) {
     Column(
         modifier = Modifier
@@ -283,9 +291,10 @@ fun AgreementSection(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            Checkbox(checked = checked, onCheckedChange = onCheckedChange)
+            Checkbox(checked = checked && isTransactionComplete, onCheckedChange = onCheckedChange)
 
             Text(
+
                 style = customTextStyle.labelMedium,
                 text = stringResource(id = R.string.i_fuel_activate_verification),
                 modifier = Modifier.padding(top = 16.dp, bottom = 16.dp)
@@ -301,7 +310,7 @@ fun AgreementSection(
                 )
             },
             text = "Submit Transaction",
-            isEnabled = checked,
+            isEnabled = checked && isTransactionComplete,
             modifier = Modifier
                 .fillMaxWidth()
         )
@@ -310,7 +319,6 @@ fun AgreementSection(
 
 @Composable
 fun HeaderSection() {
-
     val offset = Offset(15.0f, 10.0f)
     Text(
         text = "Activate & Deactivate the Pump",

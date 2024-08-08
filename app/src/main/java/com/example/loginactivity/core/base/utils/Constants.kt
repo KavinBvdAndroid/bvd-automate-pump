@@ -4,6 +4,7 @@ class Constants {
     companion object {
         const val PERMISSION_REQUEST_CODE = 1001
         const val BASE_URL = "https://portal.bvdpetroleum.com:82/"
+        const val BASE_URL_LOCAL = "http://bvdpro.local.bvdpetro.com:82"
         const val PUMP_BASE_URL = "http://192.168.0.180:8080"
         const val PUMP_START_CMD = "PMPON"
         const val PUMP_STOP_CMD = "PMPOFF"

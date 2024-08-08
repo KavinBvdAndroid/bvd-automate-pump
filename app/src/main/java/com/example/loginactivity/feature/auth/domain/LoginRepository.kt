@@ -1,10 +1,8 @@
-package com.example.bvddriverfleetapp.feature.auth.domain.repository
+package com.example.loginactivity.feature.auth.domain
 
-import com.example.bvddriverfleetapp.core.base.BaseRepository
-import com.example.bvddriverfleetapp.data.retrofit.Resource
-import com.example.bvddriverfleetapp.data.retrofit.UserDetails
-import com.example.bvddriverfleetapp.feature.auth.data.model.LoginResponse
+import com.example.loginactivity.core.base.generics.Resource
+import com.example.loginactivity.feature.auth.data.model.LoginResponse
 
 interface LoginRepository {
-    suspend fun loginUser(email: String): Resource<LoginResponse>
+    suspend fun loginUser(email: String, password:String): Resource<LoginResponse>
 }

@@ -1,9 +1,10 @@
 package com.example.bvddriverfleetapp.data.sharedpref
 
 import android.content.SharedPreferences
-import com.example.bvddriverfleetapp.core.utils.Constants
+import com.example.loginactivity.core.base.utils.Constants
+import javax.inject.Inject
 
-class SessionManager(private val sharedPreferences: SharedPreferences) : SharedPrefMethods {
+class SessionManager @Inject constructor(private val sharedPreferences: SharedPreferences) : SharedPrefMethods {
     override fun saveAuthToken(token: String) {
         sharedPreferences.edit().putString(Constants.KEY_AUTH_TOKEN, token).apply()
 

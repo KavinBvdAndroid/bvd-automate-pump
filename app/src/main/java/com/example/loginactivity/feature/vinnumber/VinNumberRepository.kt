@@ -1,8 +1,8 @@
-package com.example.loginactivity.feature.auth.domain
+package com.example.loginactivity.feature.vinnumber
 
 import com.example.loginactivity.core.base.generics.Resource
 import com.example.loginactivity.feature.auth.data.model.LoginResponse
 
-interface LoginRepository {
-    suspend fun loginUser(email: String, password:String): Resource<LoginResponse>
+interface VinNumberRepository {
+    suspend fun verifyVinNumber(vinNumber:String):  Resource<VinNumberResponse>
 }
