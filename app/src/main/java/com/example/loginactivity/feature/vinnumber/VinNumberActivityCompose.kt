@@ -1,4 +1,4 @@
-package com.example.loginactivity.feature.auth.presentation
+package com.example.loginactivity.feature.vinnumber
 
 import android.content.Intent
 import android.os.Bundle
@@ -48,7 +48,7 @@ import com.example.loginactivity.core.base.generics.customTextStyle
 import com.example.loginactivity.core.base.generics.isValidVinNumber
 import com.example.loginactivity.core.base.utils.AppUtils
 import com.example.loginactivity.core.base.utils.Constants
-import com.example.loginactivity.feature.auth.data.model.VehicleDetail
+import com.example.loginactivity.feature.automatefuel.data.model.VehicleDetail
 import com.example.loginactivity.feature.auth.ui.theme.LoginActivityTheme
 import com.example.loginactivity.feature.automatefuel.presentation.FetchingSiteLocationCompose
 
@@ -60,7 +60,6 @@ class VinNumberActivityCompose : ComponentActivity() {
             LoginActivityTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     VinContent(innerPadding)
-
                 }
             }
         }
