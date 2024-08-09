@@ -24,7 +24,7 @@
     <string name="h_verify_vehicle_details">"Verify Vehicle Details"</string>
     <string name="title_activity_fetching_site_location_compose">FetchingSiteLocationCompose
     </string>
-    <string name="h_driver_location">"Your Location"</string>
+    <string name="h_driver_location_warning">"Press the button when you are ready to start.. "</string>
     <string name="title_activity_site_location_list_compose">SiteLocationListActivityCompose
     </string>
     <string name="title_activity_fuel_selection">FuelSelectionActivity</string>

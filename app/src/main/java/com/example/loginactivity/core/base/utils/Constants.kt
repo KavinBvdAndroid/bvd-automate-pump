@@ -13,7 +13,7 @@ class Constants {
         const val KEY_AUTH_TOKEN = "auth_token"
         const val IS_LOGGED_IN = "is_logged_in"
         const val NUM_PAGES = 3
-        const val VIN_NUMBER_LENGTH = 17
+        const val VIN_NUMBER_LENGTH = 3
         val permissionsToCheck = arrayOf(
             android.Manifest.permission.CAMERA,
             android.Manifest.permission.ACCESS_FINE_LOCATION,

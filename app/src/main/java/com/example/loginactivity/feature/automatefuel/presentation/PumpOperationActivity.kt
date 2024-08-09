@@ -73,7 +73,6 @@ import com.example.loginactivity.R
 import com.example.loginactivity.core.base.generics.GenericProgressBar
 import com.example.loginactivity.core.base.generics.Resource
 import com.example.loginactivity.core.base.generics.ReusableElevatedButton
-import com.example.loginactivity.core.base.generics.arsenalFontFamily
 import com.example.loginactivity.core.base.generics.customTextStyle
 import com.example.loginactivity.core.base.utils.AppUtils
 import com.example.loginactivity.feature.automatefuel.data.model.PumpParams
@@ -294,7 +293,6 @@ fun AgreementSection(
             Checkbox(checked = checked && isTransactionComplete, onCheckedChange = onCheckedChange)
 
             Text(
-
                 style = customTextStyle.labelMedium,
                 text = stringResource(id = R.string.i_fuel_activate_verification),
                 modifier = Modifier.padding(top = 16.dp, bottom = 16.dp)

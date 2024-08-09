@@ -120,7 +120,8 @@ private fun LoginContent(innerPadding: PaddingValues) {
                 onClick = {
                 },
                 modifier = Modifier
-                    .fillMaxWidth())
+                    .fillMaxWidth()
+            )
 
             ReusableTextInput(
                 value = loginPassword,
@@ -136,12 +137,12 @@ private fun LoginContent(innerPadding: PaddingValues) {
                     .fillMaxWidth(),
                 isPassword = true,
                 isPasswordVisible = isPasswordVisible,
-                onPasswordVisibilityChange = {isPasswordVisible = it}
+                onPasswordVisibilityChange = { isPasswordVisible = it }
             )
 
             ReusableElevatedButton(
                 onClick = {
-                    viewModel.loginUserEmail(loginEmail,loginPassword)
+                    viewModel.loginUserEmail(loginEmail, loginPassword)
                 },
                 text = "Login",
                 isEnabled = isEmailValid && isPasswordValid,
@@ -155,8 +156,9 @@ private fun LoginContent(innerPadding: PaddingValues) {
     }
     loginResult?.let { ObserveLoginResult(it) }
 }
+
 @Composable
-fun ObserveLoginResult(loginResult: Resource<LoginResponse> ) {
+fun ObserveLoginResult(loginResult: Resource<LoginResponse>) {
     val context = LocalContext.current
 
     when (loginResult) {
@@ -166,7 +168,7 @@ fun ObserveLoginResult(loginResult: Resource<LoginResponse> ) {
 
         is Resource.Failure -> {
             GenericProgressBar(false)
-           CustomErrorAlertDialog(showDg = true ){}
+            CustomErrorAlertDialog(showDg = true) {}
         }
 
         is Resource.Success -> {
@@ -179,19 +181,17 @@ fun ObserveLoginResult(loginResult: Resource<LoginResponse> ) {
 }
 
 @Composable
-fun CustomErrorAlertDialog(showDg: Boolean, dismissDialogCallback:() -> Unit)  {
-    var showDialog by rememberSaveable { mutableStateOf(showDg) }
+fun CustomErrorAlertDialog(showDg: Boolean, dismissDialogCallback: () -> Unit) {
 
-    if (showDialog) {
-        ErrorAlertDialog(
-            title = "Error",
-            message = "An unexpected error occurred. Please try again later.",
-            buttonText = "OK",
-            onDismiss = { showDialog = false},
-            titleBackgroundColor = Color.Red, // Custom title background color
-            titleCornerRadius = 16 // Rounded corner radius
-        )
-    }
+    ErrorAlertDialog(
+        title = "Error",
+        message = "An unexpected error occurred. Please try again later.",
+        buttonText = "OK",
+        onDismiss = { },
+        titleBackgroundColor = Color.Red, // Custom title background color
+        titleCornerRadius = 16 // Rounded corner radius
+    )
+
 }
 
 @Composable

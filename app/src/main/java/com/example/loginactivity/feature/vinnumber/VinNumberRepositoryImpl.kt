@@ -11,7 +11,7 @@ import javax.inject.Inject
 
 class VinNumberRepositoryImpl @Inject constructor(
     private val gson: Gson,
-    private val apiService: VinNumberApiService
+    private val apiService: LoginApiService
 ) :
     VinNumberRepository, BaseRepository(gson) {
 

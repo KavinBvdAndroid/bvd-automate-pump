@@ -35,6 +35,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,6 +46,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -197,8 +202,6 @@ fun CustomSwitch(
 }
 
 
-
-
 @Composable
 fun ReusableTextInput(
     value: String,
@@ -262,7 +265,9 @@ fun ReusableTextInput(
                 color = errorIndicatorColor,
                 modifier = Modifier.padding(start = 16.dp, top = 4.dp)
             )
+
         }
+
 
     }
 
@@ -279,6 +284,8 @@ fun ReusableElevatedButton(
     textStyle: TextStyle = customTextStyle.labelLarge,
     modifier: Modifier
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+
     Column(modifier = modifier) {
         ElevatedButton(
             onClick = onClick,
@@ -318,14 +325,16 @@ fun LoginLogo() {
                     bottomEnd = 46.dp
                 )
             )
-            .background(colorResource(id = R.color.colorSecondary)),
+            .background(colorResource(id = R.color.colorOnPrimary)),
 
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.BottomCenter
     ) {
         Image(
-            painter = painterResource(id = R.drawable.bvd_truck_logo),
+            painter = painterResource(id = R.drawable.footer_logo),
             contentDescription = "Your image description",
-            contentScale = ContentScale.Fit
+            contentScale = ContentScale.Fit,
+            alignment = Alignment.TopCenter,
+            modifier = Modifier.size(420.dp)
         )
     }
 }
@@ -339,38 +348,48 @@ fun ErrorAlertDialog(
     titleBackgroundColor: Color = MaterialTheme.colorScheme.errorContainer,
     titleCornerRadius: Int = 16 // Default rounded corner radius
 ) {
-    AlertDialog(
-        onDismissRequest = { onDismiss() },
-        title = {
-            Box(
-                modifier = Modifier
-                    .background(
-                        titleBackgroundColor,
-                        shape = RoundedCornerShape(topStartPercent = 50, topEndPercent = 50)
+    var showDialog by rememberSaveable { mutableStateOf(true) }
+    if (showDialog) {
+
+        AlertDialog(
+            onDismissRequest = {
+                showDialog = false
+                onDismiss()
+            },
+            title = {
+                Box(
+                    modifier = Modifier
+                        .background(
+                            titleBackgroundColor,
+                            shape = RoundedCornerShape(topStartPercent = 50, topEndPercent = 50)
+                        )
+                        .padding(16.dp)
+                        .shadow(8.dp)
+                ) {
+                    Text(
+                        text = title,
+                        style = customTextStyle.titleLarge
                     )
-                    .padding(16.dp)
-                    .shadow(8.dp)
-            ) {
+                }
+            },
+            text = {
                 Text(
-                    text = title,
-                    style = customTextStyle.titleLarge
+                    text = message,
+                    style = customTextStyle.labelMedium,
+                    modifier = Modifier.padding(16.dp)
                 )
-            }
-        },
-        text = {
-            Text(
-                text = message,
-                style = customTextStyle.labelMedium,
-                modifier = Modifier.padding(16.dp)
-            )
-        },
-        confirmButton = {
-            Button(onClick = { onDismiss() }) {
-                Text(text = buttonText)
-            }
-        },
-        properties = DialogProperties(dismissOnClickOutside = false)
-    )
+            },
+            confirmButton = {
+                Button(onClick = {
+                    showDialog = false
+                    onDismiss()
+                }) {
+                    Text(text = buttonText)
+                }
+            },
+            properties = DialogProperties(dismissOnClickOutside = false)
+        )
+    }
 }
 
 
@@ -382,7 +401,7 @@ fun GenericDetailRow(label: String, value: String) {
             .padding(vertical = 4.dp)
     ) {
         Text(
-            text = "$label: ",
+            text = "$label : ",
             style = customTextStyle.labelLarge,
             modifier = Modifier.weight(1f)
         )

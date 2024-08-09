@@ -9,6 +9,7 @@ import com.example.loginactivity.core.base.generics.isValidEmail
 import com.example.loginactivity.feature.auth.data.model.LoginResponse
 import com.example.loginactivity.feature.auth.domain.ValidateUserEmailUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -26,6 +27,8 @@ class VinNumberViewModel @Inject constructor(
         viewModelScope.launch {
             _vehicleDetails.value = Resource.Loading
             val result = useCase.verifyVinNumber(vinNumber)
+//            delay(2000)
+//            val result = Resource.Success(VinNumberResponse())
             _vehicleDetails.value = result
         }
     }

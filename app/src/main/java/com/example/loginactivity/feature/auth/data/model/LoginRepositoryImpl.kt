@@ -22,7 +22,7 @@ class LoginRepositoryImpl @Inject constructor(private val gson:Gson,private val 
             handleSuccess = { it->
                 Log.d("auth token",""+it.toString())
                 if (it.has("access_token")){
-                    sessionManager.saveAuthToken(it.get("access_token").toString())
+                    sessionManager.saveAuthToken(it.get("access_token").asString)
                 }
 
             }

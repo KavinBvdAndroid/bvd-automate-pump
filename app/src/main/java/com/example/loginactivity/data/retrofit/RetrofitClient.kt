@@ -59,6 +59,11 @@ class RetrofitClient @Inject constructor(private val sessionManager: SessionMana
         pro1Retrofit.create(VinNumberApiService::class.java)
     }
 
+
+    val loginApiServiceLocal by lazy {
+        pro1RetrofitLocal.create(LoginApiService::class.java)
+    }
+
     val vinNumberApiServiceLocal by lazy {
         pro1RetrofitLocal.create(VinNumberApiService::class.java)
     }

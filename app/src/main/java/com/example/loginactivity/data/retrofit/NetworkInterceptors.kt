@@ -11,6 +11,8 @@ class NetworkInterceptors @Inject constructor(private val sessionManager: Sessio
         val authToken = sessionManager.getAuthToken()
         val requestBuilder = chain.request().newBuilder()
             .header("Content-Type", "application/json")
+            .header("Accept", "application/json")
+
 
         if (authToken != null) {
             requestBuilder.header("Authorization", "Bearer $authToken")

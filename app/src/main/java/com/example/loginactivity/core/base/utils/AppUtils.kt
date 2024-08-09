@@ -65,6 +65,7 @@ object AppUtils {
     }
 
 
+
     fun getColor(colorResId: Int): Int {
         return ContextCompat.getColor(applicationContext, colorResId)
     }

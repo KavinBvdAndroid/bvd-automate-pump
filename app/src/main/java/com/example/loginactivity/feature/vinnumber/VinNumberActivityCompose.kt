@@ -35,6 +35,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -43,6 +44,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.loginactivity.R
+import com.example.loginactivity.core.base.generics.ErrorAlertDialog
 import com.example.loginactivity.core.base.generics.GenericDetailRow
 import com.example.loginactivity.core.base.generics.GenericProgressBar
 import com.example.loginactivity.core.base.generics.Resource
@@ -54,7 +56,7 @@ import com.example.loginactivity.core.base.utils.AppUtils
 import com.example.loginactivity.core.base.utils.Constants
 import com.example.loginactivity.feature.auth.ui.theme.LoginActivityTheme
 import com.example.loginactivity.feature.automatefuel.data.model.VehicleDetail
-import com.example.loginactivity.feature.automatefuel.presentation.FetchingSiteLocationCompose
+import com.example.loginactivity.feature.locationsites.FetchingSiteLocationCompose
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -91,7 +93,7 @@ fun VinContent(innerPadding: PaddingValues) {
     var isVinNumberValid by rememberSaveable { mutableStateOf(false) }
     var showVehicleDetails by rememberSaveable { mutableStateOf(false) }
     val vehicleDetail by viewModel.vehicleDetails.observeAsState(null)
-    var vehicleDetails by rememberSaveable { mutableStateOf<VinNumberResponse?>(null) }
+    var vehicleDetails by rememberSaveable { mutableStateOf<DataItem?>(null) }
 
     val scrollState = rememberScrollState()
 
@@ -139,7 +141,8 @@ fun VinContent(innerPadding: PaddingValues) {
 
             ReusableElevatedButton(
                 onClick = {
-                    viewModel.verifyVinNumber("123")
+
+                    viewModel.verifyVinNumber(vinNumber)
                 },
                 text = "Submit",
                 isEnabled = isVinNumberValid,
@@ -156,18 +159,40 @@ fun VinContent(innerPadding: PaddingValues) {
 
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            VehicleDetails(showVehicleDetails, vehicleDetails)
+            vehicleDetails?.let { VehicleDetails(showVehicleDetails, it) }
         }
     }
     vehicleDetail?.let {
         GenericProgressBar(isLoading = false)
         ObserverLiveData(it, callback = { value, data ->
+            val response = data as VinNumberResponse
+            val vehicleData = response.data
 
             if (value == 1) {
-                showVehicleDetails = true
-                vehicleDetails = data as VinNumberResponse
+                if (!vehicleData.isNullOrEmpty() && vehicleData.first() != null && vehicleData.first().toString()
+                        .isNotEmpty()) {
+                    showVehicleDetails = true
+                    vehicleDetails = vehicleData.first()
+                } else {
+                    ErrorAlertDialog(
+                        title = "Error",
+                        message = "No Records Found, Please make sure the vin number is correct",
+                        buttonText = "OK",
+                        onDismiss = { showVehicleDetails = false },
+                        titleBackgroundColor = Color.Red, // Custom title background color
+                        titleCornerRadius = 16 // Rounded corner radius
+                    )
+                }
             } else {
-                showVehicleDetails = false
+
+                ErrorAlertDialog(
+                    title = "Error",
+                    message = "An unexpected error occurred. Please try again later.",
+                    buttonText = "OK",
+                    onDismiss = { showVehicleDetails = false },
+                    titleBackgroundColor = Color.Red, // Custom title background color
+                    titleCornerRadius = 16 // Rounded corner radius
+                )
             }
         })
     }
@@ -176,7 +201,10 @@ fun VinContent(innerPadding: PaddingValues) {
 }
 
 @Composable
-fun ObserverLiveData(vehicleDetail: Resource<VinNumberResponse>, callback: (Int, Any?) -> Unit) {
+fun ObserverLiveData(
+    vehicleDetail: Resource<VinNumberResponse>,
+    callback: @Composable (Int, Any?) -> Unit
+) {
 
     when (vehicleDetail) {
         is Resource.Loading -> {
@@ -195,7 +223,7 @@ fun ObserverLiveData(vehicleDetail: Resource<VinNumberResponse>, callback: (Int,
 }
 
 @Composable
-fun VehicleDetails(showVehicleDetails: Boolean, VinNumberResponse: VinNumberResponse?) {
+fun VehicleDetails(showVehicleDetails: Boolean, vehicleDataItem: DataItem) {
     if (showVehicleDetails) {
         val context = LocalContext.current
 
@@ -226,29 +254,34 @@ fun VehicleDetails(showVehicleDetails: Boolean, VinNumberResponse: VinNumberResp
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     GenericDetailRow(
-                        label = "Vehicle Vin Number",
-                        value = testVehicleDetails.vinNumber.orEmpty()
+                        label = "ID",
+                        value = (vehicleDataItem.id ?: "N/A").toString()
                     )
                     GenericDetailRow(
-                        label = "Truck Name",
-                        value = testVehicleDetails.name.orEmpty()
-                    )
-                    GenericDetailRow(label = "Color", value = testVehicleDetails.color.orEmpty())
-                    GenericDetailRow(
-                        label = "Driver Name",
-                        value = testVehicleDetails.owner.orEmpty()
+                        label = "Vin Number",
+                        value = vehicleDataItem.vin_number ?: "N/A"
                     )
                     GenericDetailRow(
-                        label = "Fuel type",
-                        value = testVehicleDetails.fuelType.orEmpty()
+                        label = "Unit Number",
+                        value = vehicleDataItem.unit_number ?: "N/A"
                     )
                     GenericDetailRow(
-                        label = "Vehicle Number",
-                        value = testVehicleDetails.number.orEmpty()
+                        label = "Model",
+                        value = vehicleDataItem.model ?: "N/A"
                     )
                     GenericDetailRow(
-                        label = "Vehicle Mileage",
-                        value = testVehicleDetails.mileage.orEmpty()
+                        label = "Make",
+                        value = vehicleDataItem.make ?: "N/A"
+                    )
+
+                    GenericDetailRow(
+                        label = "Year",
+                        value = (vehicleDataItem.year ?: "N/A").toString()
+                    )
+
+                    GenericDetailRow(
+                        label = "Created Time",
+                        value = vehicleDataItem.created_at ?: "N/A"
                     )
 
                 }

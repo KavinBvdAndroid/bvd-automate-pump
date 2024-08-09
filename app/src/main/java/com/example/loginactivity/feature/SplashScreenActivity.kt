@@ -74,7 +74,7 @@ fun SplashScreenDemo(innerPadding: PaddingValues) {
                         bottomEnd = 70.dp
                     )
                 )
-                .background(colorResource(id = R.color.colorSecondary)),
+                .background(colorResource(id = R.color.colorOnPrimary)),
 
             contentAlignment = Alignment.Center
         ) {

@@ -5,6 +5,8 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
         android:name=".core.MyApplication"
@@ -54,15 +56,21 @@
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="${GOOGLE_KEY}" />
+            android:value="AIzaSyDO0dHeBDBRU1hRM9aTbnQhv-ha-mdAf7g" />
 
         <activity
-            android:name=".feature.automatefuel.presentation.SiteLocationListActivityCompose"
+            android:name=".feature.locationsites.SiteLocationListActivityCompose"
             android:exported="false"
             android:label="@string/title_activity_site_location_list_compose"
-            android:theme="@style/Theme.LoginActivity" />
+            android:theme="@style/Theme.LoginActivity" >
+        <intent-filter>
+            <action android:name="android.intent.action.MAIN" />
+
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent-filter>
+        </activity>
         <activity
-            android:name=".feature.automatefuel.presentation.FetchingSiteLocationCompose"
+            android:name=".feature.locationsites.FetchingSiteLocationCompose"
             android:exported="false"
             android:label="@string/title_activity_fetching_site_location_compose"
             android:theme="@style/Theme.LoginActivity" />
@@ -71,11 +79,7 @@
             android:exported="true"
             android:label="@string/title_activity_vin_number_compose"
             android:theme="@style/Theme.LoginActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".feature.auth.presentation.LoginActivityCompose"

@@ -83,18 +83,18 @@ object NetworkDatabaseModule {
     }
 
     @Provides
-    fun ProvidesLoginApiService(sessionManager: SessionManager): LoginApiService {
-        return RetrofitClient(sessionManager).loginApiService
+    fun ProvidesLoginApiService(sessionManager: SessionManager): LoginApiService{
+        return RetrofitClient(sessionManager).loginApiServiceLocal
     }
 
-//    @Provides
-//    fun ProvidesVinNumberApiService(sessionManager: SessionManager): VinNumberApiService {
-//        return RetrofitClient(sessionManager).vinNumberApiService
-//    }
     @Provides
-    fun ProvidesVinNumberApiServiceLocal(sessionManager: SessionManager): VinNumberApiService {
+    fun ProvidesVinNumberApiService(sessionManager: SessionManager): VinNumberApiService {
         return RetrofitClient(sessionManager).vinNumberApiServiceLocal
     }
+//    @Provides
+//    fun ProvidesVinNumberApiServiceLocal(sessionManager: SessionManager): VinNumberApiService {
+//        return RetrofitClient(sessionManager).vinNumberApiServiceLocal
+//    }
 
 
     @Provides
@@ -105,9 +105,9 @@ object NetworkDatabaseModule {
     @Provides
     fun providesVinNumberRepository(
         gson: Gson,
-        vinNumberApiService: VinNumberApiService
+        vinNumberApiService: LoginApiService
     ): VinNumberRepository {
-        return VinNumberRepositoryImpl(gson, vinNumberApiService)
+        return VinNumberRepositoryImpl(gson,vinNumberApiService)
     }
 
     @Provides

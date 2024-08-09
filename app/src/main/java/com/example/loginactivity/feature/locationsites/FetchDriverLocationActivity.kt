@@ -1,10 +1,15 @@
-package com.example.loginactivity.feature.automatefuel.presentation
+package com.example.loginactivity.feature.locationsites
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
+import android.location.Location
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -20,16 +25,28 @@ import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.loginactivity.R
+import com.example.loginactivity.core.base.generics.GenericProgressBar
 import com.example.loginactivity.core.base.generics.customTextStyle
 import com.example.loginactivity.feature.ui.theme.LoginActivityTheme
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
+import com.google.android.gms.tasks.CancellationTokenSource
 
 class FetchingSiteLocationCompose : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,15 +69,44 @@ fun MainContentDemo() {
         modifier = Modifier.fillMaxSize(),
     ) { innerPadding ->
         FetchLocationContent(innerPadding)
+
     }
 
 }
+
+@SuppressLint("MissingPermission")
+@Composable
+fun FetchCurrentLocation(
+    onGetCurrentLocationSuccess: (Pair<Double, Double>) -> Unit,
+    onGetCurrentLocationFailed: (Exception) -> Unit,
+    priority: Boolean = true
+) {
+
+    val context = LocalContext.current
+    var fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)
+
+    // Determine the accuracy priority based on the 'priority' parameter
+    val accuracy = if (priority) Priority.PRIORITY_HIGH_ACCURACY
+    else Priority.PRIORITY_BALANCED_POWER_ACCURACY
+
+    fusedLocationProviderClient.getCurrentLocation(
+        accuracy,
+        CancellationTokenSource().token
+    ).addOnSuccessListener { location ->
+        location?.let {
+            onGetCurrentLocationSuccess(Pair(it.latitude, it.longitude))
+        }
+    }
+}
+
 
 @Composable
 fun FetchLocationContent(innerPadding: PaddingValues) {
     val scrollState = rememberScrollState()
     val context = LocalContext.current
-
+    var isFetchLocation by rememberSaveable { mutableStateOf(false) }
+    var driverLocation by rememberSaveable { mutableStateOf<Location?>(null) }
+    var showProgress by rememberSaveable { mutableStateOf(false) }
     Column(
         modifier = Modifier
             .padding(innerPadding)
@@ -71,26 +117,29 @@ fun FetchLocationContent(innerPadding: PaddingValues) {
     ) {
         Text(
             style = customTextStyle.titleLarge,
-            text = stringResource(id = R.string.h_driver_location),
+            text = stringResource(id = R.string.h_driver_location_warning),
             modifier = Modifier.padding(top = 16.dp, bottom = 16.dp),
         )
 
-        Text(
-            style = customTextStyle.titleLarge,
-            text = "2345 steels avenue, Brampton, ON",
-            modifier = Modifier.padding(top = 16.dp, bottom = 16.dp),
-        )
-
+//
         ElevatedButton(
             onClick = {
-                context.startActivity(Intent(context, SiteLocationListActivityCompose::class.java))
+                isFetchLocation = true
             },
             modifier = Modifier
                 .size(260.dp) // Adjust size as needed
                 .background(Color.Blue, shape = CircleShape), // Background color and shape
             shape = CircleShape, // Button shape
 
-            colors = ButtonDefaults.buttonColors(containerColor = Color.Blue), // Button colors
+            colors = ButtonDefaults.elevatedButtonColors(
+                containerColor = colorResource(id = R.color.colorOnPrimary),
+                contentColor = Color.White,
+                disabledContainerColor = colorResource(id = R.color.disabledStartButtonColor),
+            ), // Button colors
+            elevation = ButtonDefaults.elevatedButtonElevation(
+                defaultElevation = 16.dp,
+                pressedElevation = 10.dp// Adjust shadow elevation as needed
+            ),
             contentPadding = PaddingValues(0.dp) // Remove padding to make it perfectly circular
         ) {
             Text(
@@ -100,8 +149,84 @@ fun FetchLocationContent(innerPadding: PaddingValues) {
             )
         }
     }
+
+    if (isFetchLocation) {
+        GenericProgressBar(true)
+        FetchUserLocation {
+            driverLocation = it
+        }
+    }
+
+    if (driverLocation != null) {
+        GenericProgressBar(false)
+        LaunchedEffect(true) {
+
+            val intent = Intent()
+            context.startActivity(
+                Intent(context, SiteLocationListActivityCompose::class.java)
+                    .putExtra("latitude", driverLocation!!.latitude)
+                    .putExtra("longitude", driverLocation!!.longitude)
+            )
+        }
+    }
 }
 
+@Composable
+fun FetchUserLocation(locationCallback: (location: Location) -> Unit) {
+    val context = LocalContext.current
+    val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
+    var location by remember { mutableStateOf<Location?>(null) }
+    var locationPermissionGranted by remember { mutableStateOf(false) }
+
+    // Request location permission
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { isGranted ->
+            locationPermissionGranted = isGranted
+            if (isGranted) {
+                fetchLocation(fusedLocationClient) {
+                    location = it
+                }
+            }
+        }
+    )
+
+    LaunchedEffect(true) {
+        locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+    }
+
+
+    if (location != null) {
+        locationCallback(location!!)
+    } else {
+        Text("Fetching location...")
+    }
+}
+
+@SuppressLint("MissingPermission")
+fun fetchLocation(
+    fusedLocationClient: FusedLocationProviderClient,
+    onLocationFetched: (Location?) -> Unit
+) {
+//    fusedLocationClient.getCurrentLocation()
+//        .addOnSuccessListener { location: Location? ->
+//            onLocationFetched(location)
+//        }
+//        .addOnFailureListener {
+//            onLocationFetched(null)
+//        }
+
+    fusedLocationClient.getCurrentLocation(
+        Priority.PRIORITY_HIGH_ACCURACY,
+        CancellationTokenSource().token
+    ).addOnSuccessListener { location ->
+        location?.let {
+            onLocationFetched(location)
+        }
+    }.addOnFailureListener {
+        onLocationFetched(null)
+    }
+}
 
 @Composable
 fun Greeting3(name: String, modifier: Modifier = Modifier) {

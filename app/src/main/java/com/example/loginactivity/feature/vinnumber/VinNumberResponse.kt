@@ -13,13 +13,13 @@ data class VinNumberResponse(
 
 @Parcelize
 data class DataItem(
-	val unitNumber: String? = null,
-	val updatedAt: String? = null,
+	val unit_number: String? = null,
+	val updated_at: String? = null,
 	val year: Int? = null,
-	val vinNumber: String? = null,
-	val createdAt: String? = null,
+	val vin_number: String? = null,
+	val created_at: String? = null,
 	val model: String? = null,
 	val id: Int? = null,
 	val make: String? = null,
-	val deletedAt: String? = null
+	val deleted_at: String? = null
 ) : Parcelable
