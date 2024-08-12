@@ -4,8 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -13,8 +11,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -22,59 +18,42 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicText
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.loginactivity.R
 import com.example.loginactivity.core.base.generics.GenericDetailRow
-import com.example.loginactivity.core.base.generics.ReusableElevatedButton
-import com.example.loginactivity.core.base.utils.AppUtils
 import com.example.loginactivity.core.base.utils.AppUtils.hideSystemUI
 import com.example.loginactivity.feature.automatefuel.data.model.SiteDetails
 import com.example.loginactivity.feature.automatefuel.data.model.driverLocation
+import com.example.loginactivity.feature.automatefuel.data.model.listOfSites
 import com.example.loginactivity.feature.automatefuel.data.model.sortedListOfSites
-import com.example.loginactivity.feature.automatefuel.presentation.FuelSelectionActivity
 import com.example.loginactivity.feature.automatefuel.ui.theme.LoginActivityTheme
-import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -100,7 +79,7 @@ class SiteLocationListActivityCompose : ComponentActivity() {
         setContent {
             LoginActivityTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    ModalBottomSheetDemo(innerPadding, latLng)
+                    ShowMaps(innerPadding)
                 }
             }
         }
@@ -115,105 +94,170 @@ fun SiteLocationListDemo() {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
     ) { innerPadding ->
-        ModalBottomSheetDemo(innerPadding, null)
-//        BottomSheetWithMapAndSiteList(
-//            sites = sortedListOfSites,
-//            selectedSiteId = sortedListOfSites.first().siteId,
-//            onSelect = { selectedId ->
-//
-//            },
-//            innerPadding
-//        )
+        ShowMaps(innerPadding)
+
     }
 
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SiteLocationListContent(innerPadding: PaddingValues, latLng: LatLng) {
-    ModalBottomSheetDemo(innerPadding, latLng)
+fun ShowMaps(innerPadding: PaddingValues) {
 
-}
+//    val viewModel : FuelSitesViewModel =hiltViewModel()
 
-@Composable
-fun MapsContent() {
+    val sortedFuelSites by remember {
+        derivedStateOf { listOfSites.sortedBy { it.distanceToLocation } }
+    }
+    var selectedSite by remember {
+        mutableStateOf<SiteDetails>(sortedFuelSites.first())
+    }
 
-    val context = LocalContext.current
 
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(driverLocation, 15f)
     }
-    val markerClicked by rememberSaveable { mutableStateOf(false) }
-    val selectedSite by rememberSaveable { mutableStateOf<SiteDetails?>(null) }
 
-    var selectedSiteId by rememberSaveable { mutableStateOf(sortedListOfSites.first().siteId) }
+    BottomSheetScaffold(
+        sheetContent = {
+                SiteList(sites = sortedFuelSites, selectedSiteId = selectedSite.siteId, onSelect = {sie->
+                    selectedSite = sie
+                    Log.d("call back site list","${sie.siteId}")
+                })
 
-    GoogleMap(
-        modifier = Modifier.fillMaxSize(),
-        cameraPositionState = cameraPositionState,
-        properties = MapProperties(mapType = MapType.TERRAIN),
-        uiSettings = MapUiSettings(zoomControlsEnabled = true)
+        },
+        sheetPeekHeight = 100.dp,
     ) {
-        val driverMarkerState = rememberMarkerState(position = driverLocation)
+        GoogleMap(
+            modifier = Modifier.fillMaxSize(),
+            cameraPositionState = cameraPositionState,
+            properties = MapProperties(mapType = MapType.TERRAIN),
+            uiSettings = MapUiSettings(zoomControlsEnabled = true)
+        ) {
 
-        Marker(
-            state = driverMarkerState,
-            title = "My location",
-            snippet = "BVD Group",
-            icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN),
-            onInfoWindowClick = { driverMarkerState.showInfoWindow() },
-
-            )
-
-        if (markerClicked) {
-            Column(
-                modifier = Modifier
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.Top
-            ) {
-                Button(
-                    onClick = {
-                        // Implement your own logic to view location or open navigation
-                        selectedSite?.let {
-                            openGoogleMapsWithLocation(context, it.latitude, it.longitude)
-                        }
-                    },
-                    modifier = Modifier.padding(bottom = 8.dp)
-                ) {
-                    Text("View Location")
-                }
-
-                Button(
-                    onClick = {
-                        // Implement your own logic to get directions
-                        selectedSite?.let {
-                            openGoogleMapsWithDirections(context, it.latitude, it.longitude)
-                        }
-                    }
-                ) {
-                    Text("Get Directions")
-                }
+            ShowDriverLocationMarker(driverLocation)
+            selectedSite.let {
+                ShowFuelSitesLocationMarker(
+                    fuelSites = listOfSites,
+                    selectedSite = selectedSite,
+                    selectedCallback = {
+                        selectedSite = it
+                    })
             }
         }
+    }
+}
 
-        sortedListOfSites.forEach { site ->
-            val markerState = rememberMarkerState(position = LatLng(site.latitude, site.longitude))
-            Marker(
-                state = markerState,
-                title = site.name,
-                snippet = "${site.distanceToLocation} km away",
-                onInfoWindowClick = {
-                    markerState.showInfoWindow()
-                    selectedSiteId = site.siteId
-                }
-            )
-//            markerState.showInfoWindow()
-            driverMarkerState.showInfoWindow()
 
+@Composable
+fun ShowFuelSitesLocationMarker(
+    fuelSites: List<SiteDetails>, selectedSite: SiteDetails,
+    selectedCallback: (SiteDetails) -> Unit,
+) {
+    val context = LocalContext.current
+    var markerStateGlobal = rememberMarkerState()
+
+
+    val sortedFuelSites by remember(fuelSites) {
+        derivedStateOf {
+            fuelSites.sortedBy {
+                it.distanceToLocation
+            }
         }
     }
 
+    sortedFuelSites.forEach { site ->
+        key(site.siteId) {
+            FuelSiteMarker(
+                site,
+                isSelected = site.siteId == selectedSite.siteId,
+                selectedSite,
+                onSelect = selectedCallback
+            )
+        }
+
+    }
+
+
 }
+
+@Composable
+fun FuelSiteMarker(
+    site: SiteDetails,
+    isSelected: Boolean,
+    selectedSite: SiteDetails,
+    onSelect: (SiteDetails) -> Unit
+) {
+    val markerState = rememberMarkerState(position = LatLng(site.latitude, site.longitude))
+
+//    LaunchedEffect(markerState.position, key2 = isSelected) {
+//        if (isSelected) {
+//            markerState.showInfoWindow()
+//        } else {
+//            markerState.hideInfoWindow()
+//        }
+//    }
+
+    Marker(
+        state = markerState,
+        title = site.name,
+        snippet = site.address,
+        onClick = {
+            onSelect(site)
+            false
+        }
+    )
+
+    LaunchedEffect( isSelected) {
+        if (selectedSite.siteId == site.siteId && isSelected) {
+            markerState.showInfoWindow()
+        }
+    }
+}
+
+@Composable
+fun CustomInfoWindowContent(site: SiteDetails) {
+    Card(
+        modifier = Modifier
+            .background(Color.White)
+            .width(200.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        shape = RoundedCornerShape(8.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(8.dp)
+        ) {
+            Text(
+                text = site.name,
+                style = MaterialTheme.typography.headlineMedium,
+                color = Color.Black
+            )
+            Text(
+                text = site.address,
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Gray
+            )
+            Text(
+                text = "Distance: ${site.distanceToLocation} km",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Black
+            )
+        }
+    }
+}
+
+@Composable
+fun ShowDriverLocationMarker(driverLocation: LatLng) {
+    val context = LocalContext.current
+    val customBitmap = getBitmapFromVectorDrawable(context, R.drawable.pin)
+    Marker(
+        state = MarkerState(position = driverLocation),
+        title = "BVD Driver Location",
+        snippet = "Marker",
+        icon = BitmapDescriptorFactory.fromBitmap(customBitmap)
+    )
+}
+
 
 fun openGoogleMapsWithLocation(context: Context, latitude: Double, longitude: Double) {
     val uri = Uri.parse("geo:$latitude,$longitude")
@@ -230,6 +274,7 @@ fun openGoogleMapsWithDirections(context: Context, latitude: Double, longitude: 
 
     context.startActivity(intent)
 }
+
 
 @Composable
 fun SiteList(
@@ -259,94 +304,51 @@ fun SiteList(
                 RadioButtonWithSite(
                     site = site,
                     isSelected = site.siteId == sleectedId,
-                    onSelect = { onSelect(site)}
-                )
+                    onSelect = {
+                        onSelect(site)
 
 
-            }
-
-        }
-    }
-}
-
-@Composable
-fun BottomSheetWithMapAndSiteList(
-    sites: List<SiteDetails>,
-    selectedSiteId: String,
-    onSelect: (String) -> Unit,
-    innerPadding: PaddingValues
-    // Assuming you have a map state for managing the map
-) {
-
-}
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ModalBottomSheetDemo(innerPadding: PaddingValues, latLng: LatLng?) {
-
-    val viewModel: FuelSitesViewModel = hiltViewModel()
-    val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(latLng!!, 15f)
-    }
-//    val cameraPositionState = rememberCameraPositionState()
-
-
-    if (latLng != null) {
-        viewModel.saveUserLocation(latLng.latitude, latLng.longitude)
-    } else {
-        AppUtils.showToastMessage("Lat lng Null")
-    }
-
-    viewModel.updateSites(sortedListOfSites)
-
-    val sortedFuelSites = sortedListOfSites
-    var selected_site by rememberSaveable { mutableStateOf<SiteDetails?>(sortedFuelSites.first()) }
-
-    val markerStates = remember(sortedListOfSites) {
-        sortedListOfSites.associateWith { site ->
-            MarkerState(position = LatLng(site.latitude, site.longitude))
-        }
-    }
-
-    BottomSheetScaffold(
-        sheetContent = {
-            selected_site?.let { SiteList(sites = sortedFuelSites, selectedSiteId = it.siteId, onSelect = {
-                selected_site= it
-            }) }
-
-        },
-        sheetPeekHeight = 100.dp,
-    ) {
-
-        GoogleMap(
-            modifier = Modifier.fillMaxSize(),
-            cameraPositionState = cameraPositionState
-        ) {
-            if (latLng != null) {
-                ShowDriverLocation(DriverLocation(latLng.latitude,latLng.longitude))
-            }
-            sortedFuelSites.forEach { site ->
-                val markerState =markerStates[site] ?: rememberMarkerState(position = LatLng(site.latitude, site.longitude))
-
-                Marker(
-                    state = markerState,
-                    title = site.name,
-                    snippet = site.distanceToLocation.toString(),
-                    onClick = {
-                        selected_site = site
-                        true
-                    },
-
-                )
-                if (selected_site?.siteId == site.siteId) {
-                    LaunchedEffect (site.siteId){
-                        markerState.showInfoWindow()
                     }
+                )
 
-                }
+
             }
-        }
 
+        }
     }
+}
+
+
+@Composable
+fun GoogleMapView(
+    markers: List<MarkerData>,
+    onMarkerClick: (MarkerData) -> Unit
+) {
+    val singapore = LatLng(1.35, 103.87)
+    val cameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(singapore, 10f)
+    }
+
+    GoogleMap(
+        modifier = Modifier.fillMaxSize(),
+        cameraPositionState = cameraPositionState
+    ) {
+        markers.forEach { markerData ->
+            val markerState =
+                rememberMarkerState(position = markerData.position)
+            Marker(
+                state = markerState,
+                title = markerData.title,
+                snippet = markerData.snippet,
+                onClick = {
+                    onMarkerClick(markerData)
+                    true
+                }
+            )
+
+        }
+    }
+}
 
 
 //    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState()
@@ -429,6 +431,25 @@ fun ModalBottomSheetDemo(innerPadding: PaddingValues, latLng: LatLng?) {
 //            }
 //        }
 //    }
+
+@Composable
+fun InfoWindow(marker: MarkerData, onDismiss: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .padding(16.dp)
+            .background(color = colorResource(id = R.color.Transparent))
+            .width(200.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(text = marker.title, style = MaterialTheme.typography.labelMedium)
+            Text(text = marker.snippet, style = MaterialTheme.typography.bodyMedium)
+            Button(onClick = onDismiss) {
+                Text("Close")
+            }
+        }
+    }
 }
 
 @Composable
@@ -436,8 +457,7 @@ fun RadioButtonWithSite(site: SiteDetails, isSelected: Boolean, onSelect: () -> 
     Row(
         modifier = Modifier
             .clickable { onSelect() }
-            .padding(vertical = 8.dp)
-            , verticalAlignment = Alignment.CenterVertically
+            .padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically
     ) {
         RadioButton(
             selected = isSelected,
@@ -447,125 +467,13 @@ fun RadioButtonWithSite(site: SiteDetails, isSelected: Boolean, onSelect: () -> 
         Column {
             GenericDetailRow(label = "Id :", value = site.siteId)
             GenericDetailRow(label = "Name :", value = site.name)
-            GenericDetailRow(label = "Distance :", value = site.distanceToLocation.toString() +" Kms")
+            GenericDetailRow(
+                label = "Distance :",
+                value = site.distanceToLocation.toString() + " Kms"
+            )
             GenericDetailRow(label = "Address :", value = site.address)
         }
     }
-}
-
-@Composable
-fun ShowDriverLocation(driverLocation: DriverLocation) {
-    val context = LocalContext.current
-    val customBitmap = getBitmapFromVectorDrawable(context, R.drawable.pin)
-
-    driverLocation.let {
-        val marker = rememberMarkerState(position = LatLng(it.latitude, it.longitude))
-
-        Marker(
-            state = marker,
-            title = "Driver location",
-            snippet = "BVD Group",
-            icon = BitmapDescriptorFactory.fromBitmap(customBitmap),
-        )
-        marker.showInfoWindow()
-    }
-
-}
-
-@Composable
-fun ShowFuelSiteLocation(
-    fuelSiteDetails: List<SiteDetails>, markerStates: Map<String, MarkerState>,
-    selectedSiteCallback: (selectedSiteB: SiteDetails) -> Unit
-) {
-
-    Log.d("maps location", "Recompose outer")
-
-    fuelSiteDetails.forEach { site ->
-        val markerState = markerStates[site.siteId] ?: rememberMarkerState(
-            position = LatLng(
-                site.latitude,
-                site.longitude
-            )
-        )
-
-        Marker(
-            state = markerState,
-            title = site.name,
-            snippet = site.distanceToLocation.toString(),
-            onClick = {
-                selectedSiteCallback(site)
-                markerState.showInfoWindow()
-                true
-            }
-        )
-        Log.d("maps location", "Recompose")
-//        if (selectedSiteB?.id == site.id) {
-//            markerState.showInfoWindow()
-//        }
-        // Optional: Show info window based on user interaction
-    }
-
-//    val derivedSortedListOfSites by remember {
-//        derivedStateOf { fuelSiteDetails.sortedBy { it.distanceToLocation } }
-//    }
-//    // Use remember to keep marker states stable
-//
-//    val markerStates = remember(derivedSortedListOfSites) {
-//        derivedSortedListOfSites.associateWith { site ->
-//            MarkerState(position = LatLng(site.latitude, site.longitude))
-//        }
-//    }
-
-//    val finalMarkerState = rememberMarkerState(markerStates[s])
-//    derivedSortedListOfSites.forEach {site->
-//        val markerState = markerStates[site]!!
-
-//        val markerState = markerStates.value.getOrPut(site.siteId) {
-//            rememberMarkerState(position = LatLng(site.latitude, site.longitude))
-//        }
-
-//        Marker(
-//            state = markerState,
-//            title = site.name,
-//            snippet = site.distanceToLocation.toString(),
-//        )
-//
-//    }
-
-}
-
-@Composable
-fun ShowDriverLocationMap(latLng: LatLng) {
-    val context = LocalContext.current
-
-    val latitude = rememberSaveable { mutableDoubleStateOf(latLng.latitude) }
-    val longitude = rememberSaveable { mutableDoubleStateOf(latLng.longitude) }
-    val driverLatLng by derivedStateOf { LatLng(latitude.doubleValue, longitude.doubleValue) }
-
-    val driverMarkerState = remember { MarkerState(position = driverLatLng) }
-    val customBitmap = getBitmapFromVectorDrawable(context, R.drawable.pin)
-    val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(driverLocation, 15f)
-    }
-
-    GoogleMap(
-        modifier = Modifier.fillMaxSize(),
-        cameraPositionState = cameraPositionState,
-        properties = MapProperties(mapType = MapType.TERRAIN),
-        uiSettings = MapUiSettings(zoomControlsEnabled = true)
-    ) {
-        Marker(
-            state = driverMarkerState,
-            title = "Driver location",
-            snippet = "BVD Group",
-            icon = BitmapDescriptorFactory.fromBitmap(customBitmap),
-        )
-        LaunchedEffect(key1 = driverLatLng.latitude, key2 = driverLatLng.longitude) {
-            driverMarkerState.showInfoWindow()
-        }
-//        ShowFuelSitesLocation()
-    }
-
 }
 
 
@@ -621,255 +529,6 @@ fun getBitmapFromVectorDrawable(context: Context, drawableId: Int): Bitmap {
     val canvas = android.graphics.Canvas(bitmap)
     vectorDrawable.draw(canvas)
     return Bitmap.createScaledBitmap(bitmap, 100, 100, false)
-}
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun MapsBottomSheet() {
-    val context = LocalContext.current
-    val markerClicked by rememberSaveable { mutableStateOf(false) }
-    var selectedSite by rememberSaveable { mutableStateOf(sortedListOfSites.first()) }
-    var showInfoWindow by remember { mutableStateOf(false) }
-    var selectedSiteId by rememberSaveable { mutableStateOf(sortedListOfSites.first().siteId) }
-
-    val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(driverLocation, 15f)
-    }
-
-
-    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState()
-    val coroutineScope = rememberCoroutineScope()
-
-    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
-    val initialHeight = screenHeight * 0.2f
-    val fullHeight = screenHeight // Full screen height
-
-    BottomSheetScaffold(
-        scaffoldState = bottomSheetScaffoldState,
-        sheetContent = {
-//            LocationListBottomSheet(locations = sortedListOfSites, selectedSite = selectedSite) {
-//                showInfoWindow = true
-//            }
-        },
-        sheetPeekHeight = initialHeight,
-        sheetShape = MaterialTheme.shapes.medium,
-        sheetShadowElevation = 8.dp,
-        sheetContainerColor = MaterialTheme.colorScheme.background
-    ) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-
-            GoogleMap(
-                modifier = Modifier.fillMaxSize(),
-                cameraPositionState = cameraPositionState,
-                properties = MapProperties(mapType = MapType.TERRAIN),
-                uiSettings = MapUiSettings(zoomControlsEnabled = true)
-            ) {
-                val driverMarkerState = rememberMarkerState(position = driverLocation)
-                // Define marker states outside the loop
-                val markerStates = remember(sortedListOfSites) {
-                    sortedListOfSites.associateWith { site ->
-                        MarkerState(position = LatLng(site.latitude, site.longitude))
-                    }
-                }
-                Marker(
-                    state = driverMarkerState,
-                    title = "My location",
-                    snippet = "BVD Group",
-                    icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN),
-                    onInfoWindowClick = { driverMarkerState.showInfoWindow() },
-
-                    )
-                driverMarkerState.showInfoWindow()
-
-
-                if (markerClicked) {
-                    Column(
-                        modifier = Modifier
-                            .padding(16.dp),
-                        horizontalAlignment = Alignment.End,
-                        verticalArrangement = Arrangement.Top
-                    ) {
-                        Button(
-                            onClick = {
-                                // Implement your own logic to view location or open navigation
-                                selectedSite.let {
-                                    openGoogleMapsWithLocation(context, it.latitude, it.longitude)
-                                }
-                            },
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        ) {
-                            Text("View Location")
-                        }
-
-                        Button(
-                            onClick = {
-                                // Implement your own logic to get directions
-                                selectedSite.let {
-                                    openGoogleMapsWithDirections(context, it.latitude, it.longitude)
-                                }
-                            }
-                        ) {
-                            Text("Get Directions")
-                        }
-                    }
-                }
-
-                sortedListOfSites.forEach { site ->
-                    val markerState = markerStates[site]!!
-
-                    Marker(
-                        state = markerState,
-                        title = site.name,
-                        snippet = "${site.distanceToLocation} km away",
-                        onInfoWindowClick = {
-                            openGoogleMapsWithDirections(
-                                context,
-                                selectedSite.latitude,
-                                selectedSite.longitude
-                            )
-                        },
-                        onClick = {
-                            selectedSite = site
-                            showInfoWindow = true
-                            true
-                        }
-                    )
-                    if (selectedSite == site && showInfoWindow) {
-                        LaunchedEffect(markerState) {
-                            markerState.showInfoWindow()
-                            showInfoWindow = false
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-}
-
-@Composable
-fun LocationListBottomSheet(
-    locations: List<SiteDetails>,
-    selectedSite: SiteDetails?,
-    onLocationSelected: (SiteDetails) -> Unit
-) {
-    val newSelectedSite by remember {
-        derivedStateOf { mutableStateOf(selectedSite) }
-    }
-    val context = LocalContext.current
-    val scrollState = rememberScrollState()
-
-    Column(
-        modifier = Modifier
-            .wrapContentSize()
-            .verticalScroll(scrollState)
-    ) {
-        locations.forEach { site ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                RadioButton(
-                    modifier = Modifier.size(24.dp),
-                    selected = site.siteId == newSelectedSite.value?.siteId,
-                    onClick = {
-                        newSelectedSite.value = site
-                        onLocationSelected(newSelectedSite.value!!)
-                    })
-                Spacer(modifier = Modifier.width(8.dp))
-                Column {
-                    Text(
-                        text = site.name,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onLocationSelected(site) }
-                            .padding(vertical = 8.dp),
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                    Text(
-                        text = site.address,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onLocationSelected(site) }
-                            .padding(vertical = 8.dp),
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                    Text(
-                        text = "Distance : ${site.distanceToLocation} Kms",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onLocationSelected(site) }
-                            .padding(vertical = 8.dp),
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                }
-
-            }
-            HorizontalDivider()
-        }
-
-        ReusableElevatedButton(
-            onClick = {
-                AppUtils.showToastMessage("Validated...")
-                context.startActivity(Intent(context, FuelSelectionActivity::class.java))
-            },
-            text = "Continue",
-            isEnabled = selectedSite != null || newSelectedSite != null,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp)
-        )
-    }
-}
-
-fun getBitmapDescriptorFromDrawable(drawableResId: Int, context: Context): BitmapDescriptor {
-    val drawable: Drawable = ContextCompat.getDrawable(context, drawableResId)!!
-    val bitmap: Bitmap = (drawable as BitmapDrawable).bitmap
-    return BitmapDescriptorFactory.fromBitmap(bitmap)
-}
-
-fun calculateDistance(driverLocation: LatLng, destinations: List<SiteDetails>) {
-
-}
-
-@Composable
-fun MainScreen() {
-    val items = List(100) { "Item $it" } // Sample data
-    val scrollState = rememberLazyListState()
-
-    OptimizedLazyColumn(items = items, scrollState = scrollState)
-}
-
-@Composable
-fun OptimizedLazyColumn(items: List<String>, scrollState: LazyListState) {
-    LazyColumn(
-        state = scrollState,
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-    ) {
-        itemsIndexed(items) { index, item ->
-            ListItem(item = item, index = index)
-        }
-    }
-}
-
-@Composable
-fun ListItem(item: String, index: Int) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-            .background(Color.Gray)
-            .padding(16.dp)
-    ) {
-        BasicText(
-            text = "Item $index: $item",
-            modifier = Modifier.fillMaxWidth()
-        )
-    }
 }
 
 
