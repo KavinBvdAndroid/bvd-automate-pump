@@ -12,10 +12,13 @@ import com.example.loginactivity.data.retrofit.RetrofitClient
 import com.example.loginactivity.data.retrofit.VinNumberApiService
 import com.example.loginactivity.feature.auth.data.model.LoginRepositoryImpl
 import com.example.loginactivity.feature.auth.domain.LoginRepository
-import com.example.loginactivity.feature.automatefuel.data.reposiotryimpl.PumpOperationRepositoryImpl
-import com.example.loginactivity.feature.automatefuel.domain.usecase.PumpOperationRepository
-import com.example.loginactivity.feature.automatefuel.domain.usecase.StartPumpUseCase
-import com.example.loginactivity.feature.automatefuel.domain.usecase.StopPumpUseCase
+import com.example.loginactivity.feature.pumpoperation.data.reposiotryimpl.PumpOperationRepositoryImpl
+import com.example.loginactivity.feature.pumpoperation.domain.repo.PumpOperationRepository
+import com.example.loginactivity.feature.pumpoperation.domain.usecase.StartPumpUseCase
+import com.example.loginactivity.feature.pumpoperation.domain.usecase.StopPumpUseCase
+import com.example.loginactivity.feature.maps.data.repoimpl.FetchInYardSitesRepositoryImpl
+import com.example.loginactivity.feature.maps.domain.FetchInYardSitesRepository
+import com.example.loginactivity.feature.pumpoperation.domain.usecase.SaveTransactionUseCase
 import com.example.loginactivity.feature.vinnumber.VinNumberRepository
 import com.example.loginactivity.feature.vinnumber.VinNumberRepositoryImpl
 import com.google.gson.Gson
@@ -83,12 +86,18 @@ object NetworkDatabaseModule {
     }
 
     @Provides
-    fun ProvidesLoginApiService(sessionManager: SessionManager): LoginApiService{
+    fun provideSaveTransactionUseCase(pumpOperationRepository: PumpOperationRepository): SaveTransactionUseCase {
+        return SaveTransactionUseCase((pumpOperationRepository))
+    }
+
+
+    @Provides
+    fun providesLoginApiService(sessionManager: SessionManager): LoginApiService{
         return RetrofitClient(sessionManager).loginApiServiceLocal
     }
 
     @Provides
-    fun ProvidesVinNumberApiService(sessionManager: SessionManager): VinNumberApiService {
+    fun providesVinNumberApiService(sessionManager: SessionManager): VinNumberApiService {
         return RetrofitClient(sessionManager).vinNumberApiServiceLocal
     }
 //    @Provides
@@ -108,6 +117,11 @@ object NetworkDatabaseModule {
         vinNumberApiService: LoginApiService
     ): VinNumberRepository {
         return VinNumberRepositoryImpl(gson,vinNumberApiService)
+    }
+
+    @Provides
+    fun providesFetchInYardSitesRepository(gson: Gson, loginApiService: LoginApiService): FetchInYardSitesRepository {
+        return FetchInYardSitesRepositoryImpl(gson, loginApiService)
     }
 
     @Provides

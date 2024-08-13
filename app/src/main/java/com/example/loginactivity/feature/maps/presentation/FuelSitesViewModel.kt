@@ -4,27 +4,30 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.loginactivity.core.base.generics.Resource
 import com.example.loginactivity.feature.maps.data.model.DriverLocation
-import com.example.loginactivity.feature.automatefuel.data.model.SiteDetails
-import com.example.loginactivity.feature.automatefuel.data.model.sortedListOfSites
+import com.example.loginactivity.feature.pumpoperation.data.model.SiteDetails
+import com.example.loginactivity.feature.maps.data.model.FetchInYardSitesResponse
+import com.example.loginactivity.feature.maps.domain.usecase.FetchInYardSiteUseCase
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.MarkerState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class FuelSitesViewModel @Inject constructor(): ViewModel() {
+class FuelSitesViewModel @Inject constructor(private val fetchInYardSiteUseCase: FetchInYardSiteUseCase): ViewModel() {
 
 
     private val _mutableDriverLocation = MutableStateFlow(DriverLocation(0.0, 0.0))
     val driverLocationFlow : StateFlow<DriverLocation> = _mutableDriverLocation
 
-    private val _fuelSiteDetails = MutableStateFlow<List<SiteDetails>>(sortedListOfSites)
-    val fuelSiteDetails : StateFlow<List<SiteDetails>> = _fuelSiteDetails
+    private val _fuelSiteDetails = MutableStateFlow<Resource<FetchInYardSitesResponse>>(Resource.Loading)
+    val fuelSiteDetails : StateFlow<Resource<FetchInYardSitesResponse>> = _fuelSiteDetails
 
-
+//    private val _fuelSiteDetails = MutableStateFlow<List<SiteDetails>>(sortedListOfSites)
+//    val fuelSiteDetails : StateFlow<List<SiteDetails>> = _fuelSiteDetails
 
     private val _sites = MutableStateFlow<List<SiteDetails>>(emptyList())
     val sites: StateFlow<List<SiteDetails>> = _sites
@@ -37,10 +40,11 @@ class FuelSitesViewModel @Inject constructor(): ViewModel() {
         _mutableDriverLocation.value = DriverLocation(latitude,longitude)
     }
 
-    fun fetchNearBySites(latLng: LatLng){
+    fun fetchNearBySites(latLng: LatLng? = null){
         viewModelScope.launch {
-            Resource.Loading
-
+//            val result = fetchInYardSiteUseCase.fetchInYardSites(latLng)
+//            _fuelSiteDetails.value = result
+            delay(3000)
         }
     }
 

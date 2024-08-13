@@ -32,6 +32,7 @@
     <string name="title_activity_transaction">TransactionActivity</string>
     <string name="title_activity_test_composable">TestComposableActivity</string>
     <string name="title_activity_splash_screen">SplashScreenActivity</string>
+    <string name="title_activity_transaction_details">TransactionDetailsActivity</string>
 
 
 </resources>

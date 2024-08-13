@@ -1,11 +1,13 @@
 package com.example.loginactivity.data.retrofit
 
 import com.example.bvddriverfleetapp.data.sharedpref.SessionManager
+import com.example.loginactivity.core.base.testdatas.mockToken
 import okhttp3.Interceptor
 import okhttp3.Response
 import javax.inject.Inject
 
-class NetworkInterceptors @Inject constructor(private val sessionManager: SessionManager) : Interceptor{
+class NetworkInterceptors @Inject constructor(private val sessionManager: SessionManager) :
+    Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val authToken = sessionManager.getAuthToken()
@@ -14,9 +16,12 @@ class NetworkInterceptors @Inject constructor(private val sessionManager: Sessio
             .header("Accept", "application/json")
 
 
-        if (authToken != null) {
-            requestBuilder.header("Authorization", "Bearer $authToken")
-        }
+//        if (authToken != null) {
+//            requestBuilder.header("Authorization", "Bearer $authToken")
+//        }
 
-        return chain.proceed(requestBuilder.build())    }
+        requestBuilder.header("Authorization", "Bearer $mockToken")
+
+        return chain.proceed(requestBuilder.build())
+    }
 }

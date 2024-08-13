@@ -55,8 +55,8 @@ import com.example.loginactivity.core.base.generics.isValidVinNumber
 import com.example.loginactivity.core.base.utils.AppUtils
 import com.example.loginactivity.core.base.utils.Constants
 import com.example.loginactivity.feature.auth.ui.theme.LoginActivityTheme
-import com.example.loginactivity.feature.automatefuel.data.model.VehicleDetail
-import com.example.loginactivity.feature.maps.presentation.FetchingSiteLocationCompose
+import com.example.loginactivity.feature.maps.presentation.FetchingDriverLocationActivity
+import com.example.loginactivity.feature.pumpoperation.data.model.VehicleDetail
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -308,7 +308,7 @@ fun VehicleDetails(showVehicleDetails: Boolean, vehicleDataItem: DataItem) {
                         context.startActivity(
                             Intent(
                                 context,
-                                FetchingSiteLocationCompose::class.java
+                                FetchingDriverLocationActivity::class.java
                             )
                         )
                     },

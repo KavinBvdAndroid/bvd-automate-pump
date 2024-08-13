@@ -1,7 +1,7 @@
 package com.example.loginactivity.core.base
 
 import android.util.Log
-import com.example.loginactivity.core.base.generics.GenericErrorResponse
+import com.example.loginactivity.core.base.generics.GenericBaseResponse
 import com.example.loginactivity.core.base.generics.Resource
 import com.google.gson.Gson
 import com.google.gson.JsonObject
@@ -30,7 +30,7 @@ abstract class BaseRepository(private val gson: Gson) {
 
                     if (jsonObject.has("error") && jsonObject.get("error").asBoolean) {
                         val errorResponse =
-                            gson.fromJson(jsonObject, GenericErrorResponse::class.java)
+                            gson.fromJson(jsonObject, GenericBaseResponse::class.java)
                         Resource.Failure(
                             errorResponse.message ?: "Unknown error",
                             errorResponse

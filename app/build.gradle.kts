@@ -101,6 +101,11 @@ dependencies {
     //icons
     implementation(libs.compose.material.icons.extended)
 
+    //Room
+    implementation(libs.room.runtime)
+    implementation(libs.room.compiler) // If you're using Kapt for annotation processing
+    implementation(libs.room.ktx)
+
     implementation(libs.core.splashscreen)
 
     implementation(libs.hilt.android)

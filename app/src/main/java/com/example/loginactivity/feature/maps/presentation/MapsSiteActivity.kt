@@ -10,6 +10,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -33,37 +35,55 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.loginactivity.R
+import com.example.loginactivity.core.base.generics.ErrorAlertDialog
 import com.example.loginactivity.core.base.generics.GenericDetailRow
+import com.example.loginactivity.core.base.generics.GenericProgressBar
+import com.example.loginactivity.core.base.generics.Resource
+import com.example.loginactivity.core.base.generics.ReusableElevatedButton
+import com.example.loginactivity.core.base.generics.formatLatitude
+import com.example.loginactivity.core.base.generics.transferToFuelSites
+import com.example.loginactivity.core.base.testdatas.driverLocation
+import com.example.loginactivity.core.base.testdatas.listOfSites
+import com.example.loginactivity.core.base.testdatas.sortedListOfSites
 import com.example.loginactivity.core.base.utils.AppUtils.hideSystemUI
+import com.example.loginactivity.feature.pumpoperation.data.model.SiteDetails
+import com.example.loginactivity.feature.pumpoperation.presentation.ui.StartFuelingActivity
+import com.example.loginactivity.feature.pumpoperation.ui.theme.LoginActivityTheme
+import com.example.loginactivity.feature.maps.data.model.DataItem
+import com.example.loginactivity.feature.maps.data.model.FetchInYardSitesResponse
 import com.example.loginactivity.feature.maps.data.model.MarkerData
-import com.example.loginactivity.feature.automatefuel.data.model.SiteDetails
-import com.example.loginactivity.feature.automatefuel.data.model.driverLocation
-import com.example.loginactivity.feature.automatefuel.data.model.listOfSites
-import com.example.loginactivity.feature.automatefuel.data.model.sortedListOfSites
-import com.example.loginactivity.feature.automatefuel.ui.theme.LoginActivityTheme
+import com.example.loginactivity.feature.maps.domain.model.FuelSite
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerInfoWindow
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
@@ -81,7 +101,7 @@ class SiteLocationListActivityCompose : ComponentActivity() {
         setContent {
             LoginActivityTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    ShowMaps(innerPadding)
+                    FetchFuelSites(innerPadding)
                 }
             }
         }
@@ -96,36 +116,84 @@ fun SiteLocationListDemo() {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
     ) { innerPadding ->
-        ShowMaps(innerPadding)
-
+        ShowMapsMockData(innerPadding, listOfSites)
+//        FetchFuelSites(innerPadding)
     }
 
 }
 
+@Composable
+fun FetchFuelSites(innerPadding: PaddingValues) {
+    val viewModel: FuelSitesViewModel = hiltViewModel()
+    viewModel.fetchNearBySites()
+
+    val fuelSites by viewModel.fuelSiteDetails.collectAsState()
+
+    when (fuelSites) {
+        is Resource.Loading -> GenericProgressBar(isLoading = true)
+        is Resource.Success -> ShowMapsMockData(
+            innerPadding = innerPadding,
+            listOfSites
+        )
+
+        is Resource.Failure -> ErrorAlertDialog(
+            title = "Error",
+            message = (fuelSites as Resource.Failure).message,
+            buttonText = "Ok",
+            onDismiss = { })
+    }
+
+}
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ShowMaps(innerPadding: PaddingValues) {
+fun ShowMapsMockData(innerPadding: PaddingValues, fuelSites: List<SiteDetails>) {
 
-    val viewModel : FuelSitesViewModel =hiltViewModel()
-
-    val sortedFuelSites by remember {
-        derivedStateOf { listOfSites.sortedBy { it.distanceToLocation } }
+    val sortedFuelSites by remember(listOfSites) {
+        derivedStateOf<List<SiteDetails>> { listOfSites.sortedBy { it.distanceToLocation } }
     }
     var selectedSite by remember {
         mutableStateOf<SiteDetails>(sortedFuelSites.first())
     }
+
+    var drawMarker by rememberSaveable {
+        mutableStateOf(true)
+    }
+
+    val context = LocalContext.current
 
 
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(driverLocation, 15f)
     }
 
+    Log.d("function Recompose", "Recomps")
     BottomSheetScaffold(
         sheetContent = {
-                SiteList(sites = sortedFuelSites, selectedSiteId = selectedSite.siteId, onSelect = {sie->
-                    selectedSite = sie
-                    Log.d("call back site list","${sie.siteId}")
-                })
+            Column {
+                SiteListMockApi(
+                    sites = sortedListOfSites,
+                    selectedSiteId = selectedSite.siteId,
+                    onSelect = { site ->
+                        selectedSite = site
+                        Log.d("call back site list", site.siteId)
+                    })
+
+                ReusableElevatedButton(
+                    onClick = {
+                        context.startActivity(
+                            Intent(context, StartFuelingActivity::class.java)
+                                .putExtra("selectedSite", selectedSite)
+
+                        )
+                    },
+                    text = "Continue",
+                    modifier = Modifier.fillMaxWidth(),
+                    isEnabled = true
+                )
+            }
+
 
         },
         sheetPeekHeight = 100.dp,
@@ -134,20 +202,302 @@ fun ShowMaps(innerPadding: PaddingValues) {
             modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState,
             properties = MapProperties(mapType = MapType.TERRAIN),
-            uiSettings = MapUiSettings(zoomControlsEnabled = true)
+            uiSettings = MapUiSettings(zoomControlsEnabled = true),
+            onMapClick = {
+
+            }
         ) {
 
             ShowDriverLocationMarker(driverLocation)
-            selectedSite.let {
-                ShowFuelSitesLocationMarker(
-                    fuelSites = listOfSites,
-                    selectedSite = selectedSite,
-                    selectedCallback = {
-                        selectedSite = it
-                    })
+
+            LaunchedEffect(sortedFuelSites) {
+                drawMarker = true
             }
+            sortedFuelSites.forEachIndexed { index, site ->
+
+
+                val markerState =
+                    rememberMarkerState(position = LatLng(site.latitude, site.longitude))
+
+                if (drawMarker) {
+                    MarkerInfoWindow(
+                        state = markerState,
+                        title = "${site.name} : ${site.distanceToLocation} Kms",
+                        snippet = "Get Directions",
+
+                        anchor = Offset(0.5f, 0.0f),
+                        onClick = {
+                            selectedSite = site
+                            false // Consume the click event
+                        },
+                        onInfoWindowClick = {
+                            openGoogleMapsWithDirections(context, site.latitude, site.longitude)
+                        },
+
+                        )
+                }
+
+                LaunchedEffect(key1 = selectedSite) {
+                    if (selectedSite.siteId == site.siteId) {
+                        Log.d("selected site", site.siteId)
+                        markerState.showInfoWindow()
+                        cameraPositionState.animate(
+                            CameraUpdateFactory.newLatLngZoom(
+                                LatLng(site.latitude, site.longitude), 15f // Zoom level
+                            )
+                        )
+                    }
+
+                }
+
+//                if (index == sortedFuelSites.size-1){
+//                    drawMarker = false
+//                }
+            }
+
         }
     }
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ShowMapsRealAPI(innerPadding: PaddingValues, fuelSites: FetchInYardSitesResponse?) {
+
+    val listOfDataItem: List<DataItem?> = fuelSites?.data?.data ?: emptyList()
+    val listOfFuelSites = transferToFuelSites(listOfDataItem)
+
+    val sortedFuelSites by remember(listOfFuelSites) {
+        derivedStateOf<List<FuelSite>> { listOfFuelSites.sortedBy { it.stateId } }
+    }
+    var selectedSite by remember {
+        mutableStateOf<FuelSite>(listOfFuelSites.first())
+    }
+
+    var drawMarker by rememberSaveable {
+        mutableStateOf(true)
+    }
+
+    val context = LocalContext.current
+
+
+    val cameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(driverLocation, 15f)
+    }
+
+    Log.d("function Recompsoe", "Recomps")
+    BottomSheetScaffold(
+        sheetContent = {
+            Column {
+                SiteList(
+                    sites = sortedFuelSites,
+                    selectedSiteId = selectedSite.id.toString(),
+                    onSelect = { site ->
+                        selectedSite = site
+                        Log.d("call back site list", site.id.toString())
+                    })
+
+                ReusableElevatedButton(
+                    onClick = { /*TODO*/ },
+                    text = "Continue",
+                    modifier = Modifier.fillMaxWidth(),
+                    isEnabled = true
+                )
+            }
+
+
+        },
+        sheetPeekHeight = 100.dp,
+    ) {
+        GoogleMap(
+            modifier = Modifier.fillMaxSize(),
+            cameraPositionState = cameraPositionState,
+            properties = MapProperties(mapType = MapType.TERRAIN),
+            uiSettings = MapUiSettings(zoomControlsEnabled = true),
+            onMapClick = {
+
+            }
+        ) {
+
+            ShowDriverLocationMarker(driverLocation)
+
+            LaunchedEffect(sortedFuelSites) {
+                drawMarker = true
+            }
+            sortedFuelSites.forEachIndexed { index, site ->
+
+                val formattedLatitude = formatLatitude(site.latitude, site.latitudeDirection)
+                val formattedLongitude = formatLatitude(site.longitude, site.longitudeDirection)
+
+                val markerState =
+                    rememberMarkerState(position = LatLng(formattedLatitude, formattedLongitude))
+
+                if (drawMarker) {
+                    MarkerInfoWindow(
+                        state = markerState,
+                        title = "${site.name} : ${site.stateId} Kms",
+                        snippet = "Get Directions",
+
+                        anchor = Offset(0.5f, 0.0f),
+                        onClick = {
+                            selectedSite = site
+                            false // Consume the click event
+                        },
+                        onInfoWindowClick = {
+                            openGoogleMapsWithDirections(
+                                context,
+                                formattedLatitude,
+                                formattedLongitude
+                            )
+                        },
+
+                        )
+                }
+
+                LaunchedEffect(key1 = selectedSite) {
+                    if (selectedSite.id == site.id) {
+                        Log.d("selected site", site.id.toString())
+                        markerState.showInfoWindow()
+                        cameraPositionState.animate(
+                            CameraUpdateFactory.newLatLngZoom(
+                                LatLng(formattedLatitude, formattedLongitude), 15f // Zoom level
+                            )
+                        )
+                    }
+
+                }
+
+//                if (index == sortedFuelSites.size-1){
+//                    drawMarker = false
+//                }
+            }
+
+        }
+    }
+}
+
+@Composable
+fun CustomInfoWindow(marker: Marker) {
+    Column(
+        modifier = Modifier
+            .background(Color.White, shape = RoundedCornerShape(8.dp))
+            .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
+            .padding(8.dp)
+    ) {
+        Text(
+            text = marker.title ?: "No Title",
+            style = TextStyle(fontWeight = FontWeight.Bold, color = Color.Black)
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = marker.snippet ?: "No Snippet",
+            style = TextStyle(color = Color.Black)
+        )
+    }
+}
+
+
+//@OptIn(ExperimentalMaterial3Api::class)
+//@Composable
+//fun ShowMapsWithCustomInfoWindow(innerPadding: PaddingValues) {
+//
+//    val sortedFuelSites by remember(listOfSites) {
+//        derivedStateOf { listOfSites.sortedBy { it.distanceToLocation } }
+//    }
+//    var selectedSite by rememberSaveable {
+//        mutableStateOf<SiteDetails>(sortedFuelSites.first())
+//    }
+//
+//    var drawMarker by rememberSaveable {
+//        mutableStateOf(true)
+//    }
+//
+//var markerState = rememberMarkerState()
+//    var marker = Marker()
+//    val cameraPositionState = rememberCameraPositionState {
+//        position = CameraPosition.fromLatLngZoom(driverLocation, 15f)
+//    }
+//
+//    Log.d("function Recompsoe", "Recomps")
+//    BottomSheetScaffold(
+//        sheetContent = {
+//            SiteList(
+//                sites = sortedFuelSites,
+//                selectedSiteId = selectedSite.siteId,
+//                onSelect = { site ->
+//                    selectedSite = site
+//                    Log.d("call back site list", site.siteId)
+//                })
+//
+//        },
+//        sheetPeekHeight = 500.dp,
+//    ) {
+//        GoogleMap(
+//            modifier = Modifier.fillMaxSize(),
+//            cameraPositionState = cameraPositionState,
+//            properties = MapProperties(mapType = MapType.TERRAIN),
+//            uiSettings = MapUiSettings(zoomControlsEnabled = true)
+//        ) {
+//
+//            ShowDriverLocationMarker(driverLocation)
+//
+//            sortedFuelSites.forEach { site ->
+//                key(site.siteId) {
+//                     markerState =
+//                        rememberMarkerState(position = LatLng(site.latitude, site.longitude))
+//                    Marker(
+//                        state = markerState,
+//                        title = site.name,
+//                        snippet = site.address,
+//                        onClick = {
+//                            selectedSite = site
+//                            true // Return true to consume the click event
+//                        }
+//                    )
+//                }
+//            }
+//        }
+//
+//        selectedSite.let {
+//            LaunchedEffect(key1 = it) {
+//               CustomInfoWindow(marker = markerState. )
+//            }
+//        }
+//
+//
+//    }
+//}
+
+
+@Composable
+fun FuelSiteMarker(
+    site: SiteDetails,
+    isSelected: Boolean,
+    sortedFuelSites: List<SiteDetails>,
+    onSelect: (SiteDetails) -> Unit
+) {
+    val markerState = rememberMarkerState(position = LatLng(site.latitude, site.longitude))
+
+    LaunchedEffect(isSelected) {
+        if (isSelected) {
+            markerState.showInfoWindow()
+        } else {
+            markerState.hideInfoWindow()
+        }
+    }
+
+    LaunchedEffect(sortedFuelSites) {
+
+    }
+    Marker(
+        state = markerState,
+        title = site.name,
+        snippet = site.siteId,
+        onClick = {
+            onSelect(site)
+            true // Return true to consume the click event
+        }
+    )
 }
 
 
@@ -210,7 +560,7 @@ fun FuelSiteMarker(
         }
     )
 
-    LaunchedEffect( isSelected) {
+    LaunchedEffect(isSelected) {
         if (selectedSite.siteId == site.siteId && isSelected) {
             markerState.showInfoWindow()
         }
@@ -279,16 +629,16 @@ fun openGoogleMapsWithDirections(context: Context, latitude: Double, longitude: 
 
 
 @Composable
-fun SiteList(
+fun SiteListMockApi(
     sites: List<SiteDetails>,
     selectedSiteId: String,
     onSelect: (SiteDetails) -> Unit
 ) {
 
-    var sleectedId = selectedSiteId
+    var selectedId = selectedSiteId
     LazyColumn(modifier = Modifier.padding(8.dp)) {
         items(items = sites, key = { item ->
-            item.siteId
+            item.siteId.toString()
         }) { site ->
 
             Card(
@@ -297,21 +647,64 @@ fun SiteList(
                     .fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 onClick = {
-                    sleectedId = site.siteId
+                    selectedId = site.siteId.toString()
                 },
                 colors = CardDefaults.cardColors(containerColor = Color.LightGray),
                 elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
             ) {
 
-                RadioButtonWithSite(
+                RadioButtonWithSiteMockData(
                     site = site,
-                    isSelected = site.siteId == sleectedId,
+                    isSelected = site.siteId == selectedId,
                     onSelect = {
                         onSelect(site)
-
-
                     }
                 )
+
+
+            }
+
+        }
+    }
+}
+
+
+@Composable
+fun SiteList(
+    sites: List<FuelSite?>,
+    selectedSiteId: String,
+    onSelect: (FuelSite) -> Unit
+) {
+
+    var selectedId = selectedSiteId
+    LazyColumn(modifier = Modifier.padding(8.dp)) {
+        items(items = sites, key = { item ->
+            item?.id.toString()
+        }) { site ->
+
+            Card(
+                modifier = Modifier
+                    .padding(top = 8.dp, bottom = 8.dp)
+                    .fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                onClick = {
+                    if (site != null) {
+                        selectedId = site.id.toString()
+                    }
+                },
+                colors = CardDefaults.cardColors(containerColor = Color.LightGray),
+                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+            ) {
+
+                if (site != null) {
+                    RadioButtonWithSite(
+                        site = site,
+                        isSelected = site.id.toString() == selectedId,
+                        onSelect = {
+                            onSelect(site)
+                        }
+                    )
+                }
 
 
             }
@@ -455,7 +848,7 @@ fun InfoWindow(marker: MarkerData, onDismiss: () -> Unit) {
 }
 
 @Composable
-fun RadioButtonWithSite(site: SiteDetails, isSelected: Boolean, onSelect: () -> Unit) {
+fun RadioButtonWithSiteMockData(site: SiteDetails, isSelected: Boolean, onSelect: () -> Unit) {
     Row(
         modifier = Modifier
             .clickable { onSelect() }
@@ -468,10 +861,35 @@ fun RadioButtonWithSite(site: SiteDetails, isSelected: Boolean, onSelect: () -> 
         Spacer(modifier = Modifier.width(8.dp))
         Column {
             GenericDetailRow(label = "Id :", value = site.siteId)
-            GenericDetailRow(label = "Name :", value = site.name)
+            site.name.let { GenericDetailRow(label = "Name :", value = it) }
             GenericDetailRow(
                 label = "Distance :",
                 value = site.distanceToLocation.toString() + " Kms"
+            )
+            site.address.let { GenericDetailRow(label = "Address :", value = it) }
+        }
+    }
+}
+
+
+@Composable
+fun RadioButtonWithSite(site: FuelSite, isSelected: Boolean, onSelect: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .clickable { onSelect() }
+            .padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically
+    ) {
+        RadioButton(
+            selected = isSelected,
+            onClick = onSelect
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Column {
+            GenericDetailRow(label = "Id :", value = site.id.toString())
+            site.name.let { GenericDetailRow(label = "Name :", value = it) }
+            GenericDetailRow(
+                label = "Distance :",
+                value = site.city.toString() + " Kms"
             )
             GenericDetailRow(label = "Address :", value = site.address)
         }

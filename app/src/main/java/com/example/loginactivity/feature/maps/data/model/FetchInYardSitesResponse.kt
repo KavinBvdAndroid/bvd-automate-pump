@@ -1,6 +1,7 @@
 package com.example.loginactivity.feature.maps.data.model
 
 import android.os.Parcelable
+import com.example.loginactivity.feature.maps.domain.model.FuelSite
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
@@ -135,3 +136,4 @@ data class DataItem(
 	val contacts: List<ContactsItem?>? = null,
 	val status: Int? = null
 ) : Parcelable
+
