@@ -1,4 +1,4 @@
-package com.example.loginactivity.feature.locationsites
+package com.example.loginactivity.feature.maps.presentation
 
 import android.Manifest
 import android.annotation.SuppressLint

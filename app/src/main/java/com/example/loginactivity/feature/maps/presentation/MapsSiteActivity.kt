@@ -1,4 +1,4 @@
-package com.example.loginactivity.feature.locationsites
+package com.example.loginactivity.feature.maps.presentation
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -46,9 +46,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.loginactivity.R
 import com.example.loginactivity.core.base.generics.GenericDetailRow
 import com.example.loginactivity.core.base.utils.AppUtils.hideSystemUI
+import com.example.loginactivity.feature.maps.data.model.MarkerData
 import com.example.loginactivity.feature.automatefuel.data.model.SiteDetails
 import com.example.loginactivity.feature.automatefuel.data.model.driverLocation
 import com.example.loginactivity.feature.automatefuel.data.model.listOfSites
@@ -104,7 +106,7 @@ fun SiteLocationListDemo() {
 @Composable
 fun ShowMaps(innerPadding: PaddingValues) {
 
-//    val viewModel : FuelSitesViewModel =hiltViewModel()
+    val viewModel : FuelSitesViewModel =hiltViewModel()
 
     val sortedFuelSites by remember {
         derivedStateOf { listOfSites.sortedBy { it.distanceToLocation } }

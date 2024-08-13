@@ -1,10 +1,9 @@
-package com.example.loginactivity.feature.locationsites
+package com.example.loginactivity.feature.maps.presentation
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.loginactivity.core.base.generics.Resource
+import com.example.loginactivity.feature.maps.data.model.DriverLocation
 import com.example.loginactivity.feature.automatefuel.data.model.SiteDetails
 import com.example.loginactivity.feature.automatefuel.data.model.sortedListOfSites
 import com.google.android.gms.maps.model.LatLng

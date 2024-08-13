@@ -1,4 +1,4 @@
-package com.example.loginactivity.feature.locationsites
+package com.example.loginactivity.feature.maps.data.model
 
 import com.google.android.gms.maps.model.LatLng
 

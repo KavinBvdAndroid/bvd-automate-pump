@@ -56,7 +56,7 @@ import com.example.loginactivity.core.base.utils.AppUtils
 import com.example.loginactivity.core.base.utils.Constants
 import com.example.loginactivity.feature.auth.ui.theme.LoginActivityTheme
 import com.example.loginactivity.feature.automatefuel.data.model.VehicleDetail
-import com.example.loginactivity.feature.locationsites.FetchingSiteLocationCompose
+import com.example.loginactivity.feature.maps.presentation.FetchingSiteLocationCompose
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

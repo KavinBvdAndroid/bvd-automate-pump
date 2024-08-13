@@ -59,7 +59,7 @@
             android:value="AIzaSyDO0dHeBDBRU1hRM9aTbnQhv-ha-mdAf7g" />
 
         <activity
-            android:name=".feature.locationsites.SiteLocationListActivityCompose"
+            android:name=".feature.maps.presentation.SiteLocationListActivityCompose"
             android:exported="false"
             android:label="@string/title_activity_site_location_list_compose"
             android:theme="@style/Theme.LoginActivity" >
@@ -70,7 +70,7 @@
         </intent-filter>
         </activity>
         <activity
-            android:name=".feature.locationsites.FetchingSiteLocationCompose"
+            android:name=".feature.maps.presentation.FetchingSiteLocationCompose"
             android:exported="false"
             android:label="@string/title_activity_fetching_site_location_compose"
             android:theme="@style/Theme.LoginActivity" />
