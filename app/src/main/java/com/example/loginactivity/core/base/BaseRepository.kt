@@ -16,7 +16,8 @@ abstract class BaseRepository(private val gson: Gson) {
     protected suspend fun <T> safeApiCall(
         apiCall: suspend () -> Response<ResponseBody>,
         successType: Class<T>,
-        handleSuccess: (JsonObject) -> Unit = {}
+        handleSuccess: (JsonObject) -> Unit = {},
+        handleFailure: (String) -> Unit
     ): Resource<T> {
         return try {
             val response = apiCall()
@@ -31,10 +32,12 @@ abstract class BaseRepository(private val gson: Gson) {
                     if (jsonObject.has("error") && jsonObject.get("error").asBoolean) {
                         val errorResponse =
                             gson.fromJson(jsonObject, GenericBaseResponse::class.java)
+                        handleFailure(errorResponse.message.toString())
                         Resource.Failure(
                             errorResponse.message ?: "Unknown error",
                             errorResponse
                         )
+
                     } else {
                         handleSuccess(jsonObject)
                         val parsedResponse = gson.fromJson(jsonObject, successType)
@@ -44,11 +47,14 @@ abstract class BaseRepository(private val gson: Gson) {
                 } ?: Resource.Failure("Response Body is Empty")
             } else {
                 Log.d("Error body",""+response.errorBody().toString())
+                handleFailure(response.message())
                 Resource.Failure(response.message())
             }
         } catch (e: Exception) {
+            handleFailure(e.message ?: "An Unknown Error")
             Resource.Failure(e.message ?: "An Unknown Error")
         } catch (io: IOException) {
+            handleFailure(io.message ?: "An Unknown Error")
             Resource.Failure(io.message ?: "An Unknown Error")
         }
     }

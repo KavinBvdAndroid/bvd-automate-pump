@@ -19,6 +19,9 @@ class SaveTransactionRepoImpl @Inject constructor(private val gson: Gson, privat
             successType = GenericBaseResponse::class.java,
             handleSuccess = {
                 Log.d("Api call Response Success : ","${it}")
+            },
+            handleFailure = {
+
             }
         )
     }

@@ -6,4 +6,5 @@ interface SharedPrefMethods {
     fun getAuthToken() : String?
     fun setLoggedIn(isLoggedIn: Boolean)
     fun getLoggedIn() : Boolean
+    fun clearSharedPref()
 }

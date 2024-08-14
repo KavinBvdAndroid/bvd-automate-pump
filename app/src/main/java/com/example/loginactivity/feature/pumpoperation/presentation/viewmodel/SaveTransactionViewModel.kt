@@ -21,17 +21,17 @@ class TransactionViewModel @Inject constructor(private val saveTransactionUseCas
 
     fun saveTransaction(request: SaveTransactionDto){
         viewModelScope.launch {
-            Resource.Loading
-            val result = saveTransactionUseCase.saveTransaction(request)
-            _saveTransactionResponse.value = result
+//            Resource.Loading
+//            val result = saveTransactionUseCase.saveTransactionRemote(request)
+//            _saveTransactionResponse.value = result
         }
     }
 
     fun saveTransaction_MockData(request: SaveTransactionDto){
-        viewModelScope.launch {
-            Resource.Loading
-            delay(2000)
-            _saveTransactionResponse.value = Resource.Success(GenericBaseResponse(200,"Record Created Successfully", error = false))
-        }
+//        viewModelScope.launch {
+//            Resource.Loading
+//            delay(2000)
+//            _saveTransactionResponse.value = Resource.Success(GenericBaseResponse(200,"Record Created Successfully", error = false))
+//        }
     }
 }

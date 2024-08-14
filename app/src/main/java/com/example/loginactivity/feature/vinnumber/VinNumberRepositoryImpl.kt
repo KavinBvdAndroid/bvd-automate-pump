@@ -2,10 +2,8 @@ package com.example.loginactivity.feature.vinnumber
 
 import android.util.Log
 import com.example.loginactivity.core.base.BaseRepository
-import com.example.loginactivity.core.base.generics.LoginLogo
 import com.example.loginactivity.core.base.generics.Resource
 import com.example.loginactivity.data.retrofit.LoginApiService
-import com.example.loginactivity.data.retrofit.VinNumberApiService
 import com.google.gson.Gson
 import javax.inject.Inject
 
@@ -23,6 +21,9 @@ class VinNumberRepositoryImpl @Inject constructor(
             successType = VinNumberResponse::class.java,
             handleSuccess = {
                 Log.d("vin number",""+it.toString())
+            },
+            handleFailure = {
+
             }
         )
     }

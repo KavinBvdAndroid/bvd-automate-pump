@@ -17,6 +17,9 @@ class FetchInYardSitesRepositoryImpl @Inject constructor(private val gson: Gson,
             successType = FetchInYardSitesResponse::class.java,
             handleSuccess = {
                 Log.d("Api Success Response"," FetchInYardResponse ${it}")
+            },
+            handleFailure = {
+
             }
         )
     }

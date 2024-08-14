@@ -55,7 +55,7 @@ import com.example.loginactivity.core.base.generics.isValidVinNumber
 import com.example.loginactivity.core.base.utils.AppUtils
 import com.example.loginactivity.core.base.utils.Constants
 import com.example.loginactivity.feature.auth.ui.theme.LoginActivityTheme
-import com.example.loginactivity.feature.maps.presentation.FetchingDriverLocationActivity
+import com.example.loginactivity.feature.maps.presentation.DriverLocationActivity
 import com.example.loginactivity.feature.pumpoperation.data.model.VehicleDetail
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -169,8 +169,10 @@ fun VinContent(innerPadding: PaddingValues) {
             val vehicleData = response.data
 
             if (value == 1) {
-                if (!vehicleData.isNullOrEmpty() && vehicleData.first() != null && vehicleData.first().toString()
-                        .isNotEmpty()) {
+                if (!vehicleData.isNullOrEmpty() && vehicleData.first() != null && vehicleData.first()
+                        .toString()
+                        .isNotEmpty()
+                ) {
                     showVehicleDetails = true
                     vehicleDetails = vehicleData.first()
                 } else {
@@ -307,8 +309,7 @@ fun VehicleDetails(showVehicleDetails: Boolean, vehicleDataItem: DataItem) {
                         AppUtils.showToastMessage("Validated...")
                         context.startActivity(
                             Intent(
-                                context,
-                                FetchingDriverLocationActivity::class.java
+                                context, DriverLocationActivity::class.java
                             )
                         )
                     },

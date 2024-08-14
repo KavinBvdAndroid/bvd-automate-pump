@@ -3,6 +3,7 @@ package com.example.loginactivity.core.base.testdatas
 import com.example.loginactivity.feature.pumpoperation.data.model.InyardTanksItem
 import com.example.loginactivity.feature.pumpoperation.data.model.SiteDetails
 import com.example.loginactivity.feature.pumpoperation.data.model.TankSite
+import com.example.loginactivity.feature.pumpoperation.save.SaveTransactionDto
 import com.google.android.gms.maps.model.LatLng
 
 
@@ -190,9 +191,37 @@ val testInyardTanksItem5 = InyardTanksItem(
     id = 5,
 
 )
+
+val requestTransaction = SaveTransactionDto(
+    vinNumber = 1234,
+    transactionType = "bulk",
+    inyardSiteId = 1234,
+    fuelCode = "DSL",
+    quantity = 388.77,
+    cardNumber = 123454
+)
+
+val requestTransaction1 = SaveTransactionDto(
+    vinNumber = 2345,
+    transactionType = "bulk",
+    inyardSiteId = 3333,
+    fuelCode = "DSL",
+    quantity = 4000.77,
+    cardNumber = 8383838
+)
+
+val requestTransaction2 = SaveTransactionDto(
+    vinNumber = 3344,
+    transactionType = "bulk",
+    inyardSiteId = 2222,
+    fuelCode = "DSL",
+    quantity = 400.77,
+    cardNumber =333454
+)
 val listOfInYardItems = listOf(
     testInyardTanksItem, testInyardTanksItem2, testInyardTanksItem3, testInyardTanksItem4,
     testInyardTanksItem5
 )
 
-val mockToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIyIiwianRpIjoiNzFlOWFiY2ZkNGE0MzViNjM0NjVmMmJkNGFmZGEzMmQyYmQ1ZTA2NjgyNDA4ODhjMThjY2QzNjlhNTY1Mjc2ZmE4MGI5OTMxMmJiOGMxM2YiLCJpYXQiOjE3MjM1NjY3NzYuNzkyMDE1LCJuYmYiOjE3MjM1NjY3NzYuNzkyMDE3LCJleHAiOjE3MjM2NTMxNzYuNzg1MjI2LCJzdWIiOiI1NjI1Iiwic2NvcGVzIjpbXX0.gL3odE2zVYqxodNdyr4N1YJxVdkG42r1Nz5ixRl3fXUW7tiLx21tjV6PDbveP0LKHyIzG31YuLy0CpgffZ7VGCqCwrl5Ni8hT6l7mgurY-6x_XJSZFoEbcgWjM7tVCyM2O0hGFZcifScWcwKb4FAhHL_q4WotxznOjpHzf-aZoCaiUcBJTtwsUWe-XG9Qk90mGwNMbUb7XwcJPPaXW04kGGCDP4Pyivck0cB3Il44mkwJr7o8GN1sajGAqDeMgRIahSqFnAD7__n32IkHCwm_oKVmZ7Y5dFgAuZdvS1YMvi_pPFCqkIKoDhCwhnV8MXY5GJ-uWoLT2arT-B601zUoHLIXpgO1ANNbA7X2f7WmPEZHQhp7RgeFSYpYV7a-C28P4VpQXM7Fyff6fHKWp7BzEL0xl6mxL6H0B291WrX-eSNeNs8OOOSbqBk9vA6tp65yncoYF0oD0_iOVZuNp1pTlNAPqZlVJ40caMFwy_qwkgMcBwKurMnfPfJKfrZjrV0gn2RC5ft27sA30h01yEeZwPftUg-pHDCuCpFr0E0Jn92aUX8Tv5Y47tsuw7z3R-Ei99wkQcWLcoznNWgHoxaHJlAK1TZe5Lh3mQpA0-1faV8IcqeBgRF4uomsP0eFlhKZrAHO5nonUM6KXr0yQC3_0pShWgVROb37wcIXhBezME"
+
+val mockToken ="eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIyIiwianRpIjoiMGU4MTljYjA0NWQyMjBkZTA2YTViNDNjOTFjYTc4ZWNjOGZjOTg1M2QyN2M5MGRhZDhhMDhkNjZmNGQyMzZjM2RlZDNkNmMyZjFkMGE0NmIiLCJpYXQiOjE3MjM2NTM5MjUuMzczOTQ0LCJuYmYiOjE3MjM2NTM5MjUuMzczOTQ2LCJleHAiOjE3MjM3NDAzMjUuMzY3MDE1LCJzdWIiOiI1NjI1Iiwic2NvcGVzIjpbXX0.IIoQl1G2HL1467nNAtAWIl6Pf0cF3B7ouIiN9rH4dtb3uPyMr-TbJ5YrDrxGQRzxize2etzuDXKrIOO-VaX7_M-Y_zTTk-Td_pnyi1o-O4gRkdcbOHWNms4vE0vrnGkNe8hLQ-cxNYZE_zSqzZBooHIjPIWF3B_C-QSNxWvOIcDsyePmiQc3AR4DzTxVLypQqfu9vGJFhtQenRmJQnxysNQG6vUDZHD_BcYhHHKhni7tUNAF5c-hojmhlpkLIWrsMUqUrC9pb6No6P-g2mvNNk5PSy4qigAEX7baoXeLvwE_ZU9La9-qmX18QLbR3e-EnD876oddm3IxLVdQ_4jFMWsoXFW-3WNS7gtBAUNCktUBPe_LewlyT_Lz7zFaZOkjSOZDNotW1AYeAbPZ3APlIOQxr5XfgFelg6xg-3FvdwPXSEnNKjtwGDVgNHPS-iU3_4I2wAaNSkesDH2BadYpPVrpiNY5vd83wvS-NHLQTeISXHzaXzgi9hLcYYuWUvN3MbcKB6asxFG3t1iRU0UY8EFU08Dj60dmHASF4iPnBzAZa2GzTKlj84Th61-B7v9qKPRtu2MJqaS_zwCUYz5fl0Zr97O7MquVpDwBzpOXxfuuxlwPYA3VKzamUfTiS1rhXoeFDaXMllBSQtKyfukGv4zwg2vDVzUwwZlj5RwinaU"

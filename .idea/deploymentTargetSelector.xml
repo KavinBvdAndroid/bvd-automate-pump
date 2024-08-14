@@ -19,13 +19,13 @@
       <SelectionState runConfigName="SiteLocationListDemo">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="SiteLocationListActivityCompose">
+      <SelectionState runConfigName="StartFuelingActivity">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="SiteLocationListDemo (1)">
+      <SelectionState runConfigName="FetchingDriverLocationActivity">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="ShowTransactionDemo">
+      <SelectionState runConfigName="MainContentDemo (1)">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

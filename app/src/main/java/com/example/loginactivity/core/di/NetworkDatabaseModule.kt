@@ -3,8 +3,11 @@ package com.example.loginactivity.core.di
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.room.Room
 import com.example.bvddriverfleetapp.data.sharedpref.SessionManager
+import com.example.bvddriverfleetapp.data.sharedpref.SharedPrefMethods
 import com.example.loginactivity.core.base.utils.Constants
+import com.example.loginactivity.data.local.AppDataBase
 import com.example.loginactivity.data.retrofit.LoginApiService
 import com.example.loginactivity.data.retrofit.NetworkInterceptors
 import com.example.loginactivity.data.retrofit.PumpApiService
@@ -19,6 +22,7 @@ import com.example.loginactivity.feature.pumpoperation.domain.usecase.StopPumpUs
 import com.example.loginactivity.feature.maps.data.repoimpl.FetchInYardSitesRepositoryImpl
 import com.example.loginactivity.feature.maps.domain.FetchInYardSitesRepository
 import com.example.loginactivity.feature.pumpoperation.domain.usecase.SaveTransactionUseCase
+import com.example.loginactivity.feature.pumpoperation.save.SaveTransactionDao
 import com.example.loginactivity.feature.vinnumber.VinNumberRepository
 import com.example.loginactivity.feature.vinnumber.VinNumberRepositoryImpl
 import com.google.gson.Gson
@@ -37,8 +41,8 @@ object NetworkDatabaseModule {
         return SessionManager(sharedPreferences)
     }
     @Provides
-    fun provideAuthInterceptor(sessionManager: SessionManager): NetworkInterceptors {
-        return NetworkInterceptors(sessionManager)
+    fun provideAuthInterceptor(sharedPref: SharedPrefMethods): NetworkInterceptors {
+        return NetworkInterceptors(sharedPref)
     }
 
     @Provides
@@ -70,9 +74,11 @@ object NetworkDatabaseModule {
     @Provides
     fun providePumpOperationRepository(
         gson: Gson,
-        pumpApiService: PumpApiService
+        pumpApiService: PumpApiService,
+        apiService: LoginApiService,
+        saveTransactionDao: SaveTransactionDao
     ): PumpOperationRepository {
-        return PumpOperationRepositoryImpl(gson, pumpApiService)
+        return PumpOperationRepositoryImpl(gson, pumpApiService,apiService,saveTransactionDao)
     }
 
     @Provides
@@ -105,6 +111,20 @@ object NetworkDatabaseModule {
 //        return RetrofitClient(sessionManager).vinNumberApiServiceLocal
 //    }
 
+    @Provides
+    @Singleton
+    fun provideDatabase(app: Application): AppDataBase {
+        return Room.databaseBuilder(
+            app,
+            AppDataBase::class.java,
+            "app_database"
+        ).build()
+    }
+
+    @Provides
+    fun provideTransactionDao(database: AppDataBase): SaveTransactionDao {
+        return database.transactionDao()
+    }
 
     @Provides
     fun providesLoginRepository(gson: Gson, loginApiService: LoginApiService, sessionManager:SessionManager): LoginRepository {

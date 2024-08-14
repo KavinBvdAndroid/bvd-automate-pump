@@ -41,6 +41,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -70,14 +71,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.loginactivity.R
+import com.example.loginactivity.core.base.generics.ErrorAlertDialog
 import com.example.loginactivity.core.base.generics.GenericProgressBar
 import com.example.loginactivity.core.base.generics.Resource
 import com.example.loginactivity.core.base.generics.ReusableElevatedButton
 import com.example.loginactivity.core.base.generics.customTextStyle
+import com.example.loginactivity.core.base.testdatas.requestTransaction
 import com.example.loginactivity.core.base.utils.AppUtils
 import com.example.loginactivity.feature.pumpoperation.data.model.PumpParams
 import com.example.loginactivity.feature.pumpoperation.data.model.PumpResponse
+import com.example.loginactivity.feature.pumpoperation.data.model.TransactionState
 import com.example.loginactivity.feature.pumpoperation.presentation.viewmodel.PumpOperationViewModel
+import com.example.loginactivity.feature.pumpoperation.save.SaveTransactionDto
 import com.example.loginactivity.feature.pumpoperation.ui.theme.LoginActivityTheme
 import com.example.loginactivity.feature.transaction.presentation.TransactionDetailsActivity
 import dagger.hilt.android.AndroidEntryPoint
@@ -117,6 +122,7 @@ fun StartFuel(innerPadding: PaddingValues) {
     val viewModel: PumpOperationViewModel = hiltViewModel()
     val pumpStartLivedata by viewModel.pumpStartLivedata.observeAsState(null)
     val pumpStopLivedata by viewModel.pumpStopLivedata.observeAsState(null)
+    val saveTransactionLivedata by viewModel.saveTransactionLivedata.collectAsState(null)
     var checked by rememberSaveable { mutableStateOf(false) }
     var isStartEnabled by rememberSaveable { mutableStateOf(false) }
     var isTransactionComplete by rememberSaveable { mutableStateOf(false) }
@@ -132,15 +138,14 @@ fun StartFuel(innerPadding: PaddingValues) {
 
     val testParamsData = PumpParams()
 
-    val textColor by remember {
-        derivedStateOf {
-            if (isStartEnabled) {
-                Color.Green
-            } else {
-                Color.Red
-            }
-        }
+
+    val textColor = if (isStartEnabled) {
+        colorResource(id = R.color.colorOnText1)
+    } else {
+        Color.Red
     }
+
+
 
     val processStatusText by remember {
         derivedStateOf {
@@ -151,6 +156,12 @@ fun StartFuel(innerPadding: PaddingValues) {
             }
         }
     }
+
+
+    val handleSaveTransaction: (SaveTransactionDto) -> Unit = { requestTransaction ->
+        viewModel.saveTransaction(requestTransaction)
+    }
+
 
     Column(
         modifier = Modifier
@@ -205,7 +216,13 @@ fun StartFuel(innerPadding: PaddingValues) {
         Column(modifier = Modifier.fillMaxSize()) {
             ResultSection(result)
 
-            AgreementSection(isTransactionComplete, checked = checked, { checked = it }, context)
+            AgreementSection(
+                isTransactionComplete,
+                checked = checked,
+                { checked = it },
+                handleSaveTransaction,
+                context
+            )
         }
 
 
@@ -216,6 +233,8 @@ fun StartFuel(innerPadding: PaddingValues) {
             if (code == 1) {
                 isStartEnabled = true
                 result = data.toString()
+                isTransactionComplete = false
+                checked = false
             } else {
                 isStartEnabled = false
                 if (message != null) {
@@ -239,6 +258,45 @@ fun StartFuel(innerPadding: PaddingValues) {
                     result = message
                 }
             }
+
+        }
+    }
+
+
+
+    when (val state = saveTransactionLivedata) {
+        is TransactionState.Idle -> {
+
+        }
+
+        is TransactionState.Loading -> {
+            GenericProgressBar(isLoading = true)
+        }
+
+        is TransactionState.Success -> {
+            context.startActivity(
+                Intent(
+                    context,
+                    TransactionDetailsActivity::class.java
+                ).putExtra("savedTransaction", state.saveTransactionDto)
+            )
+        }
+
+        is TransactionState.PartialSuccess -> {
+            ErrorAlertDialog(title = "Error",
+                message = state.message,
+                buttonText = "Ok",
+                onDismiss = { })
+        }
+
+        is TransactionState.Error -> {
+            ErrorAlertDialog(title = "Error",
+                message = state.message,
+                buttonText = "Ok",
+                onDismiss = { })
+        }
+
+        null -> {
 
         }
     }
@@ -275,6 +333,7 @@ fun AgreementSection(
     isTransactionComplete: Boolean,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
+    handleSaveTransaction: (SaveTransactionDto) -> Unit,
     context: Context
 ) {
     Column(
@@ -287,7 +346,7 @@ fun AgreementSection(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            Checkbox(checked = checked && isTransactionComplete, onCheckedChange = onCheckedChange)
+            Checkbox(checked = checked, onCheckedChange = onCheckedChange, enabled = isTransactionComplete )
 
             Text(
                 style = customTextStyle.labelMedium,
@@ -299,16 +358,18 @@ fun AgreementSection(
         Spacer(modifier = Modifier.height(LocalConfiguration.current.screenHeightDp.dp * 0.05f))
         ReusableElevatedButton(
             onClick = {
-                AppUtils.showToastMessage("Validated...")
-                context.startActivity(
-                    Intent(context, TransactionDetailsActivity::class.java)
-                )
+                handleSaveTransaction(requestTransaction)
             },
             text = "Submit Transaction",
             isEnabled = checked && isTransactionComplete,
             modifier = Modifier.fillMaxWidth()
         )
     }
+}
+
+@Composable
+fun SaveTransactionRemote() {
+
 }
 
 @Composable
@@ -344,8 +405,10 @@ fun SwitchButton(isPumpEnabled: Boolean, onSwitchClick: (Boolean) -> Unit) {
     ) {
         Switch(modifier = Modifier
             .height(80.dp)
-            .width(80.dp),
+            .width(80.dp)
+            .background(Color.Transparent),
             checked = isPumpEnabled,
+
             onCheckedChange = {
                 onSwitchClick(it)
             },
@@ -453,7 +516,7 @@ fun StatusTextSection(processStatusText: String, textColor: Color) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "Status : ",
+            text = "Status  ",
             textAlign = TextAlign.Start,
             fontWeight = FontWeight.Normal,
             style = customTextStyle.headlineLarge,
@@ -474,7 +537,7 @@ fun StatusTextSection(processStatusText: String, textColor: Color) {
 fun ResultSection(result: String) {
 
     Text(
-        text = "Result : ",
+        text = "Result ",
         textAlign = TextAlign.Start,
         fontWeight = FontWeight.Normal,
         style = customTextStyle.headlineLarge,

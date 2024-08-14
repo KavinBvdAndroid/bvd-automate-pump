@@ -90,7 +90,7 @@ import com.google.maps.android.compose.rememberMarkerState
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class SiteLocationListActivityCompose : ComponentActivity() {
+class MapsSiteActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -101,7 +101,8 @@ class SiteLocationListActivityCompose : ComponentActivity() {
         setContent {
             LoginActivityTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    FetchFuelSites(innerPadding)
+//                    FetchFuelSites(innerPadding)
+                    ShowMapsMockData(innerPadding, listOfSites)
                 }
             }
         }
@@ -130,7 +131,9 @@ fun FetchFuelSites(innerPadding: PaddingValues) {
     val fuelSites by viewModel.fuelSiteDetails.collectAsState()
 
     when (fuelSites) {
-        is Resource.Loading -> GenericProgressBar(isLoading = true)
+        is Resource.Loading -> {
+            GenericProgressBar(isLoading = true)
+        }
         is Resource.Success -> ShowMapsMockData(
             innerPadding = innerPadding,
             listOfSites

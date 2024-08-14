@@ -52,6 +52,9 @@ class SplashScreenActivity : ComponentActivity() {
     }
 }
 
+fun checkSessionManager(){
+
+}
 @Composable
 fun SplashScreenDemo(innerPadding: PaddingValues) {
 

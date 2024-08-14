@@ -12,6 +12,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,8 +21,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.BottomNavigation
+import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,6 +43,12 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import com.example.loginactivity.R
 import com.example.loginactivity.core.base.generics.GenericProgressBar
 import com.example.loginactivity.core.base.generics.customTextStyle
@@ -50,14 +60,14 @@ import com.google.android.gms.tasks.CancellationTokenSource
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class FetchingDriverLocationActivity : ComponentActivity() {
+class DriverLocationActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             LoginActivityTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    FetchLocationContent(innerPadding)
+                    FetchLocationContent()
                 }
             }
         }
@@ -67,12 +77,23 @@ class FetchingDriverLocationActivity : ComponentActivity() {
 @Preview(showBackground = true)
 @Composable
 fun MainContentDemo() {
+    val navController = rememberNavController()
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-    ) { innerPadding ->
-        FetchLocationContent(innerPadding)
+        bottomBar = {
+            BottomNavigationBar(navController = navController)
+        }
+    ) {
+        BottomNavGraph(navController = navController)
+        SideCp(it)
 
     }
+
+}
+
+@Composable
+fun SideCp(inner:PaddingValues){
 
 }
 
@@ -101,9 +122,74 @@ fun FetchCurrentLocation(
     }
 }
 
+@Composable
+fun BottomNavGraph(navController: NavHostController) {
+    NavHost(navController = navController, startDestination = BottomNavItem.Location.route) {
+        composable(BottomNavItem.Location.route) {
+            FetchLocationContent()
+        }
+        composable(BottomNavItem.TransactionHistory.route) {
+            SearchScreen()
+        }
+        composable(BottomNavItem.Profile.route) {
+            ProfileScreen()
+        }
+    }
+}
 
 @Composable
-fun FetchLocationContent(innerPadding: PaddingValues) {
+fun BottomNavigationBar(navController: NavController) {
+    val items = listOf(
+        BottomNavItem.Location,
+        BottomNavItem.TransactionHistory,
+        BottomNavItem.Profile
+    )
+
+
+    BottomNavigation {
+        val currentRoute = currentRoute(navController)
+        items.forEach { item ->
+            BottomNavigationItem(
+                icon = { Icon(item.icon, contentDescription = item.title) },
+                label = { Text(item.title) },
+                selected = currentRoute == item.route,
+                onClick = {
+                    navController.navigate(item.route) {
+                        popUpTo(navController.graph.startDestinationId) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun currentRoute(navController: NavController): String? {
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    return navBackStackEntry?.destination?.route
+}
+
+
+@Composable
+fun SearchScreen() {
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+        Text("Search Screen")
+    }
+}
+
+@Composable
+fun ProfileScreen() {
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+        Text("Profile Screen")
+    }
+}
+
+@Composable
+fun FetchLocationContent() {
     val scrollState = rememberScrollState()
     val context = LocalContext.current
     var isFetchLocation by rememberSaveable { mutableStateOf(false) }
@@ -111,7 +197,7 @@ fun FetchLocationContent(innerPadding: PaddingValues) {
     var showProgress by rememberSaveable { mutableStateOf(false) }
     Column(
         modifier = Modifier
-            .padding(innerPadding)
+
             .fillMaxSize()
             .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -165,7 +251,7 @@ fun FetchLocationContent(innerPadding: PaddingValues) {
 
             val intent = Intent()
             context.startActivity(
-                Intent(context, SiteLocationListActivityCompose::class.java)
+                Intent(context, MapsSiteActivity::class.java)
                     .putExtra("latitude", driverLocation!!.latitude)
                     .putExtra("longitude", driverLocation!!.longitude)
             )

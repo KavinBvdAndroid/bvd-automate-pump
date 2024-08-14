@@ -41,11 +41,7 @@
             android:exported="false"
             android:label="@string/title_activity_test_composable"
             android:theme="@style/Theme.LoginActivity" />
-        <activity
-            android:name=".feature.transaction.presentation.TransactionActivity"
-            android:exported="false"
-            android:label="@string/title_activity_transaction"
-            android:theme="@style/Theme.LoginActivity" />
+
         <activity
             android:name=".feature.pumpoperation.presentation.ui.StartFuelingActivity"
             android:exported="true"
@@ -63,8 +59,8 @@
             android:value="AIzaSyDO0dHeBDBRU1hRM9aTbnQhv-ha-mdAf7g" />
 
         <activity
-            android:name=".feature.maps.presentation.SiteLocationListActivityCompose"
-            android:exported="false"
+            android:name=".feature.maps.presentation.MapsSiteActivity"
+            android:exported="true"
             android:label="@string/title_activity_site_location_list_compose"
             android:theme="@style/Theme.LoginActivity" >
             <intent-filter>
@@ -74,7 +70,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".feature.maps.presentation.FetchingSiteLocationCompose"
+            android:name=".feature.maps.presentation.DriverLocationActivity"
             android:exported="false"
             android:label="@string/title_activity_fetching_site_location_compose"
             android:theme="@style/Theme.LoginActivity" />

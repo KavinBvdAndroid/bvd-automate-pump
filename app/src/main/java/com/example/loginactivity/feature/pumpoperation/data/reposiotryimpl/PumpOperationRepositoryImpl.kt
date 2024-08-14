@@ -6,35 +6,117 @@ import com.example.loginactivity.core.base.generics.Resource
 import com.example.loginactivity.data.retrofit.LoginApiService
 import com.example.loginactivity.data.retrofit.PumpApiService
 import com.example.loginactivity.feature.pumpoperation.data.model.PumpResponse
+import com.example.loginactivity.feature.pumpoperation.data.model.TransactionSaveResult
+import com.example.loginactivity.feature.pumpoperation.domain.repo.PumpOperationRepository
+import com.example.loginactivity.feature.pumpoperation.save.SaveTransactionDao
 import com.example.loginactivity.feature.pumpoperation.save.SaveTransactionDto
 import com.example.loginactivity.feature.pumpoperation.save.SaveTransactionEntity
-import com.example.loginactivity.feature.pumpoperation.domain.repo.PumpOperationRepository
 import com.google.gson.Gson
 import javax.inject.Inject
 
-class PumpOperationRepositoryImpl @Inject constructor(private val gson : Gson, private val pumpApiService: PumpApiService, private val apiService: LoginApiService): PumpOperationRepository, BaseRepository(gson)
-{
-    override suspend fun operatePump(cmd: String, params: String) : Resource<PumpResponse> {
+class PumpOperationRepositoryImpl @Inject constructor(
+    private val gson: Gson, private val pumpApiService: PumpApiService,
+    private val apiService: LoginApiService,
+    private val saveTransactionDao: SaveTransactionDao
+) : PumpOperationRepository, BaseRepository(gson) {
+    override suspend fun operatePump(cmd: String, params: String): Resource<PumpResponse> {
 
         return safeApiCall<PumpResponse>(
             apiCall = {
-                pumpApiService.operatePump(cmd,params)
+                pumpApiService.operatePump(cmd, params)
             },
             successType = PumpResponse::class.java,
-            handleSuccess = {}
+            handleSuccess = {},
+            handleFailure = {
+
+            }
         )
     }
 
-    override suspend fun saveTransactionRemote(request: SaveTransactionDto): Resource<GenericBaseResponse> {
-        return safeApiCall(
+    override suspend fun saveTransactionRemote(request: SaveTransactionDto): TransactionSaveResult {
+        var apiResult: Resource<Any> = Resource.Failure("API call not executed")
+        var localDbResult = false
+
+        safeApiCall(
             apiCall = {
                 apiService.saveInYardTransactions(request)
             },
             successType = GenericBaseResponse::class.java,
             handleSuccess = {
-
+                apiResult = Resource.Success(Unit)
+            },
+            handleFailure = {
+                apiResult = Resource.Failure(it)
             }
-        )
+        ).let { result ->
+
+            when (result) {
+                is Resource.Success -> {
+
+                    try {
+                        saveTransactionDao.insertTransaction(
+                            request.let {
+                                SaveTransactionEntity().apply {
+                                    inyardSiteId = it.inyardSiteId
+                                    fuelCode = it.fuelCode
+                                    cardNumber = it.cardNumber
+                                    quantity = it.quantity
+                                    vinNumber = it.vinNumber
+                                    isSyncedToRemote = true
+                                }
+                            }
+                        )
+                        localDbResult = true
+
+                    } catch (e: Exception) {
+                        return TransactionSaveResult.ApiSuccessLocalFailure(e.message.toString(),request)
+                    }
+
+                }
+
+                is Resource.Failure -> {
+
+                    try {
+                        saveTransactionDao.insertTransaction(
+                            request.let {
+                                SaveTransactionEntity().apply {
+                                    inyardSiteId = it.inyardSiteId
+                                    fuelCode = it.fuelCode
+                                    cardNumber = it.cardNumber
+                                    quantity = it.quantity
+                                    vinNumber = it.vinNumber
+                                    isSyncedToRemote = false
+                                }
+                            }
+                        )
+                        localDbResult = true
+                    } catch (e: Exception) {
+                        return TransactionSaveResult.BothFailed(
+                            result.message,
+                            e.message.toString()
+                        )
+                    }
+
+                }
+
+                Resource.Loading -> {}
+            }
+
+            return when {
+                apiResult is Resource.Success && localDbResult -> TransactionSaveResult.Success(request)
+                apiResult is Resource.Failure && localDbResult -> TransactionSaveResult.ApiFailureLocalSuccess(
+                    (apiResult as? Resource.Failure)?.message ?: "Unknown API error",
+                    request
+                )
+
+                else -> TransactionSaveResult.BothFailed(
+                    (apiResult as? Resource.Failure)?.message ?: "Unknown API error",
+                    "Unknown local DB error"
+                )
+            }
+
+
+        }
 
     }
 

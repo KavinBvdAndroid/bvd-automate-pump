@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,7 +37,8 @@ import com.example.loginactivity.core.base.generics.GenericDetailRow
 import com.example.loginactivity.core.base.generics.ReusableElevatedButton
 import com.example.loginactivity.core.base.generics.customTextStyle
 import com.example.loginactivity.core.base.testdatas.SiteDetails2
-import com.example.loginactivity.feature.maps.presentation.FetchingDriverLocationActivity
+import com.example.loginactivity.feature.maps.presentation.DriverLocationActivity
+import com.example.loginactivity.feature.pumpoperation.save.SaveTransactionDto
 import com.example.loginactivity.feature.pumpoperation.ui.theme.LoginActivityTheme
 import com.example.loginactivity.feature.transaction.presentation.ui.theme.Purple80
 
@@ -49,7 +49,7 @@ class TransactionDetailsActivity : ComponentActivity() {
         setContent {
             LoginActivityTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    ShowTransaction(innerPadding = innerPadding)
+                    ShowTransactionDemo(innerPadding = innerPadding,intent)
                 }
             }
         }
@@ -58,18 +58,20 @@ class TransactionDetailsActivity : ComponentActivity() {
 
 @Preview(showBackground = true)
 @Composable
-fun ShowTransactionDemo() {
+fun ShowTransactionDemo(innerPadding: PaddingValues,intent: Intent) {
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-        ShowTransaction(innerPadding = innerPadding)
+        ShowTransaction(innerPadding = innerPadding,intent)
     }
 }
 
 @Composable
-fun ShowTransaction(innerPadding: PaddingValues) {
+fun ShowTransaction(innerPadding: PaddingValues,intent: Intent) {
     val context = LocalContext.current
+    val savedTransaction = intent.getParcelableExtra<SaveTransactionDto>("savedTransaction")
 
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
             .padding(innerPadding)
             .background(Purple80),
         verticalArrangement = Arrangement.Center,
@@ -116,18 +118,24 @@ fun ShowTransaction(innerPadding: PaddingValues) {
             ) {
                 GenericDetailRow("Site Name ", SiteDetails2.name)
                 GenericDetailRow("Site Address ", SiteDetails2.address)
-                GenericDetailRow("Fuel Type ", SiteDetails2.tankSites[0].fuelType)
-                GenericDetailRow(
-                    "Litres Fueled ",
-                    "${SiteDetails2.tankSites[0].tankCapacity} Litres"
-                )
+                savedTransaction?.let {
+
+                    GenericDetailRow("Fuel Type ", it.fuelCode.orEmpty())
+                    GenericDetailRow(
+                        "Litres Fueled ",
+                        "${it.quantity} Litres"
+                    )
+                    GenericDetailRow("Transaction Type ", it.transactionType.orEmpty())
+                    GenericDetailRow("Vin Number ", it.vinNumber.toString())
+                }
+
 
                 ReusableElevatedButton(
                     onClick = {
 
                         context.startActivity(
                             Intent(
-                                context, FetchingDriverLocationActivity::class.java
+                                context, DriverLocationActivity::class.java
                             )
                         )
                     },
@@ -208,7 +216,7 @@ fun ShowTransaction2(innerPadding: PaddingValues) {
 
                         context.startActivity(
                             Intent(
-                                context, FetchingDriverLocationActivity::class.java
+                                context, DriverLocationActivity::class.java
                             )
                         )
                     },

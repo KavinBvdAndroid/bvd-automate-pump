@@ -21,4 +21,8 @@ class SessionManager @Inject constructor(private val sharedPreferences: SharedPr
     override fun getLoggedIn(): Boolean {
         return sharedPreferences.getBoolean(Constants.IS_LOGGED_IN, false)
     }
+
+    override fun clearSharedPref() {
+        sharedPreferences.edit().clear().apply()
+    }
 }
