@@ -168,7 +168,7 @@ fun ObserveLoginResult(loginResult: Resource<LoginResponse>) {
 
         is Resource.Failure -> {
             GenericProgressBar(false)
-            CustomErrorAlertDialog(showDg = true) {}
+            CustomErrorAlertDialog(showDg = true, loginResult) {}
         }
 
         is Resource.Success -> {
@@ -177,15 +177,22 @@ fun ObserveLoginResult(loginResult: Resource<LoginResponse>) {
                 context.startActivity(Intent(context, VinNumberActivityCompose::class.java))
             }
         }
+
+        else -> {}
+
     }
 }
 
 @Composable
-fun CustomErrorAlertDialog(showDg: Boolean, dismissDialogCallback: () -> Unit) {
+fun CustomErrorAlertDialog(
+    showDg: Boolean,
+    loginResult: Resource.Failure,
+    dismissDialogCallback: () -> Unit
+) {
 
     ErrorAlertDialog(
-        title = "Error",
-        message = "An unexpected error occurred. Please try again later.",
+        title = "Error \n ${loginResult.errorBody?.code ?: ""}",
+        message = "${loginResult.errorBody?.message ?: loginResult.message} error occurred. Please try again later.",
         buttonText = "OK",
         onDismiss = { },
         titleBackgroundColor = Color.Red, // Custom title background color

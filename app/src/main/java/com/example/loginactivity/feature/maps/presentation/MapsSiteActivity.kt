@@ -8,6 +8,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -33,6 +34,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -54,25 +56,28 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.compose.rememberNavController
 import com.example.loginactivity.R
 import com.example.loginactivity.core.base.generics.ErrorAlertDialog
 import com.example.loginactivity.core.base.generics.GenericDetailRow
 import com.example.loginactivity.core.base.generics.GenericProgressBar
 import com.example.loginactivity.core.base.generics.Resource
 import com.example.loginactivity.core.base.generics.ReusableElevatedButton
+import com.example.loginactivity.core.base.generics.TransparentTopBarWithBackButton
 import com.example.loginactivity.core.base.generics.formatLatitude
 import com.example.loginactivity.core.base.generics.transferToFuelSites
 import com.example.loginactivity.core.base.testdatas.driverLocation
 import com.example.loginactivity.core.base.testdatas.listOfSites
 import com.example.loginactivity.core.base.testdatas.sortedListOfSites
 import com.example.loginactivity.core.base.utils.AppUtils.hideSystemUI
-import com.example.loginactivity.feature.pumpoperation.data.model.SiteDetails
-import com.example.loginactivity.feature.pumpoperation.presentation.ui.StartFuelingActivity
-import com.example.loginactivity.feature.pumpoperation.ui.theme.LoginActivityTheme
 import com.example.loginactivity.feature.maps.data.model.DataItem
 import com.example.loginactivity.feature.maps.data.model.FetchInYardSitesResponse
 import com.example.loginactivity.feature.maps.data.model.MarkerData
 import com.example.loginactivity.feature.maps.domain.model.FuelSite
+import com.example.loginactivity.feature.pumpoperation.data.model.SiteDetails
+import com.example.loginactivity.feature.pumpoperation.presentation.ui.FuelSelectionActivity
+import com.example.loginactivity.feature.pumpoperation.presentation.ui.StartFuelingActivity
+import com.example.loginactivity.feature.pumpoperation.ui.theme.LoginActivityTheme
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
@@ -100,22 +105,29 @@ class MapsSiteActivity : ComponentActivity() {
 
         setContent {
             LoginActivityTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-//                    FetchFuelSites(innerPadding)
-                    ShowMapsMockData(innerPadding, listOfSites)
-                }
+                SiteLocationListDemo()
             }
         }
         hideSystemUI()
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
 @Composable
 fun SiteLocationListDemo() {
+    val navController = rememberNavController()
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
+        topBar = {
+            TransparentTopBarWithBackButton(
+                onBackClick = { backDispatcher?.onBackPressed() },
+                scrollBehavior = scrollBehavior
+            )
+        }
     ) { innerPadding ->
         ShowMapsMockData(innerPadding, listOfSites)
 //        FetchFuelSites(innerPadding)
@@ -134,6 +146,7 @@ fun FetchFuelSites(innerPadding: PaddingValues) {
         is Resource.Loading -> {
             GenericProgressBar(isLoading = true)
         }
+
         is Resource.Success -> ShowMapsMockData(
             innerPadding = innerPadding,
             listOfSites
@@ -144,6 +157,8 @@ fun FetchFuelSites(innerPadding: PaddingValues) {
             message = (fuelSites as Resource.Failure).message,
             buttonText = "Ok",
             onDismiss = { })
+
+        else -> {}
     }
 
 }
@@ -186,7 +201,7 @@ fun ShowMapsMockData(innerPadding: PaddingValues, fuelSites: List<SiteDetails>) 
                 ReusableElevatedButton(
                     onClick = {
                         context.startActivity(
-                            Intent(context, StartFuelingActivity::class.java)
+                            Intent(context, FuelSelectionActivity::class.java)
                                 .putExtra("selectedSite", selectedSite)
 
                         )

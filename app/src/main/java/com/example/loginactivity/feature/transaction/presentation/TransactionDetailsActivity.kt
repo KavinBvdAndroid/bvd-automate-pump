@@ -1,5 +1,6 @@
 package com.example.loginactivity.feature.transaction.presentation
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -37,10 +38,11 @@ import com.example.loginactivity.core.base.generics.GenericDetailRow
 import com.example.loginactivity.core.base.generics.ReusableElevatedButton
 import com.example.loginactivity.core.base.generics.customTextStyle
 import com.example.loginactivity.core.base.testdatas.SiteDetails2
+import com.example.loginactivity.core.base.utils.AppUtils.hideSystemUI
 import com.example.loginactivity.feature.maps.presentation.DriverLocationActivity
 import com.example.loginactivity.feature.pumpoperation.save.SaveTransactionDto
 import com.example.loginactivity.feature.pumpoperation.ui.theme.LoginActivityTheme
-import com.example.loginactivity.feature.transaction.presentation.ui.theme.Purple80
+import com.example.loginactivity.feature.transaction.presentation.ui.theme.Blue100
 
 class TransactionDetailsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,22 +52,29 @@ class TransactionDetailsActivity : ComponentActivity() {
             LoginActivityTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     ShowTransactionDemo(innerPadding = innerPadding,intent)
+//                    ShowTransactionDemo()
+
                 }
             }
         }
+        hideSystemUI()
+    }
+
+    override fun onBackPressed() {
+        // Do nothing to disable the back button
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun ShowTransactionDemo(innerPadding: PaddingValues,intent: Intent) {
+fun ShowTransactionDemo(innerPadding: PaddingValues, intent: Intent,) {
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-        ShowTransaction(innerPadding = innerPadding,intent)
+        ShowTransaction(innerPadding = innerPadding, intentgit)
     }
 }
 
 @Composable
-fun ShowTransaction(innerPadding: PaddingValues,intent: Intent) {
+fun ShowTransaction(innerPadding: PaddingValues, intent: Intent) {
     val context = LocalContext.current
     val savedTransaction = intent.getParcelableExtra<SaveTransactionDto>("savedTransaction")
 
@@ -73,7 +82,7 @@ fun ShowTransaction(innerPadding: PaddingValues,intent: Intent) {
         modifier = Modifier
             .fillMaxSize()
             .padding(innerPadding)
-            .background(Purple80),
+            .background(Blue100),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -136,8 +145,13 @@ fun ShowTransaction(innerPadding: PaddingValues,intent: Intent) {
                         context.startActivity(
                             Intent(
                                 context, DriverLocationActivity::class.java
-                            )
+                            ).apply {
+                                flags =
+                                    Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                            }
                         )
+                        (context as? Activity)?.finish()
+
                     },
                     text = "Start Next Transaction",
                     isEnabled = true,

@@ -69,7 +69,10 @@ class PumpOperationRepositoryImpl @Inject constructor(
                         localDbResult = true
 
                     } catch (e: Exception) {
-                        return TransactionSaveResult.ApiSuccessLocalFailure(e.message.toString(),request)
+                        return TransactionSaveResult.ApiSuccessLocalFailure(
+                            e.message.toString(),
+                            request
+                        )
                     }
 
                 }
@@ -100,10 +103,15 @@ class PumpOperationRepositoryImpl @Inject constructor(
                 }
 
                 Resource.Loading -> {}
+
+                else -> {}
             }
 
             return when {
-                apiResult is Resource.Success && localDbResult -> TransactionSaveResult.Success(request)
+                apiResult is Resource.Success && localDbResult -> TransactionSaveResult.Success(
+                    request
+                )
+
                 apiResult is Resource.Failure && localDbResult -> TransactionSaveResult.ApiFailureLocalSuccess(
                     (apiResult as? Resource.Failure)?.message ?: "Unknown API error",
                     request

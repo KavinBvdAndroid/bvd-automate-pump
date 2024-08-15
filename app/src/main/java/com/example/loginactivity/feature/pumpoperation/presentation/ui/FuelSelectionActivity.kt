@@ -3,9 +3,11 @@ package com.example.loginactivity.feature.pumpoperation.presentation.ui
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -21,15 +23,18 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,16 +49,22 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.loginactivity.R
 import com.example.loginactivity.core.base.generics.ReusableElevatedButton
+import com.example.loginactivity.core.base.generics.TransparentTopBarWithBackButton
+import com.example.loginactivity.core.base.generics.customTextStyle
 import com.example.loginactivity.core.base.generics.poppinsFontFamily
-import com.example.loginactivity.feature.pumpoperation.data.model.InyardTanksItem
 import com.example.loginactivity.core.base.testdatas.listOfInYardItems
+import com.example.loginactivity.core.base.utils.AppUtils.hideSystemUI
+import com.example.loginactivity.feature.pumpoperation.data.model.InyardTanksItem
 import com.example.loginactivity.feature.pumpoperation.ui.theme.LoginActivityTheme
+import kotlin.math.sin
 
 class FuelSelectionActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,11 +72,10 @@ class FuelSelectionActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             LoginActivityTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    SelectFuel(innerPadding)
-                }
+                SelectFuelDemo()
             }
         }
+        hideSystemUI()
     }
 }
 
@@ -74,12 +84,22 @@ enum class Option {
     OPTION_2
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
 @Composable
 fun SelectFuelDemo() {
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+
     Scaffold(
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxSize(),
+        topBar = {
+            TransparentTopBarWithBackButton(
+                onBackClick = { backDispatcher?.onBackPressed() },
+                scrollBehavior = scrollBehavior
+            )
+        }
     ) { innerPadding ->
         SelectFuel(innerPadding)
     }
@@ -97,8 +117,7 @@ fun SelectFuel(innerPadding: PaddingValues) {
     Column(modifier = Modifier.padding(innerPadding)) {
         Text(
             "Select the transaction", modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+                .fillMaxWidth(),
             textAlign = TextAlign.Center,
             color = colorResource(id = R.color.colorSecondary),
             style = TextStyle(
@@ -114,21 +133,36 @@ fun SelectFuel(innerPadding: PaddingValues) {
         Spacer(modifier = Modifier.height(8.dp))
 
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            RadioButton(
-                selected = selectedOption == Option.OPTION_1,
-                onClick = {
-                    selectedOption = Option.OPTION_1
-                    showYardDetails = true
 
-                }
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Wheel to Bulk")
+            Row(modifier = Modifier
+                .clickable {
+                selectedOption = Option.OPTION_1
+                showYardDetails = true
+            },
+                verticalAlignment = Alignment.CenterVertically) {
+
+                RadioButton(
+                    selected = selectedOption == Option.OPTION_1,
+                    onClick = {
+                        selectedOption = Option.OPTION_1
+                        showYardDetails = true
+
+                    }
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Wheel to Bulk", style = customTextStyle.titleMedium)
+            }
             Spacer(modifier = Modifier.height(16.dp))
 
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        selectedOption = Option.OPTION_2
+                        showYardDetails = false
+                    },
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 RadioButton(
                     selected = selectedOption == Option.OPTION_2,
@@ -138,7 +172,7 @@ fun SelectFuel(innerPadding: PaddingValues) {
                     }
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Wheel to Wheel")
+                Text("Wheel to Wheel",style = customTextStyle.titleMedium)
             }
         }
 
@@ -294,6 +328,12 @@ fun ShowYardDetails() {
                     value = query,
                     onValueChange = { query = it },
                     label = { Text("Search") },
+                singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Text,
+                        imeAction = ImeAction.Done
+                    ),
+                    maxLines = 1,
                     modifier = Modifier.fillMaxWidth()
                 )
 

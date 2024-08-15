@@ -26,7 +26,7 @@
             android:label="@string/title_activity_transaction_details"
             android:theme="@style/Theme.LoginActivity" />
         <activity
-            android:name=".feature.auth.presentation.SplashScreenActivity"
+            android:name=".feature.auth.presentation.OnBoardingActivity"
             android:exported="true"
             android:label="@string/title_activity_splash_screen"
             android:theme="@style/Theme.LoginActivity" >
@@ -50,9 +50,15 @@
         </activity>
         <activity
             android:name=".feature.pumpoperation.presentation.ui.FuelSelectionActivity"
-            android:exported="false"
+            android:exported="true"
             android:label="@string/title_activity_fuel_selection"
-            android:theme="@style/Theme.LoginActivity" />
+            android:theme="@style/Theme.LoginActivity" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
@@ -63,17 +69,19 @@
             android:exported="true"
             android:label="@string/title_activity_site_location_list_compose"
             android:theme="@style/Theme.LoginActivity" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".feature.maps.presentation.DriverLocationActivity"
-            android:exported="false"
+            android:exported="true"
             android:label="@string/title_activity_fetching_site_location_compose"
-            android:theme="@style/Theme.LoginActivity" />
+            android:theme="@style/Theme.LoginActivity" >
+        <intent-filter>
+            <action android:name="android.intent.action.MAIN" />
+
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent-filter>
+        </activity>
         <activity
             android:name=".feature.vinnumber.VinNumberActivityCompose"
             android:exported="true"

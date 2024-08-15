@@ -20,7 +20,7 @@ class LoginRepositoryImpl @Inject constructor(
 
         return safeApiCall<LoginResponse>(
             apiCall = {
-                apiService.loginUser(email, password = password)
+                apiService.loginUser(email, password)
             },
             successType = LoginResponse::class.java,
             handleSuccess = { it ->

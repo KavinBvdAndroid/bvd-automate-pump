@@ -46,7 +46,6 @@ class RetrofitClient @Inject constructor(private val sessionManager: SessionMana
     }
 
 
-
     val pumpOperationService by lazy {
         pumpRetrofit.create(PumpApiService::class.java)
     }

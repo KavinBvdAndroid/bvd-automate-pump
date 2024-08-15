@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
@@ -34,12 +35,14 @@ import androidx.compose.material.icons.filled.RemoveCircleOutline
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -75,9 +78,11 @@ import com.example.loginactivity.core.base.generics.ErrorAlertDialog
 import com.example.loginactivity.core.base.generics.GenericProgressBar
 import com.example.loginactivity.core.base.generics.Resource
 import com.example.loginactivity.core.base.generics.ReusableElevatedButton
+import com.example.loginactivity.core.base.generics.TransparentTopBarWithBackButton
 import com.example.loginactivity.core.base.generics.customTextStyle
 import com.example.loginactivity.core.base.testdatas.requestTransaction
 import com.example.loginactivity.core.base.utils.AppUtils
+import com.example.loginactivity.core.base.utils.AppUtils.hideSystemUI
 import com.example.loginactivity.feature.pumpoperation.data.model.PumpParams
 import com.example.loginactivity.feature.pumpoperation.data.model.PumpResponse
 import com.example.loginactivity.feature.pumpoperation.data.model.TransactionState
@@ -91,26 +96,34 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class StartFuelingActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             LoginActivityTheme {
-                Scaffold(
-                    modifier = Modifier.fillMaxSize()
-                ) { innerPadding ->
-                    StartFuel(innerPadding)
-                }
+                StartFuelingDemo()
             }
         }
+        hideSystemUI()
     }
+
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
 @Composable
 fun StartFuelingDemo() {
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
     Scaffold(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
+        topBar = {
+            TransparentTopBarWithBackButton(
+                onBackClick = { backDispatcher?.onBackPressed() },
+                scrollBehavior = scrollBehavior
+            )
+        }
     ) { innerPadding ->
         StartFuel(innerPadding)
     }
@@ -146,7 +159,6 @@ fun StartFuel(innerPadding: PaddingValues) {
     }
 
 
-
     val processStatusText by remember {
         derivedStateOf {
             if (isStartEnabled) {
@@ -166,7 +178,7 @@ fun StartFuel(innerPadding: PaddingValues) {
     Column(
         modifier = Modifier
             .padding(innerPadding)
-            .padding(16.dp)
+            .padding(start = 16.dp, end = 16.dp)
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -224,8 +236,6 @@ fun StartFuel(innerPadding: PaddingValues) {
                 context
             )
         }
-
-
     }
     pumpStartLivedata?.let {
         GenericProgressBar(isLoading = false)
@@ -286,13 +296,22 @@ fun StartFuel(innerPadding: PaddingValues) {
             ErrorAlertDialog(title = "Error",
                 message = state.message,
                 buttonText = "Ok",
-                onDismiss = { })
+                titleBackgroundColor = Color.Red,
+                onDismiss = {
+                    context.startActivity(
+                        Intent(
+                            context,
+                            TransactionDetailsActivity::class.java
+                        ).putExtra("savedTransaction", state.saveTransactionDto)
+                    )
+                })
         }
 
         is TransactionState.Error -> {
             ErrorAlertDialog(title = "Error",
                 message = state.message,
                 buttonText = "Ok",
+                titleBackgroundColor = Color.Red,
                 onDismiss = { })
         }
 
@@ -325,6 +344,8 @@ fun ObservePumpData(
             pumpResponseCallback(0, null, pumpResponseData.message)
 
         }
+
+        else -> {}
     }
 }
 
@@ -346,7 +367,11 @@ fun AgreementSection(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            Checkbox(checked = checked, onCheckedChange = onCheckedChange, enabled = isTransactionComplete )
+            Checkbox(
+                checked = checked,
+                onCheckedChange = onCheckedChange,
+                enabled = isTransactionComplete
+            )
 
             Text(
                 style = customTextStyle.labelMedium,
@@ -377,7 +402,7 @@ fun HeaderSection() {
     val offset = Offset(15.0f, 10.0f)
     Text(
         text = "Activate & Deactivate the Pump",
-        textAlign = TextAlign.Start,
+        textAlign = TextAlign.Center,
         fontWeight = FontWeight.Bold,
         modifier = Modifier
             .fillMaxWidth()
@@ -517,7 +542,7 @@ fun StatusTextSection(processStatusText: String, textColor: Color) {
     ) {
         Text(
             text = "Status  ",
-            textAlign = TextAlign.Start,
+            textAlign = TextAlign.Center,
             fontWeight = FontWeight.Normal,
             style = customTextStyle.headlineLarge,
             modifier = Modifier
@@ -527,6 +552,7 @@ fun StatusTextSection(processStatusText: String, textColor: Color) {
             text = processStatusText,
             fontWeight = FontWeight.SemiBold,
             color = textColor,
+            textAlign = TextAlign.Center,
             style = customTextStyle.headlineLarge,
             modifier = Modifier.weight(1f)
         )

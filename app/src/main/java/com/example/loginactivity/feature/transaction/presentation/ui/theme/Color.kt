@@ -9,3 +9,14 @@ val Pink80 = Color(0xFFEFB8C8)
 val Purple40 = Color(0xFF6650a4)
 val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
+
+val Blue50 = Color(0xFFE3F2FD) // Light blue
+val Blue100 = Color(0xFFBBDEFB) // Light blue
+val Blue200 = Color(0xFF90CAF9) // Blue
+val Blue300 = Color(0xFF64B5F6) // Light blue
+val Blue400 = Color(0xFF42A5F5) // Blue
+val Blue500 = Color(0xFF2196F3) // Default blue
+val Blue600 = Color(0xFF1E88E5) // Darker blue
+val Blue700 = Color(0xFF1976D2) // Dark blue
+val Blue800 = Color(0xFF1565C0) // Even darker blue
+val Blue900 = Color(0xFF0D47A1) // Very dark blue

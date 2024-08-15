@@ -76,7 +76,7 @@ class PumpOperationViewModel @Inject constructor(
         viewModelScope.launch {
             _pumpStartLivedata.value = Resource.Loading
 //           val actualResult = pumpStartUseCase.startActivatingPump(cmd,params)
-            delay(1000)
+            delay(500)
             val result = Resource.Success(startMockPumpResponse)
             val Fresult = Resource.Failure("Pump Failed to turn on")
 
@@ -87,7 +87,7 @@ class PumpOperationViewModel @Inject constructor(
     fun stopPump(cmd: String, params: String) {
         viewModelScope.launch {
             _pumpStopLivedata.value = Resource.Loading
-            delay(5000)
+            delay(500)
 //            val actualResult = pumpStopUseCase.stopActivatingPump(cmd,params)
             val result = Resource.Success(stopMockPumpResponse)
             val Fresult = Resource.Failure("Pump Failed to turn off")

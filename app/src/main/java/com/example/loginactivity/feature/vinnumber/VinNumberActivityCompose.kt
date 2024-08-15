@@ -3,6 +3,7 @@ package com.example.loginactivity.feature.vinnumber
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedVisibility
@@ -16,17 +17,21 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -45,14 +50,18 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.loginactivity.R
 import com.example.loginactivity.core.base.generics.ErrorAlertDialog
+import com.example.loginactivity.core.base.generics.GenericBaseResponse
 import com.example.loginactivity.core.base.generics.GenericDetailRow
 import com.example.loginactivity.core.base.generics.GenericProgressBar
+import com.example.loginactivity.core.base.generics.GenericShadowHeader
 import com.example.loginactivity.core.base.generics.Resource
 import com.example.loginactivity.core.base.generics.ReusableElevatedButton
 import com.example.loginactivity.core.base.generics.ReusableTextInput
+import com.example.loginactivity.core.base.generics.TransparentTopBarWithBackButton
 import com.example.loginactivity.core.base.generics.customTextStyle
 import com.example.loginactivity.core.base.generics.isValidVinNumber
 import com.example.loginactivity.core.base.utils.AppUtils
+import com.example.loginactivity.core.base.utils.AppUtils.hideSystemUI
 import com.example.loginactivity.core.base.utils.Constants
 import com.example.loginactivity.feature.auth.ui.theme.LoginActivityTheme
 import com.example.loginactivity.feature.maps.presentation.DriverLocationActivity
@@ -66,22 +75,33 @@ class VinNumberActivityCompose : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             LoginActivityTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    VinContent(innerPadding)
-                }
+                VinDemo()
             }
         }
+        hideSystemUI()
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
 @Composable
 fun VinDemo() {
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-    ) { innerPadding ->
-        VinContent(innerPadding)
-    }
+        topBar = {
+            TransparentTopBarWithBackButton(
+                onBackClick = { backDispatcher?.onBackPressed() },
+                scrollBehavior = scrollBehavior
+            )
+        },
+        content =
+        { innerPadding ->
+            VinContent(innerPadding)
+        }
+    )
 
 }
 
@@ -112,12 +132,16 @@ fun VinContent(innerPadding: PaddingValues) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            Text(
-                style = customTextStyle.titleLarge,
-                text = stringResource(id = R.string.h_vin_number),
-                modifier = Modifier.padding(top = 16.dp, bottom = 16.dp),
+//            Text(
+//                style = customTextStyle.titleLarge,
+//                text = stringResource(id = R.string.h_vin_number),
+//                modifier = Modifier.padding(top = 16.dp, bottom = 16.dp),
+//            )
+            GenericShadowHeader(
+                label = stringResource(id = R.string.h_vin_number),
+                modifier = Modifier.padding(top = 0.dp)
             )
-
+            Spacer(modifier = Modifier.width(16.dp))
             ReusableTextInput(
                 value = vinNumber,
                 keyboardType = KeyboardOptions(keyboardType = KeyboardType.Text),
@@ -141,7 +165,6 @@ fun VinContent(innerPadding: PaddingValues) {
 
             ReusableElevatedButton(
                 onClick = {
-
                     viewModel.verifyVinNumber(vinNumber)
                 },
                 text = "Submit",
@@ -165,15 +188,17 @@ fun VinContent(innerPadding: PaddingValues) {
     vehicleDetail?.let {
         GenericProgressBar(isLoading = false)
         ObserverLiveData(it, callback = { value, data ->
-            val response = data as VinNumberResponse
-            val vehicleData = response.data
+
 
             if (value == 1) {
+                val response = data as VinNumberResponse
+                val vehicleData = response.data
                 if (!vehicleData.isNullOrEmpty() && vehicleData.first() != null && vehicleData.first()
                         .toString()
                         .isNotEmpty()
                 ) {
                     showVehicleDetails = true
+
                     vehicleDetails = vehicleData.first()
                 } else {
                     ErrorAlertDialog(
@@ -189,7 +214,7 @@ fun VinContent(innerPadding: PaddingValues) {
 
                 ErrorAlertDialog(
                     title = "Error",
-                    message = "An unexpected error occurred. Please try again later.",
+                    message = "An {${data.toString()}} error occurred. Please try again later.",
                     buttonText = "OK",
                     onDismiss = { showVehicleDetails = false },
                     titleBackgroundColor = Color.Red, // Custom title background color
@@ -221,6 +246,8 @@ fun ObserverLiveData(
             callback(0, vehicleDetail.message)
 
         }
+
+        else -> {}
     }
 }
 
@@ -230,6 +257,7 @@ fun VehicleDetails(showVehicleDetails: Boolean, vehicleDataItem: DataItem) {
         val context = LocalContext.current
 
         var checked by rememberSaveable { mutableStateOf(false) }
+
         AnimatedVisibility(
             visible = showVehicleDetails,
             enter = slideInHorizontally() + expandVertically(animationSpec = tween(durationMillis = 2000)),  // 1 second duration
@@ -238,17 +266,20 @@ fun VehicleDetails(showVehicleDetails: Boolean, vehicleDataItem: DataItem) {
 
 
             Column(
-
                 modifier = Modifier
                     .animateContentSize()
                     .fillMaxSize(),
 
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    style = customTextStyle.titleLarge,
-                    text = stringResource(id = R.string.h_verify_vehicle_details),
-                    modifier = Modifier.padding(bottom = 16.dp),
+//                Text(
+//                    style = customTextStyle.titleLarge,
+//                    text = stringResource(id = R.string.h_verify_vehicle_details),
+//                    modifier = Modifier.padding(bottom = 16.dp),
+//                )
+                GenericShadowHeader(
+                    label = stringResource(id = R.string.h_verify_vehicle_details),
+                    modifier = Modifier.padding(top = 16.dp)
                 )
                 Column(
                     modifier = Modifier
@@ -295,7 +326,10 @@ fun VehicleDetails(showVehicleDetails: Boolean, vehicleDataItem: DataItem) {
                         .padding(end = 12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Checkbox(checked = checked, onCheckedChange = { checked = it })
+                    Checkbox(checked = checked, onCheckedChange = {
+                        checked = it
+
+                    })
 
                     Text(
                         style = customTextStyle.labelMedium,
@@ -306,7 +340,6 @@ fun VehicleDetails(showVehicleDetails: Boolean, vehicleDataItem: DataItem) {
 
                 ReusableElevatedButton(
                     onClick = {
-                        AppUtils.showToastMessage("Validated...")
                         context.startActivity(
                             Intent(
                                 context, DriverLocationActivity::class.java

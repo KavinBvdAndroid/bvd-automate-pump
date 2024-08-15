@@ -8,8 +8,10 @@
     <color name="colorPrimaryVariant">#f6af2b</color>
     <color name="colorOnPrimary">#0007C5</color>
 
+
+    <color name="colorPrimaryBlue">#000740</color>
     <color name="colorSecondary">#282f77</color>
-<color name="Transparent">#80BBDEFB</color>
+    <color name="Transparent">#80BBDEFB</color>
     <color name="colorError">#a6003d</color>
 
     <color name="disabledStopButtonColor">#77a6003d</color>

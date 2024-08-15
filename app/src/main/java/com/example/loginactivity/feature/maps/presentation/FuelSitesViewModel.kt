@@ -23,7 +23,7 @@ class FuelSitesViewModel @Inject constructor(private val fetchInYardSiteUseCase:
     private val _mutableDriverLocation = MutableStateFlow(DriverLocation(0.0, 0.0))
     val driverLocationFlow : StateFlow<DriverLocation> = _mutableDriverLocation
 
-    private val _fuelSiteDetails = MutableStateFlow<Resource<FetchInYardSitesResponse>>(Resource.Loading)
+    private val _fuelSiteDetails = MutableStateFlow<Resource<FetchInYardSitesResponse>>(Resource.Idle)
     val fuelSiteDetails : StateFlow<Resource<FetchInYardSitesResponse>> = _fuelSiteDetails
 
 //    private val _fuelSiteDetails = MutableStateFlow<List<SiteDetails>>(sortedListOfSites)

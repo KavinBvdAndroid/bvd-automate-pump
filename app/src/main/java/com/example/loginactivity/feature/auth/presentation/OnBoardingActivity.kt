@@ -32,13 +32,17 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.loginactivity.R
 import com.example.loginactivity.core.base.generics.LoginLogo
 import com.example.loginactivity.core.base.generics.customTextStyle
 import com.example.loginactivity.core.base.utils.AppUtils.hideSystemUI
 import com.example.loginactivity.feature.ui.theme.LoginActivityTheme
+import com.example.loginactivity.feature.vinnumber.VinNumberActivityCompose
+import dagger.hilt.android.AndroidEntryPoint
 
-class SplashScreenActivity : ComponentActivity() {
+@AndroidEntryPoint
+class OnBoardingActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -52,12 +56,9 @@ class SplashScreenActivity : ComponentActivity() {
     }
 }
 
-fun checkSessionManager(){
-
-}
 @Composable
 fun SplashScreenDemo(innerPadding: PaddingValues) {
-
+    val viewModel: SplashViewModel = hiltViewModel()
     val context = LocalContext.current
     Column(
         modifier = Modifier
@@ -86,7 +87,11 @@ fun SplashScreenDemo(innerPadding: PaddingValues) {
         Box(
             modifier = Modifier
                 .clickable {
-                    context.startActivity(Intent(context, LoginActivityCompose::class.java))
+                    if (viewModel.isUserLoggedIn()) {
+                        context.startActivity(Intent(context, VinNumberActivityCompose::class.java))
+                    } else {
+                        context.startActivity(Intent(context, LoginActivityCompose::class.java))
+                    }
                 }
                 .padding(start = 30.dp, end = 16.dp) // Optional padding
         ) {

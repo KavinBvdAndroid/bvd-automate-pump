@@ -1,5 +1,6 @@
 package com.example.loginactivity.core.base.generics
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -18,6 +19,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
@@ -25,14 +28,19 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -43,7 +51,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -137,6 +147,14 @@ val customTextStyle = Typography(
         color = Color.Black
     ),
 
+    titleMedium = TextStyle(
+        fontFamily = poppinsFontFamily,
+        fontWeight = FontWeight.W500,
+        fontSize = 20.sp,
+        color = Color.Black,
+        textAlign = TextAlign.Center
+    ),
+
     labelLarge = TextStyle(
         fontFamily = poppinsFontFamily,
         fontWeight = FontWeight.Normal,
@@ -163,6 +181,7 @@ val customTextStyle = Typography(
         textAlign = TextAlign.Center
     )
 
+
 )
 
 val startMockPumpResponse = PumpResponse(
@@ -175,6 +194,7 @@ val stopMockPumpResponse = PumpResponse(
     params = "SuccessParams"
 )
 
+val offset = Offset(15.0f, 10.0f)
 
 @Composable
 fun CustomSwitch(
@@ -340,6 +360,115 @@ fun LoginLogo() {
             alignment = Alignment.TopCenter,
             modifier = Modifier.size(420.dp)
         )
+    }
+}
+
+@Composable
+fun GenericShadowHeader(label: String, modifier: Modifier, textAlign: TextAlign = TextAlign.Center){
+    Text(
+        label, modifier = modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        textAlign = textAlign,
+        color = colorResource(id = R.color.colorSecondary),
+        style = TextStyle(
+            fontSize = 30.sp,
+            shadow = Shadow(
+                color = Color.LightGray, offset = offset, blurRadius = 3f
+            ),
+            fontFamily = poppinsFontFamily,
+            fontWeight = FontWeight.Bold
+        )
+    )
+}
+@Composable
+fun ElevatedCircleButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier
+            .size(260.dp) // Size of the circle button
+            .background(Color.Transparent), // Transparent background to show only the border
+        shape = CircleShape, // Makes the button circular
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.Transparent, // Transparent background for the button
+            contentColor = Color.Blue, // Text and icon color
+            disabledContainerColor = Color.Gray, // Background color when disabled
+            disabledContentColor = Color.DarkGray // Content color when disabled
+        ),
+        border = BorderStroke(2.dp, Color.Blue) // Outlined border color and thickness
+    ) {
+        content() // Button content (icon or text)
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TransparentTopBarWithBackButton(
+    onBackClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    scrollBehavior: TopAppBarScrollBehavior? = null,
+    title:String=""
+) {
+
+    TopAppBar(
+        title = {
+            Text(text = title,
+                modifier=Modifier.fillMaxWidth(),
+                style = TextStyle(
+                    fontSize = 30.sp,
+                    color = colorResource(id = R.color.colorSecondary),
+                    textAlign = TextAlign.Center,
+                    shadow = Shadow(
+                        color = Color.LightGray, offset = offset, blurRadius = 3f)
+            ))
+
+        },
+        navigationIcon = {
+            IconButton(onClick = onBackClick) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack, // Back arrow icon
+                    contentDescription = "Back",
+                    tint = colorResource(id = R.color.colorSecondary) // Set the tint to your desired color
+                )
+            }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = Color.Transparent, // Transparent background
+            scrolledContainerColor = Color.LightGray
+        ),
+        modifier = modifier.fillMaxWidth(),
+         scrollBehavior = scrollBehavior
+    )
+}
+
+@Composable
+fun ElevatedCircleButtonShadow(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) {
+    Surface(
+        modifier = modifier.size(64.dp), // Size of the circle button
+        shape = CircleShape, // Makes the surface circular
+        color = Color.Transparent, // Background color of the button
+        shadowElevation = 8.dp, // Elevation for the shadow effect
+        border = BorderStroke(2.dp, Color.Blue) // Border color and thickness
+    ) {
+        Button(
+            onClick = onClick,
+            modifier = Modifier.fillMaxSize(),
+            shape = CircleShape, // Ensures the button is circular
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Transparent, // Transparent background for the button
+                contentColor = Color.Blue // Text and icon color
+            ),
+        ) {
+            content() // Button content (icon or text)
+        }
     }
 }
 
