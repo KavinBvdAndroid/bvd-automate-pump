@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,7 +29,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -37,8 +37,8 @@ import com.example.loginactivity.R
 import com.example.loginactivity.core.base.generics.LoginLogo
 import com.example.loginactivity.core.base.generics.customTextStyle
 import com.example.loginactivity.core.base.utils.AppUtils.hideSystemUI
-import com.example.loginactivity.feature.ui.theme.LoginActivityTheme
 import com.example.loginactivity.feature.vinnumber.VinNumberActivityCompose
+import com.example.loginactivity.ui.theme.LoginActivityTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -47,12 +47,23 @@ class OnBoardingActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             LoginActivityTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                Scaffold(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.onPrimary)) { innerPadding ->
                     SplashScreenDemo(innerPadding)
                 }
             }
         }
         hideSystemUI()
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = false)
+@Composable
+fun PreviewSplash() {
+
+    LoginActivityTheme {
+        Scaffold(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.onPrimary)) { innerPadding ->
+            SplashScreenDemo(innerPadding)
+        }
     }
 }
 
@@ -66,6 +77,8 @@ fun SplashScreenDemo(innerPadding: PaddingValues) {
             .fillMaxSize()
 
 
+
+
     ) {
         Box(
             modifier = Modifier
@@ -77,7 +90,7 @@ fun SplashScreenDemo(innerPadding: PaddingValues) {
                         bottomEnd = 70.dp
                     )
                 )
-                .background(colorResource(id = R.color.colorOnPrimary)),
+                .background(MaterialTheme.colorScheme.onPrimary),
 
             contentAlignment = Alignment.Center
         ) {

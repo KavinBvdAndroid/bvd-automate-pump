@@ -23,16 +23,19 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.lightColors
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Shapes
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -42,6 +45,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.Typography
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -137,6 +141,45 @@ val poppinsFontFamily = FontFamily(
     Font(R.font.poppins_medium, FontWeight.Medium),
     Font(R.font.poppins_semibold, FontWeight.SemiBold)
 )
+
+val Colors = lightColors(
+    primary = Color(0xFF6200EE),
+    secondary = Color(0xFF03DAC5),
+    // Define other colors as needed
+)
+
+//@Composable
+//fun myAppColorScheme(): ColorScheme {
+//    return lightColorScheme(
+//        primary = colorResource(id = R.color.colorPrimary),
+//        onPrimary =  colorResource(id = R.color.colorOnPrimary),
+//        primaryContainer = Color(0xFFF6AF2B),
+//        onPrimaryContainer = Color(0xFF282F77),
+//        secondary = Color(0xFF000740),
+//        onSecondary = Color(0xFFFFFFFF),
+//        secondaryContainer = Color(0xFF424242),
+//        onSecondaryContainer = Color(0xFFFFFFFF),
+//        background = Color.White,
+//        onBackground = Color.Black,
+//        surface = Color.White,
+//        onSurface = Color.Black,
+//        error = Color(0xFFA6003D),
+//        onError = Color.White,
+//        outline = Color(0xFF77A6003D)
+//
+//    )
+//}
+//
+//@Composable
+//fun MyAppTheme(content: @Composable () -> Unit) {
+//    val colorScheme = myAppColorScheme()
+//
+//    MaterialTheme(
+//        colorScheme = colorScheme,
+//        typography = customTextStyle,
+//        content = content
+//    )
+//}
 
 
 val customTextStyle = Typography(
@@ -243,7 +286,7 @@ fun ReusableTextInput(
     onPasswordVisibilityChange: (Boolean) -> Unit = {},
     trailingIcon: (@Composable () -> Unit)? = null,
     errorMessage: String = "",
-    errorIndicatorColor: Color = colorResource(R.color.colorError),
+    errorIndicatorColor: Color = MaterialTheme.colorScheme.error,
     focusedIndicatorColor: Color = colorResource(R.color.colorPrimaryVariant),
     unfocusedIndicatorColor: Color = colorResource(R.color.black),
     textStyle: TextStyle = customTextStyle.labelLarge,

@@ -65,11 +65,10 @@ class TransactionDetailsActivity : ComponentActivity() {
     }
 }
 
-@Preview(showBackground = true)
 @Composable
 fun ShowTransactionDemo(innerPadding: PaddingValues, intent: Intent,) {
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-        ShowTransaction(innerPadding = innerPadding, intentgit)
+        ShowTransaction(innerPadding = innerPadding, intent)
     }
 }
 

@@ -6,7 +6,6 @@ import android.content.Intent
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -46,7 +45,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -71,7 +69,7 @@ import com.example.loginactivity.core.base.generics.TransparentTopBarWithBackBut
 import com.example.loginactivity.core.base.generics.customTextStyle
 import com.example.loginactivity.core.base.utils.AppUtils
 import com.example.loginactivity.core.base.utils.AppUtils.hideSystemUI
-import com.example.loginactivity.feature.ui.theme.LoginActivityTheme
+import com.example.loginactivity.ui.theme.LoginActivityTheme
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
@@ -109,7 +107,7 @@ fun MainContentDemo() {
                 onBackClick = { backDispatcher?.onBackPressed() },
                 scrollBehavior = scrollBehavior,
 
-            )
+                )
         }
     ) {
         BottomNavGraph(navController = navController, it)
@@ -341,7 +339,10 @@ fun FetchLocationContent(paddingValues: PaddingValues) {
     if (driverLocation != null) {
         GenericProgressBar(false)
         LaunchedEffect(true) {
-            Log.d("driver location intent","${driverLocation?.latitude} and ${driverLocation?.longitude}")
+            Log.d(
+                "driver location intent",
+                "${driverLocation?.latitude} and ${driverLocation?.longitude}"
+            )
 
             context.startActivity(
                 Intent(context, MapsSiteActivity::class.java)
@@ -410,7 +411,7 @@ fun fetchLocation(
         Priority.PRIORITY_HIGH_ACCURACY,
         CancellationTokenSource().token
     ).addOnSuccessListener { location ->
-        Log.d("driver location","${location.latitude} and ${location.longitude}")
+        Log.d("driver location", "${location.latitude} and ${location.longitude}")
         location?.let {
             onLocationFetched(location)
         }
