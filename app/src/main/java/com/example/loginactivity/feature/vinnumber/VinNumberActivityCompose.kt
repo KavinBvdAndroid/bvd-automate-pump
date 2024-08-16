@@ -93,7 +93,8 @@ fun VinDemo() {
         topBar = {
             TransparentTopBarWithBackButton(
                 onBackClick = { backDispatcher?.onBackPressed() },
-                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
+                topBarColor = Color.Black
             )
         },
         content =

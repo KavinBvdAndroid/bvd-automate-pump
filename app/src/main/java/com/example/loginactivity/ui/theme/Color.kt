@@ -14,6 +14,8 @@ val ColorPrimary = Color(0xFF0F1D7F)
 val ColorPrimaryVariant = Color(0xFFF6AF2B)
 val ColorOnPrimary= Color(0xFF0007C5)
 val BackgroundPrimary = Color(0xFFFFFFFF)
+val SurfaceColor = Color(0xFFE3F2FD)
+
 
 val ColorPrimaryBlue = Color(0xFF000740)
 val ColorSecondary = Color(0xFF282F77)
@@ -25,6 +27,12 @@ val ColorDisabled = Color(0x77F6AF2B)
 val ColorEnabled = Color(0xFFF6AF2B) // Assuming colorPrimaryVariant is #F6AF2B
 val TextDisabled = Color(0xFFFFFFFF) // Assuming white is #FFFFFF
 
+val ColorDutchWhite = Color(0xFFDBD5B2)
+val ColorCardBottomSheet = Color(0xFF2E294E)
+val SemiTransparentCardColor = ColorCardBottomSheet.copy(alpha = 0.2f)
+
+val LabelTextColor = Color(0xFF8A817C)
+val LabelValueColor = Color(0xFF121212)
 
 // define your colors for dark theme
 val clear_dark = Color(0xFFA05162)

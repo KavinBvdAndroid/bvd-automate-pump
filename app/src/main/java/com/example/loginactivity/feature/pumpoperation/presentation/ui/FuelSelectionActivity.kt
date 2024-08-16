@@ -23,17 +23,14 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -49,14 +46,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.loginactivity.R
+import com.example.loginactivity.core.base.generics.GenericDetailRow
 import com.example.loginactivity.core.base.generics.ReusableElevatedButton
+import com.example.loginactivity.core.base.generics.RoundSearchBox
 import com.example.loginactivity.core.base.generics.TransparentTopBarWithBackButton
 import com.example.loginactivity.core.base.generics.customTextStyle
 import com.example.loginactivity.core.base.generics.poppinsFontFamily
@@ -64,7 +61,9 @@ import com.example.loginactivity.core.base.testdatas.listOfInYardItems
 import com.example.loginactivity.core.base.utils.AppUtils.hideSystemUI
 import com.example.loginactivity.feature.pumpoperation.data.model.InyardTanksItem
 import com.example.loginactivity.feature.pumpoperation.ui.theme.LoginActivityTheme
-import kotlin.math.sin
+import com.example.loginactivity.feature.transaction.presentation.ui.theme.Blue100
+import com.example.loginactivity.feature.transaction.presentation.ui.theme.Blue50
+import com.example.loginactivity.feature.transaction.presentation.ui.theme.Blue500
 
 class FuelSelectionActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -94,10 +93,12 @@ fun SelectFuelDemo() {
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             TransparentTopBarWithBackButton(
                 onBackClick = { backDispatcher?.onBackPressed() },
-                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
+                topBarColor = Color.Black
             )
         }
     ) { innerPadding ->
@@ -114,7 +115,9 @@ fun SelectFuel(innerPadding: PaddingValues) {
     var selectedOption by rememberSaveable { mutableStateOf<Option?>(null) }
     var showYardDetails by rememberSaveable { mutableStateOf<Boolean>(false) }
 
-    Column(modifier = Modifier.padding(innerPadding)) {
+    Column(modifier = Modifier
+        .padding(innerPadding)
+        .background(Color.Transparent)) {
         Text(
             "Select the transaction", modifier = Modifier
                 .fillMaxWidth(),
@@ -134,12 +137,14 @@ fun SelectFuel(innerPadding: PaddingValues) {
 
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
 
-            Row(modifier = Modifier
-                .clickable {
-                selectedOption = Option.OPTION_1
-                showYardDetails = true
-            },
-                verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = Modifier
+                    .clickable {
+                        selectedOption = Option.OPTION_1
+                        showYardDetails = true
+                    },
+                verticalAlignment = Alignment.CenterVertically
+            ) {
 
                 RadioButton(
                     selected = selectedOption == Option.OPTION_1,
@@ -172,12 +177,12 @@ fun SelectFuel(innerPadding: PaddingValues) {
                     }
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Wheel to Wheel",style = customTextStyle.titleMedium)
+                Text("Wheel to Wheel", style = customTextStyle.titleMedium)
             }
         }
 
 
-        Column {
+        Column(modifier = Modifier.background(Blue50)) {
             if (showYardDetails) {
                 ShowYardDetails()
             }
@@ -253,7 +258,7 @@ fun ShowYardDetails() {
                         onClick = {
                             newSelectedSite = it
                         },
-                        colors = CardDefaults.cardColors(containerColor = Color.LightGray),
+                        colors = CardDefaults.cardColors(MaterialTheme.colorScheme.tertiary),
                         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
                     ) {
                         Row(
@@ -272,69 +277,54 @@ fun ShowYardDetails() {
 
                             Spacer(modifier = Modifier.width(8.dp))
                             Column {
-                                Text(
-                                    text = "Tank type : ${it.tankType}",
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 8.dp),
-                                    style = MaterialTheme.typography.titleLarge
-                                )
-                                Text(
-                                    text = "Tank Description : ${it.tankDescription}",
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 8.dp),
-                                    style = MaterialTheme.typography.titleLarge
-                                )
-                                Text(
-                                    text = "Tank Capacity : ${it.capacity}",
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 8.dp),
-                                    style = MaterialTheme.typography.titleLarge
-                                )
-                                Text(
-                                    text = "Tank Safe Fill Limit : ${it.safeFillLimit}",
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 8.dp),
-                                    style = MaterialTheme.typography.titleLarge
-                                )
 
-                                Text(
-                                    text = "Product Code : ${it.productCode}",
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 8.dp),
-                                    style = MaterialTheme.typography.titleLarge
+                                GenericDetailRow(
+                                    label = "Tank type",
+                                    value = it.tankType.toString()
+                                )
+                                GenericDetailRow(
+                                    label = "Description",
+                                    value = it.tankDescription.toString()
+                                )
+                                GenericDetailRow(label = "Capacity", value = it.capacity.toString())
+                                GenericDetailRow(
+                                    label = "Safe limit",
+                                    value = it.safeFillLimit.toString()
+                                )
+                                GenericDetailRow(
+                                    label = "Product code",
+                                    value = it.productCode.toString()
                                 )
 
                             }
                         }
                     }
-                    Divider()
                 }
             }
 
             Surface(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .wrapContentSize()
                     .align(Alignment.TopCenter),
                 shadowElevation = 8.dp,
-                shape = RoundedCornerShape(4.dp),
-                color = Color.White
+                shape = RoundedCornerShape(50.dp),
             ) {
-                TextField(
+//                TextField(
+//                    value = query,
+//                    onValueChange = { query = it },
+//                    label = { Text("Search") },
+//                singleLine = true,
+//                    keyboardOptions = KeyboardOptions(
+//                        keyboardType = KeyboardType.Text,
+//                        imeAction = ImeAction.Done
+//                    ),
+//                    maxLines = 1,
+//                    modifier = Modifier.fillMaxWidth()
+//                )
+
+                RoundSearchBox(
                     value = query,
                     onValueChange = { query = it },
-                    label = { Text("Search") },
-                singleLine = true,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Text,
-                        imeAction = ImeAction.Done
-                    ),
-                    maxLines = 1,
-                    modifier = Modifier.fillMaxWidth()
                 )
 
             }

@@ -15,12 +15,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBackIosNew
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.lightColors
@@ -40,15 +42,19 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.Typography
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -82,6 +88,9 @@ import com.example.loginactivity.feature.maps.data.model.DataItem
 import com.example.loginactivity.feature.maps.data.model.InyardSiteAccessDetails
 import com.example.loginactivity.feature.maps.data.model.State
 import com.example.loginactivity.feature.maps.domain.model.FuelSite
+import com.example.loginactivity.feature.transaction.presentation.ui.theme.Blue500
+import com.example.loginactivity.ui.theme.LabelTextColor
+import com.example.loginactivity.ui.theme.LabelValueColor
 
 @Composable
 fun GenericProgressBar(
@@ -454,7 +463,8 @@ fun TransparentTopBarWithBackButton(
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
     scrollBehavior: TopAppBarScrollBehavior? = null,
-    title:String=""
+    title:String="",
+    topBarColor:Color
 ) {
 
     TopAppBar(
@@ -480,8 +490,8 @@ fun TransparentTopBarWithBackButton(
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.Transparent, // Transparent background
-            scrolledContainerColor = Color.LightGray
+            containerColor = topBarColor,
+            scrolledContainerColor = Blue500// Transparent background
         ),
         modifier = modifier.fillMaxWidth(),
          scrollBehavior = scrollBehavior
@@ -560,7 +570,8 @@ fun ErrorAlertDialog(
                     showDialog = false
                     onDismiss()
                 }) {
-                    Text(text = buttonText)
+                    Text(text = buttonText
+                    , color = Color.White)
                 }
             },
             properties = DialogProperties(dismissOnClickOutside = false)
@@ -568,6 +579,35 @@ fun ErrorAlertDialog(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun RoundSearchBox(
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    TextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(50)),
+        placeholder = { Text("Search...") },
+        leadingIcon = {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = "Search icon"
+            )
+        },
+        singleLine = true,
+        colors = TextFieldDefaults.colors(
+            unfocusedContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            disabledIndicatorColor = Color.Transparent
+        )
+    )
+}
 
 @Composable
 fun GenericDetailRow(label: String, value: String) {
@@ -575,14 +615,17 @@ fun GenericDetailRow(label: String, value: String) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
+            .background(Color.Transparent)
     ) {
         Text(
-            text = "$label : ",
+            text = "$label  ",
+            color = LabelTextColor,
             style = customTextStyle.labelLarge,
             modifier = Modifier.weight(1f)
         )
         Text(
             text = value,
+            color = LabelValueColor,
             style = customTextStyle.labelLarge,
             modifier = Modifier.weight(1f)
         )
@@ -646,3 +689,4 @@ fun formatLongitude( latitude:Double, longitudeDirection:String) : Double{
     }
     return formattedLongitude.toDouble()
 }
+

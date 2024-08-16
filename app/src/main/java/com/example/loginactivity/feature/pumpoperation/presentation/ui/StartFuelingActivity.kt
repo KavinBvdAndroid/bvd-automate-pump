@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -44,6 +45,7 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -61,6 +63,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
@@ -90,6 +93,8 @@ import com.example.loginactivity.feature.pumpoperation.presentation.viewmodel.Pu
 import com.example.loginactivity.feature.pumpoperation.save.SaveTransactionDto
 import com.example.loginactivity.feature.pumpoperation.ui.theme.LoginActivityTheme
 import com.example.loginactivity.feature.transaction.presentation.TransactionDetailsActivity
+import com.example.loginactivity.feature.transaction.presentation.ui.theme.Blue500
+import com.example.loginactivity.feature.transaction.presentation.ui.theme.Blue700
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -114,14 +119,31 @@ class StartFuelingActivity : ComponentActivity() {
 @Preview(showBackground = true)
 @Composable
 fun StartFuelingDemo() {
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    val scrollState = rememberLazyListState()
+
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+
+    val topBarColor by remember {
+        derivedStateOf {
+            // Change color based on scroll position
+            if (scrollState.firstVisibleItemScrollOffset > 100) {
+                Blue700 // Replace with your desired color
+            } else {
+                Color.Transparent // Initial color when at the top
+            }
+        }
+    }
+
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize()
+            ,
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             TransparentTopBarWithBackButton(
                 onBackClick = { backDispatcher?.onBackPressed() },
-                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
+                topBarColor = topBarColor
             )
         }
     ) { innerPadding ->
@@ -174,44 +196,24 @@ fun StartFuel(innerPadding: PaddingValues) {
         viewModel.saveTransaction(requestTransaction)
     }
 
-
     Column(
         modifier = Modifier
-            .padding(innerPadding)
-            .padding(start = 16.dp, end = 16.dp)
             .fillMaxSize()
+            .padding(innerPadding)
+            .background(Color.Transparent)
             .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
-
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-
         Column(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
         ) {
             HeaderSection()
-//        ActionButtons(isStartEnabled = isStartEnabled, isStopEnabled = isStopEnabled, onStartClick = {
-//            isStartEnabled = false
-//            processStatus = 1
-//            isStopEnabled = true
-//        }, onStopClick = {
-//            isStopEnabled = false
-//            processStatus = 0
-//            isStartEnabled = true
-//        })
-//        CustomSwitch(
-//            isChecked = isStartEnabled,
-//            onCheckedChange = { isChecked ->
-//                isStartEnabled = isChecked
-//            },
-//            switchWidth = 100.dp, // Adjust width as needed
-//            switchHeight = 50.dp, // Adjust height as needed
-//            modifier = Modifier.padding(top = 16.dp)
-//        )
-
             Spacer(modifier = Modifier.height(LocalConfiguration.current.screenHeightDp.dp * 0.1f))
             SwitchButton(isPumpEnabled = isStartEnabled, onSwitchClick = {
                 if (it) {
@@ -224,8 +226,6 @@ fun StartFuel(innerPadding: PaddingValues) {
 
             StatusTextSection(processStatusText, textColor)
             Spacer(modifier = Modifier.height(LocalConfiguration.current.screenHeightDp.dp * 0.1f))
-        }
-        Column(modifier = Modifier.fillMaxSize()) {
             ResultSection(result)
 
             AgreementSection(
@@ -236,7 +236,70 @@ fun StartFuel(innerPadding: PaddingValues) {
                 context
             )
         }
+
     }
+//    Column(
+//        modifier = Modifier
+//            .padding(innerPadding)
+//            .padding(start = 16.dp, end = 16.dp)
+//            .fillMaxSize()
+//            .verticalScroll(rememberScrollState()),
+//        horizontalAlignment = Alignment.CenterHorizontally,
+//        verticalArrangement = Arrangement.Top
+//
+//    ) {
+//
+//
+//        Column(
+//            modifier = Modifier.fillMaxWidth(),
+//            horizontalAlignment = Alignment.CenterHorizontally,
+//            verticalArrangement = Arrangement.SpaceBetween
+//        ) {
+//            HeaderSection()
+////        ActionButtons(isStartEnabled = isStartEnabled, isStopEnabled = isStopEnabled, onStartClick = {
+////            isStartEnabled = false
+////            processStatus = 1
+////            isStopEnabled = true
+////        }, onStopClick = {
+////            isStopEnabled = false
+////            processStatus = 0
+////            isStartEnabled = true
+////        })
+////        CustomSwitch(
+////            isChecked = isStartEnabled,
+////            onCheckedChange = { isChecked ->
+////                isStartEnabled = isChecked
+////            },
+////            switchWidth = 100.dp, // Adjust width as needed
+////            switchHeight = 50.dp, // Adjust height as needed
+////            modifier = Modifier.padding(top = 16.dp)
+////        )
+//
+//            Spacer(modifier = Modifier.height(LocalConfiguration.current.screenHeightDp.dp * 0.1f))
+//            SwitchButton(isPumpEnabled = isStartEnabled, onSwitchClick = {
+//                if (it) {
+//                    viewModel.startPump("PMPON", testParamsData.toString())
+//                } else {
+//                    viewModel.stopPump("PMPOFF", testParamsData.toString())
+//                }
+//            })
+//            Spacer(modifier = Modifier.height(LocalConfiguration.current.screenHeightDp.dp * 0.1f))
+//
+//            StatusTextSection(processStatusText, textColor)
+//            Spacer(modifier = Modifier.height(LocalConfiguration.current.screenHeightDp.dp * 0.1f))
+//        }
+//        Column(modifier = Modifier.fillMaxSize()) {
+//            ResultSection(result)
+//
+//            AgreementSection(
+//                isTransactionComplete,
+//                checked = checked,
+//                { checked = it },
+//                handleSaveTransaction,
+//                context
+//            )
+//        }
+//    }
     pumpStartLivedata?.let {
         GenericProgressBar(isLoading = false)
         ObservePumpData(pumpResponseData = it) { code, data, message ->

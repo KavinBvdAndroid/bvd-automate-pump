@@ -10,9 +10,13 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import com.example.loginactivity.ui.theme.BackgroundPrimary
+import com.example.loginactivity.ui.theme.ColorDutchWhite
+import com.example.loginactivity.ui.theme.ColorError
 import com.example.loginactivity.ui.theme.ColorOnPrimary
 import com.example.loginactivity.ui.theme.ColorPrimary
 import com.example.loginactivity.ui.theme.ColorPrimaryVariant
+import com.example.loginactivity.ui.theme.SemiTransparentCardColor
+import com.example.loginactivity.ui.theme.SurfaceColor
 
 
 private val DarkColorScheme = darkColorScheme(
@@ -27,6 +31,12 @@ private val LightColorScheme = lightColorScheme(
     primaryContainer = ColorPrimaryVariant,
     onPrimary = ColorOnPrimary,
     background = BackgroundPrimary,
+    tertiaryContainer = SemiTransparentCardColor,
+    onTertiary = ColorPrimaryVariant,
+    tertiary = ColorDutchWhite,
+    error = ColorError,
+    errorContainer = ColorError,
+    surfaceContainer = SurfaceColor
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
     surface = Color(0xFFFFFBFE),
@@ -42,7 +52,7 @@ private val LightColorScheme = lightColorScheme(
 fun LoginActivityTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -51,7 +61,7 @@ fun LoginActivityTheme(
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
 
-        darkTheme -> DarkColorScheme
+        darkTheme -> LightColorScheme
         else -> LightColorScheme
     }
 
