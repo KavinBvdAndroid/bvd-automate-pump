@@ -128,7 +128,9 @@ fun SiteLocationListDemo() {
             TransparentTopBarWithBackButton(
                 onBackClick = { backDispatcher?.onBackPressed() },
                 scrollBehavior = scrollBehavior,
-                topBarColor = Color.Black
+                topBarColor = Color.Transparent
+
+
             )
         }
     ) { innerPadding ->
@@ -249,7 +251,7 @@ fun ShowMapsMockData(innerPadding: PaddingValues, fuelSites: List<SiteDetails>) 
             modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState,
             properties = MapProperties(mapType = MapType.TERRAIN),
-            uiSettings = MapUiSettings(zoomControlsEnabled = true),
+            uiSettings = MapUiSettings(zoomControlsEnabled = false),
             onMapClick = {
 
             }

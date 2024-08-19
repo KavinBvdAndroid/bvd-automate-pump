@@ -1,5 +1,6 @@
 package com.example.loginactivity.feature.auth.presentation
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -179,6 +180,7 @@ fun ObserveLoginResult(loginResult: Resource<LoginResponse>) {
             GenericProgressBar(false)
             LaunchedEffect(Unit) {
                 context.startActivity(Intent(context, VinNumberActivityCompose::class.java))
+                (context as? Activity)?.finish()
             }
         }
 

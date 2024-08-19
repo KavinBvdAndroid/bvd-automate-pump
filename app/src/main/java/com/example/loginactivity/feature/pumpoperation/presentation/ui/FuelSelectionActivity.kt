@@ -98,7 +98,7 @@ fun SelectFuelDemo() {
             TransparentTopBarWithBackButton(
                 onBackClick = { backDispatcher?.onBackPressed() },
                 scrollBehavior = scrollBehavior,
-                topBarColor = Color.Black
+                topBarColor = Color.Transparent
             )
         }
     ) { innerPadding ->

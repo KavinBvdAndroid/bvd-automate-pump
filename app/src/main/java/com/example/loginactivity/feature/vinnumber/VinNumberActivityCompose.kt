@@ -28,6 +28,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -64,6 +65,8 @@ import com.example.loginactivity.core.base.utils.AppUtils.hideSystemUI
 import com.example.loginactivity.core.base.utils.Constants
 import com.example.loginactivity.feature.maps.presentation.DriverLocationActivity
 import com.example.loginactivity.feature.pumpoperation.data.model.VehicleDetail
+import com.example.loginactivity.ui.theme.ColorPrimary
+import com.example.loginactivity.ui.theme.ColorPrimaryBlue
 import com.example.loginactivity.ui.theme.LoginActivityTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -94,7 +97,7 @@ fun VinDemo() {
             TransparentTopBarWithBackButton(
                 onBackClick = { backDispatcher?.onBackPressed() },
                 scrollBehavior = scrollBehavior,
-                topBarColor = Color.Black
+                topBarColor = Color.Transparent
             )
         },
         content =
@@ -326,7 +329,11 @@ fun VehicleDetails(showVehicleDetails: Boolean, vehicleDataItem: DataItem) {
                         .padding(end = 12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Checkbox(checked = checked, onCheckedChange = {
+                    Checkbox( colors = CheckboxDefaults.colors(
+                        checkedColor = ColorPrimary,  // Color when checked
+                        checkmarkColor = Color.White // Color of the checkmark icon
+                    ),
+                         checked = checked, onCheckedChange = {
                         checked = it
 
                     })

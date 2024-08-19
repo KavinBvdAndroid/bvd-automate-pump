@@ -12,4 +12,5 @@ sealed class BottomNavItem (val route: String, val icon: ImageVector, val title:
     object TransactionHistory : BottomNavItem("TransactionHistory", Icons.Default.CreditCard, "Transactions")
     object Profile : BottomNavItem("profile", Icons.Default.Person, "Profile")
 
+
 }

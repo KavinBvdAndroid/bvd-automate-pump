@@ -64,6 +64,7 @@ class TransactionDetailsActivity : ComponentActivity() {
     }
 
     override fun onBackPressed() {
+        super.onBackPressed()
         // Do nothing to disable the back button
     }
 }
@@ -150,7 +151,7 @@ fun ShowTransaction(innerPadding: PaddingValues, intent: Intent) {
                                 context, DriverLocationActivity::class.java
                             ).apply {
                                 flags =
-                                    Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                     Intent.FLAG_ACTIVITY_CLEAR_TOP
                             }
                         )
                         (context as? Activity)?.finish()

@@ -22,7 +22,16 @@ class SessionManager @Inject constructor(private val sharedPreferences: SharedPr
         return sharedPreferences.getBoolean(Constants.IS_LOGGED_IN, false)
     }
 
-    override fun clearSharedPref() {
-        sharedPreferences.edit().clear().apply()
+    override fun setIsBoardingCompleted(isBoardingShowed: Boolean) {
+        return sharedPreferences.edit().putBoolean(Constants.IS_BOARDING_SHOWN, isBoardingShowed).apply()
+    }
+
+    override fun getIsBoardingCompleted(): Boolean {
+        return sharedPreferences.getBoolean(Constants.IS_BOARDING_SHOWN, false)
+    }
+    override fun clearSharedPref():Boolean {
+         sharedPreferences.edit().clear().apply()
+        setIsBoardingCompleted(true)
+        return true
     }
 }

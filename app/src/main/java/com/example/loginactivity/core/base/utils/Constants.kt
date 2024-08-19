@@ -12,6 +12,7 @@ class Constants {
         const val SHARED_PREF_NAME = "bvd_shared_pref"
         const val KEY_AUTH_TOKEN = "auth_token"
         const val IS_LOGGED_IN = "is_logged_in"
+        const val IS_BOARDING_SHOWN = "is_boarding_shown"
         const val NUM_PAGES = 3
         const val VIN_NUMBER_LENGTH = 3
         val permissionsToCheck = arrayOf(

@@ -1,10 +1,13 @@
 package com.example.bvddriverfleetapp.data.sharedpref
 
-interface SharedPrefMethods {
+import com.example.loginactivity.data.sharedpref.LoggingSharedPrefMethods
+
+interface SharedPrefMethods : LoggingSharedPrefMethods {
 
     fun saveAuthToken(token:String)
     fun getAuthToken() : String?
     fun setLoggedIn(isLoggedIn: Boolean)
     fun getLoggedIn() : Boolean
-    fun clearSharedPref()
+    fun setIsBoardingCompleted(isBoardingShowed:Boolean)
+    fun getIsBoardingCompleted():Boolean
 }

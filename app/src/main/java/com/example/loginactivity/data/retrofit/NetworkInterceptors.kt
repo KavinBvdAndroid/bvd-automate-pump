@@ -17,11 +17,11 @@ class NetworkInterceptors @Inject constructor(private val sessionManager: Shared
             .header("Accept", "application/json")
 
 
-//        if (authToken != null) {
-//            requestBuilder.header("Authorization", "Bearer $authToken")
-//        }
+        if (authToken != null) {
+            requestBuilder.header("Authorization", "Bearer $authToken")
+        }
 
-        requestBuilder.header("Authorization", "Bearer $sessionManager")
+//        requestBuilder.header("Authorization", "Bearer $sessionManager.")
 
         return chain.proceed(requestBuilder.build())
     }
