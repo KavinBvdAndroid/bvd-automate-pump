@@ -1,13 +1,19 @@
-package com.example.loginactivity.feature.pumpoperation.save
+package com.example.loginactivity.feature.pumpoperation.data.model.save
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "Transactions")
-data class SaveTransactionEntity(
+data class TransactionEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
+
+    @ColumnInfo(name = "truck_id")
+    var truckId: Int? = null,
+
+    @ColumnInfo(name = "driver_id")
+    var driverId: Int? = null,
 
     @ColumnInfo(name = "fuel_code")
     var fuelCode: String? = null,

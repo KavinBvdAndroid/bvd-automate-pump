@@ -12,16 +12,15 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -30,14 +29,12 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Shapes
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -45,16 +42,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.Typography
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -65,7 +58,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -79,15 +74,16 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import com.example.loginactivity.R
-import com.example.loginactivity.feature.pumpoperation.data.model.PumpResponse
 import com.example.loginactivity.feature.maps.data.model.DataItem
 import com.example.loginactivity.feature.maps.data.model.InyardSiteAccessDetails
 import com.example.loginactivity.feature.maps.data.model.State
 import com.example.loginactivity.feature.maps.domain.model.FuelSite
+import com.example.loginactivity.feature.pumpoperation.data.model.PumpResponse
 import com.example.loginactivity.feature.transaction.presentation.ui.theme.Blue500
 import com.example.loginactivity.ui.theme.LabelTextColor
 import com.example.loginactivity.ui.theme.LabelValueColor
@@ -237,12 +233,12 @@ val customTextStyle = Typography(
 )
 
 val startMockPumpResponse = PumpResponse(
-    msg = "Successfully started",
-    params = "SuccessParams"
+    msg = "Success - Pump On",
+    params = ""
 )
 
 val stopMockPumpResponse = PumpResponse(
-    msg = "Stopped successfully",
+    msg = "Success - 1.036 litres pumped",
     params = "SuccessParams"
 )
 
@@ -364,7 +360,11 @@ fun ReusableElevatedButton(
 
     Column(modifier = modifier) {
         ElevatedButton(
-            onClick = onClick,
+            onClick = {
+                onClick()
+                keyboardController?.hide()
+
+            },
             enabled = isEnabled,
             colors = ButtonDefaults.elevatedButtonColors(
                 containerColor = backgroundColor,
@@ -416,7 +416,11 @@ fun LoginLogo() {
 }
 
 @Composable
-fun GenericShadowHeader(label: String, modifier: Modifier, textAlign: TextAlign = TextAlign.Center){
+fun GenericShadowHeader(
+    label: String,
+    modifier: Modifier,
+    textAlign: TextAlign = TextAlign.Center
+) {
     Text(
         label, modifier = modifier
             .fillMaxWidth()
@@ -433,6 +437,7 @@ fun GenericShadowHeader(label: String, modifier: Modifier, textAlign: TextAlign 
         )
     )
 }
+
 @Composable
 fun ElevatedCircleButton(
     onClick: () -> Unit,
@@ -463,22 +468,42 @@ fun TransparentTopBarWithBackButton(
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
     scrollBehavior: TopAppBarScrollBehavior? = null,
-    title:String="",
-    topBarColor:Color
+    title: String = "",
+    topBarColor: Color
 ) {
-
+    var titleWidth = 0
+    val offsetX = with(LocalDensity.current) {
+        (0 / 2).toDp().roundToPx()
+    }
     TopAppBar(
+
         title = {
-            Text(text = title,
-                modifier=Modifier.fillMaxWidth(),
+            Text(
+                text = title,
+                modifier = Modifier.fillMaxWidth(),
                 style = TextStyle(
                     fontSize = 30.sp,
                     color = colorResource(id = R.color.colorSecondary),
                     textAlign = TextAlign.Center,
                     shadow = Shadow(
-                        color = Color.LightGray, offset = offset, blurRadius = 3f)
-            ))
-
+                        color = Color.LightGray, offset = offset, blurRadius = 3f
+                    )
+                )
+            )
+            Box(
+                 modifier = Modifier.fillMaxWidth()
+                     .onGloballyPositioned { coordinates ->
+                         titleWidth = coordinates.size.width
+                     }.padding(start = 16.dp),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.bvd_logo2),
+                    contentDescription = null, // Add content description for accessibility
+                    modifier = Modifier.size(50.dp), // Adjust size as needed
+                    contentScale = ContentScale.Fit
+                )
+            }
         },
         navigationIcon = {
             IconButton(onClick = onBackClick) {
@@ -494,7 +519,7 @@ fun TransparentTopBarWithBackButton(
             scrolledContainerColor = Blue500// Transparent background
         ),
         modifier = modifier.fillMaxWidth(),
-         scrollBehavior = scrollBehavior
+        scrollBehavior = scrollBehavior
     )
 }
 
@@ -570,8 +595,9 @@ fun ErrorAlertDialog(
                     showDialog = false
                     onDismiss()
                 }) {
-                    Text(text = buttonText
-                    , color = Color.White)
+                    Text(
+                        text = buttonText, color = Color.White
+                    )
                 }
             },
             properties = DialogProperties(dismissOnClickOutside = false)
@@ -656,7 +682,8 @@ fun transferToFuelSites(dtoList: List<DataItem?>): List<FuelSite> {
             state = dto?.state ?: State(), // Ensure State class has a default constructor
             longitude = dto?.longitude ?: 0.0,
             zip = dto?.zip ?: "N/A",
-            inyardSiteAccessDetails = dto?.inyardSiteAccessDetails ?: InyardSiteAccessDetails(), // Ensure this class has a default constructor
+            inyardSiteAccessDetails = dto?.inyardSiteAccessDetails
+                ?: InyardSiteAccessDetails(), // Ensure this class has a default constructor
             hours = dto?.hours ?: "N/A",
             address = dto?.address ?: "N/A",
             inyardSiteType = dto?.inyardSiteType ?: "N/A",
@@ -673,16 +700,17 @@ fun transferToFuelSites(dtoList: List<DataItem?>): List<FuelSite> {
 }
 
 
-fun formatLatitude( latitude:Double, latitudeDirection:String) : Double{
-    val formattedLatitude =  if (latitudeDirection == "S") {
+fun formatLatitude(latitude: Double, latitudeDirection: String): Double {
+    val formattedLatitude = if (latitudeDirection == "S") {
         "-${"%.4f".format(latitude)}"
     } else {
         "+${"%.4f".format(latitude)}"
     }
     return formattedLatitude.toDouble()
 }
-fun formatLongitude( latitude:Double, longitudeDirection:String) : Double{
-    val formattedLongitude =  if (longitudeDirection == "W") {
+
+fun formatLongitude(latitude: Double, longitudeDirection: String): Double {
+    val formattedLongitude = if (longitudeDirection == "W") {
         "-${"%.4f".format(latitude)}"
     } else {
         "+${"%.4f".format(latitude)}"

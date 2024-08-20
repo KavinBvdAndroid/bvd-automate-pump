@@ -650,7 +650,7 @@ fun CustomInfoWindowContent(site: SiteDetails) {
 @Composable
 fun ShowDriverLocationMarker(driverLocation: LatLng) {
     val context = LocalContext.current
-    val customBitmap = getBitmapFromVectorDrawable(context, R.drawable.pin)
+    val customBitmap = getBitmapFromVectorDrawable(context, R.drawable.truck)
     Marker(
         state = MarkerState(position = driverLocation),
         title = "BVD Driver Location",

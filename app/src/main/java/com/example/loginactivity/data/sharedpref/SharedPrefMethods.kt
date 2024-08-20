@@ -10,4 +10,8 @@ interface SharedPrefMethods : LoggingSharedPrefMethods {
     fun getLoggedIn() : Boolean
     fun setIsBoardingCompleted(isBoardingShowed:Boolean)
     fun getIsBoardingCompleted():Boolean
+    fun saveDriverId(driverId:String)
+    fun getDriverId(): Int
+    fun saveTruckId(driverId:String)
+    fun getTruckId(): Int
 }

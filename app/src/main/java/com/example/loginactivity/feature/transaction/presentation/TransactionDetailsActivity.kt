@@ -4,6 +4,8 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
@@ -25,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -39,8 +42,8 @@ import com.example.loginactivity.core.base.generics.ReusableElevatedButton
 import com.example.loginactivity.core.base.generics.customTextStyle
 import com.example.loginactivity.core.base.testdatas.SiteDetails2
 import com.example.loginactivity.core.base.utils.AppUtils.hideSystemUI
-import com.example.loginactivity.feature.maps.presentation.DriverLocationActivity
-import com.example.loginactivity.feature.pumpoperation.save.SaveTransactionDto
+import com.example.loginactivity.feature.dashboard.presentation.ui.DriverLocationActivity
+import com.example.loginactivity.feature.pumpoperation.data.model.save.TransactionDto
 import com.example.loginactivity.feature.pumpoperation.ui.theme.LoginActivityTheme
 
 class TransactionDetailsActivity : ComponentActivity() {
@@ -63,10 +66,6 @@ class TransactionDetailsActivity : ComponentActivity() {
         hideSystemUI()
     }
 
-    override fun onBackPressed() {
-        super.onBackPressed()
-        // Do nothing to disable the back button
-    }
 }
 
 @Composable
@@ -82,8 +81,21 @@ fun ShowTransactionDemo(innerPadding: PaddingValues, intent: Intent) {
 @Composable
 fun ShowTransaction(innerPadding: PaddingValues, intent: Intent) {
     val context = LocalContext.current
-    val savedTransaction = intent.getParcelableExtra<SaveTransactionDto>("savedTransaction")
+    val savedTransaction = intent.getParcelableExtra<TransactionDto>("savedTransaction")
+    val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+    DisposableEffect(backDispatcher) {
+        val callback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
 
+            }
+        }
+
+        backDispatcher?.addCallback(callback)
+
+        onDispose {
+            callback.remove()
+        }
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -151,7 +163,7 @@ fun ShowTransaction(innerPadding: PaddingValues, intent: Intent) {
                                 context, DriverLocationActivity::class.java
                             ).apply {
                                 flags =
-                                     Intent.FLAG_ACTIVITY_CLEAR_TOP
+                                    Intent.FLAG_ACTIVITY_CLEAR_TOP
                             }
                         )
                         (context as? Activity)?.finish()

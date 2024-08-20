@@ -15,14 +15,18 @@ import com.example.loginactivity.data.retrofit.RetrofitClient
 import com.example.loginactivity.data.retrofit.VinNumberApiService
 import com.example.loginactivity.feature.auth.data.model.LoginRepositoryImpl
 import com.example.loginactivity.feature.auth.domain.LoginRepository
+import com.example.loginactivity.feature.maps.data.repoimpl.FetchInYardSitesRepositoryImpl
+import com.example.loginactivity.feature.maps.domain.FetchInYardSitesRepository
+import com.example.loginactivity.feature.pumpoperation.data.model.save.SaveTransactionDao
 import com.example.loginactivity.feature.pumpoperation.data.reposiotryimpl.PumpOperationRepositoryImpl
 import com.example.loginactivity.feature.pumpoperation.domain.repo.PumpOperationRepository
 import com.example.loginactivity.feature.pumpoperation.domain.usecase.StartPumpUseCase
 import com.example.loginactivity.feature.pumpoperation.domain.usecase.StopPumpUseCase
-import com.example.loginactivity.feature.maps.data.repoimpl.FetchInYardSitesRepositoryImpl
-import com.example.loginactivity.feature.maps.domain.FetchInYardSitesRepository
-import com.example.loginactivity.feature.pumpoperation.domain.usecase.SaveTransactionUseCase
-import com.example.loginactivity.feature.pumpoperation.save.SaveTransactionDao
+import com.example.loginactivity.feature.transaction.data.TransactionRepositoryImpl
+import com.example.loginactivity.feature.transaction.data.datasource.LocalTransactionDataSource
+import com.example.loginactivity.feature.transaction.data.datasource.RemoteTransactionDataSource
+import com.example.loginactivity.feature.transaction.domain.TransactionRepository
+import com.example.loginactivity.feature.transaction.domain.usecases.SaveTransactionUseCase
 import com.example.loginactivity.feature.vinnumber.VinNumberRepository
 import com.example.loginactivity.feature.vinnumber.VinNumberRepositoryImpl
 import com.google.gson.Gson
@@ -40,6 +44,7 @@ object NetworkDatabaseModule {
     fun provideSessionManager(sharedPreferences: SharedPreferences): SessionManager {
         return SessionManager(sharedPreferences)
     }
+
     @Provides
     fun provideAuthInterceptor(sharedPref: SharedPrefMethods): NetworkInterceptors {
         return NetworkInterceptors(sharedPref)
@@ -78,7 +83,7 @@ object NetworkDatabaseModule {
         apiService: LoginApiService,
         saveTransactionDao: SaveTransactionDao
     ): PumpOperationRepository {
-        return PumpOperationRepositoryImpl(gson, pumpApiService,apiService,saveTransactionDao)
+        return PumpOperationRepositoryImpl(gson, pumpApiService, apiService, saveTransactionDao)
     }
 
     @Provides
@@ -92,13 +97,13 @@ object NetworkDatabaseModule {
     }
 
     @Provides
-    fun provideSaveTransactionUseCase(pumpOperationRepository: PumpOperationRepository): SaveTransactionUseCase {
-        return SaveTransactionUseCase((pumpOperationRepository))
+    fun provideSaveTransactionUseCase(transactionRepository: TransactionRepository): SaveTransactionUseCase {
+        return SaveTransactionUseCase((transactionRepository))
     }
 
 
     @Provides
-    fun providesLoginApiService(sessionManager: SessionManager): LoginApiService{
+    fun providesLoginApiService(sessionManager: SessionManager): LoginApiService {
         return RetrofitClient(sessionManager).loginApiServiceLocal
     }
 
@@ -126,8 +131,14 @@ object NetworkDatabaseModule {
         return database.transactionDao()
     }
 
+
+    //Repository Impl
     @Provides
-    fun providesLoginRepository(gson: Gson, loginApiService: LoginApiService, sessionManager:SessionManager): LoginRepository {
+    fun providesLoginRepository(
+        gson: Gson,
+        loginApiService: LoginApiService,
+        sessionManager: SessionManager
+    ): LoginRepository {
         return LoginRepositoryImpl(gson, loginApiService, sessionManager)
     }
 
@@ -136,13 +147,38 @@ object NetworkDatabaseModule {
         gson: Gson,
         vinNumberApiService: LoginApiService
     ): VinNumberRepository {
-        return VinNumberRepositoryImpl(gson,vinNumberApiService)
+        return VinNumberRepositoryImpl(gson, vinNumberApiService)
     }
 
     @Provides
-    fun providesFetchInYardSitesRepository(gson: Gson, loginApiService: LoginApiService): FetchInYardSitesRepository {
+    fun providesFetchInYardSitesRepository(
+        gson: Gson,
+        loginApiService: LoginApiService
+    ): FetchInYardSitesRepository {
         return FetchInYardSitesRepositoryImpl(gson, loginApiService)
     }
+
+    @Provides
+    fun providesTransactionRepository(
+        gson: Gson,
+        localTransactionDataSource: LocalTransactionDataSource,
+        remoteTransactionDataSource: RemoteTransactionDataSource
+    ): TransactionRepository {
+        return TransactionRepositoryImpl(
+            localTransactionDataSource,
+            remoteTransactionDataSource,
+            gson
+        )
+    }
+    @Provides
+    fun provideLocalTransactionDataSource(apiService: SaveTransactionDao):LocalTransactionDataSource{
+        return LocalTransactionDataSource(apiService)
+    }
+    @Provides
+    fun provideRemoteTransactionDataSource(apiService: LoginApiService):RemoteTransactionDataSource{
+        return RemoteTransactionDataSource(apiService)
+    }
+
 
     @Provides
     @Singleton
@@ -154,8 +190,6 @@ object NetworkDatabaseModule {
     fun provideSharedPref(application: Application): SharedPreferences {
         return application.getSharedPreferences(Constants.SHARED_PREF_NAME, Context.MODE_PRIVATE)
     }
-
-
 
 
 }

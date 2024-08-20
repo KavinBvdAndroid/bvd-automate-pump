@@ -1,6 +1,6 @@
 package com.example.loginactivity.data.retrofit
 
-import com.example.loginactivity.feature.pumpoperation.save.SaveTransactionDto
+import com.example.loginactivity.feature.pumpoperation.data.model.save.TransactionDto
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
@@ -27,6 +27,6 @@ interface LoginApiService {
 
     @POST("api/saveInyardTransaction")
     suspend fun saveInYardTransactions(
-        @Body transactionDetails: SaveTransactionDto
+        @Body transactionDetails: TransactionDto
     ): Response<ResponseBody>
 }

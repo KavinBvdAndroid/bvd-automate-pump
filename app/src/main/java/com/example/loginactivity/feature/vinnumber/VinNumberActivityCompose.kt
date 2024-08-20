@@ -63,10 +63,9 @@ import com.example.loginactivity.core.base.generics.customTextStyle
 import com.example.loginactivity.core.base.generics.isValidVinNumber
 import com.example.loginactivity.core.base.utils.AppUtils.hideSystemUI
 import com.example.loginactivity.core.base.utils.Constants
-import com.example.loginactivity.feature.maps.presentation.DriverLocationActivity
+import com.example.loginactivity.feature.dashboard.presentation.ui.DriverLocationActivity
 import com.example.loginactivity.feature.pumpoperation.data.model.VehicleDetail
 import com.example.loginactivity.ui.theme.ColorPrimary
-import com.example.loginactivity.ui.theme.ColorPrimaryBlue
 import com.example.loginactivity.ui.theme.LoginActivityTheme
 import dagger.hilt.android.AndroidEntryPoint
 

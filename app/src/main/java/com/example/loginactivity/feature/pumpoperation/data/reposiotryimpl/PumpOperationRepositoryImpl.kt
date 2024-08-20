@@ -8,9 +8,9 @@ import com.example.loginactivity.data.retrofit.PumpApiService
 import com.example.loginactivity.feature.pumpoperation.data.model.PumpResponse
 import com.example.loginactivity.feature.pumpoperation.data.model.TransactionSaveResult
 import com.example.loginactivity.feature.pumpoperation.domain.repo.PumpOperationRepository
-import com.example.loginactivity.feature.pumpoperation.save.SaveTransactionDao
-import com.example.loginactivity.feature.pumpoperation.save.SaveTransactionDto
-import com.example.loginactivity.feature.pumpoperation.save.SaveTransactionEntity
+import com.example.loginactivity.feature.pumpoperation.data.model.save.SaveTransactionDao
+import com.example.loginactivity.feature.pumpoperation.data.model.save.TransactionDto
+import com.example.loginactivity.feature.pumpoperation.data.model.save.TransactionEntity
 import com.google.gson.Gson
 import javax.inject.Inject
 
@@ -33,7 +33,7 @@ class PumpOperationRepositoryImpl @Inject constructor(
         )
     }
 
-    override suspend fun saveTransactionRemote(request: SaveTransactionDto): TransactionSaveResult {
+    override suspend fun saveTransactionRemote(request: TransactionDto): TransactionSaveResult {
         var apiResult: Resource<Any> = Resource.Failure("API call not executed")
         var localDbResult = false
 
@@ -56,7 +56,7 @@ class PumpOperationRepositoryImpl @Inject constructor(
                     try {
                         saveTransactionDao.insertTransaction(
                             request.let {
-                                SaveTransactionEntity().apply {
+                                TransactionEntity().apply {
                                     inyardSiteId = it.inyardSiteId
                                     fuelCode = it.fuelCode
                                     cardNumber = it.cardNumber
@@ -82,7 +82,7 @@ class PumpOperationRepositoryImpl @Inject constructor(
                     try {
                         saveTransactionDao.insertTransaction(
                             request.let {
-                                SaveTransactionEntity().apply {
+                                TransactionEntity().apply {
                                     inyardSiteId = it.inyardSiteId
                                     fuelCode = it.fuelCode
                                     cardNumber = it.cardNumber
@@ -128,7 +128,7 @@ class PumpOperationRepositoryImpl @Inject constructor(
 
     }
 
-    override suspend fun saveTransactionLocally(transactionEntity: SaveTransactionEntity): Long {
+    override suspend fun saveTransactionLocally(transactionEntity: TransactionEntity): Long {
 
         TODO("Not yet implemented")
     }

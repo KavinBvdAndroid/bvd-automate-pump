@@ -48,7 +48,6 @@
             android:label="@string/title_activity_start_fueling"
             android:theme="@style/Theme.LoginActivity">
 
-
         </activity>
         <activity
             android:name=".feature.pumpoperation.presentation.ui.FuelSelectionActivity"
@@ -68,7 +67,7 @@
             android:label="@string/title_activity_site_location_list_compose"
             android:theme="@style/Theme.LoginActivity"></activity>
         <activity
-            android:name=".feature.maps.presentation.DriverLocationActivity"
+            android:name=".feature.dashboard.presentation.ui.DriverLocationActivity"
             android:exported="true"
             android:label="@string/title_activity_fetching_site_location_compose"
             android:theme="@style/Theme.LoginActivity">

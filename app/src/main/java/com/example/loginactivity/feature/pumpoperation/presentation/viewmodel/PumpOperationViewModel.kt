@@ -10,10 +10,10 @@ import com.example.loginactivity.core.base.generics.stopMockPumpResponse
 import com.example.loginactivity.feature.pumpoperation.data.model.PumpResponse
 import com.example.loginactivity.feature.pumpoperation.data.model.TransactionSaveResult
 import com.example.loginactivity.feature.pumpoperation.data.model.TransactionState
-import com.example.loginactivity.feature.pumpoperation.domain.usecase.SaveTransactionUseCase
 import com.example.loginactivity.feature.pumpoperation.domain.usecase.StartPumpUseCase
 import com.example.loginactivity.feature.pumpoperation.domain.usecase.StopPumpUseCase
-import com.example.loginactivity.feature.pumpoperation.save.SaveTransactionDto
+import com.example.loginactivity.feature.pumpoperation.data.model.save.TransactionDto
+import com.example.loginactivity.feature.transaction.domain.usecases.SaveTransactionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,6 +27,7 @@ class PumpOperationViewModel @Inject constructor(
     private val saveTransactionUseCase: SaveTransactionUseCase
 ) : ViewModel() {
 
+
     private val _pumpStartLivedata = MutableLiveData<Resource<PumpResponse>>()
     val pumpStartLivedata: LiveData<Resource<PumpResponse>> = _pumpStartLivedata
 
@@ -36,7 +37,7 @@ class PumpOperationViewModel @Inject constructor(
     private val _saveTransactionLivedata = MutableStateFlow<TransactionState>(TransactionState.Idle)
     val saveTransactionLivedata: MutableStateFlow<TransactionState> = _saveTransactionLivedata
 
-    fun saveTransaction(request: SaveTransactionDto) {
+    fun saveTransaction(request: TransactionDto) {
         viewModelScope.launch {
             _saveTransactionLivedata.value = TransactionState.Loading
             val result = saveTransactionUseCase.saveTransactionRemote(request)

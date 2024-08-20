@@ -1,15 +1,11 @@
 package com.example.loginactivity.feature.pumpoperation.presentation.ui
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.system.Os.remove
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
-import androidx.activity.OnBackPressedDispatcher
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -52,7 +48,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -82,7 +77,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.compose.rememberNavController
 import com.example.loginactivity.R
 import com.example.loginactivity.core.base.generics.ErrorAlertDialog
 import com.example.loginactivity.core.base.generics.GenericProgressBar
@@ -97,7 +91,7 @@ import com.example.loginactivity.feature.pumpoperation.data.model.PumpParams
 import com.example.loginactivity.feature.pumpoperation.data.model.PumpResponse
 import com.example.loginactivity.feature.pumpoperation.data.model.TransactionState
 import com.example.loginactivity.feature.pumpoperation.presentation.viewmodel.PumpOperationViewModel
-import com.example.loginactivity.feature.pumpoperation.save.SaveTransactionDto
+import com.example.loginactivity.feature.pumpoperation.data.model.save.TransactionDto
 import com.example.loginactivity.feature.pumpoperation.ui.theme.LoginActivityTheme
 import com.example.loginactivity.feature.transaction.presentation.TransactionDetailsActivity
 import com.example.loginactivity.feature.transaction.presentation.ui.theme.Blue700
@@ -108,12 +102,10 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class StartFuelingActivity : ComponentActivity() {
-    private lateinit var backPressedDispatcher: OnBackPressedDispatcher
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        backPressedDispatcher = onBackPressedDispatcher
         setContent {
             LoginActivityTheme {
                 StartFuelingDemo()
@@ -122,9 +114,6 @@ class StartFuelingActivity : ComponentActivity() {
         hideSystemUI()
     }
 
-    fun customBackPressed() {
-        backPressedDispatcher.onBackPressed()
-    }
 
 }
 
@@ -133,22 +122,29 @@ class StartFuelingActivity : ComponentActivity() {
 @Composable
 fun StartFuelingDemo() {
     val scrollState = rememberLazyListState()
-val context = LocalContext.current
+    val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-    var isBackButtonEnabled = rememberSaveable {true}
-    Log.d("start fueloing", " ${isBackButtonEnabled}")
+    var isBackButtonEnabled by rememberSaveable { mutableStateOf(true) }
     val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
-
-
-    BackHandler(enabled = true) {
-
-        if (isBackButtonEnabled){
-            if (context is Activity) {
-                context.onBackPressed()
+    DisposableEffect(backDispatcher) {
+        val callback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (isBackButtonEnabled) {
+                    val intent = Intent(context, FuelSelectionActivity::class.java)
+                    intent.flags =
+                        Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    context.startActivity(intent)
+                }
             }
         }
 
+        backDispatcher?.addCallback(callback)
+
+        onDispose {
+            callback.remove()
+        }
     }
+
 
     val topBarColor by remember {
         derivedStateOf {
@@ -167,8 +163,11 @@ val context = LocalContext.current
         topBar = {
             TransparentTopBarWithBackButton(
                 onBackClick = {
-                    if (isBackButtonEnabled){
-                        (context as? StartFuelingActivity)?.customBackPressed()
+                    if (isBackButtonEnabled) {
+                        val intent = Intent(context, FuelSelectionActivity::class.java)
+                        intent.flags =
+                            Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                        context.startActivity(intent)
                     }
 
                 },
@@ -183,6 +182,8 @@ val context = LocalContext.current
     }
 
 }
+
+
 
 @Composable
 fun StartFuel(innerPadding: PaddingValues, onBackButtonDisabled: () -> Unit) {
@@ -224,7 +225,7 @@ fun StartFuel(innerPadding: PaddingValues, onBackButtonDisabled: () -> Unit) {
     }
 
 
-    val handleSaveTransaction: (SaveTransactionDto) -> Unit = { requestTransaction ->
+    val handleSaveTransaction: (TransactionDto) -> Unit = { requestTransaction ->
         viewModel.saveTransaction(requestTransaction)
     }
 
@@ -277,7 +278,7 @@ fun StartFuel(innerPadding: PaddingValues, onBackButtonDisabled: () -> Unit) {
         ObservePumpData(pumpResponseData = it) { code, data, message ->
             if (code == 1) {
                 isStartEnabled = true
-                result = data.toString()
+                result = data?.msg.toString()
                 isTransactionComplete = false
                 checked = false
                 onBackButtonDisabled()
@@ -297,7 +298,7 @@ fun StartFuel(innerPadding: PaddingValues, onBackButtonDisabled: () -> Unit) {
             if (code == 1) {
                 isStartEnabled = false
                 isTransactionComplete = true
-                result = data.toString()
+                result = data?.msg.toString()
             } else {
                 isStartEnabled = true
                 if (message != null) {
@@ -390,7 +391,7 @@ fun AgreementSection(
     isTransactionComplete: Boolean,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
-    handleSaveTransaction: (SaveTransactionDto) -> Unit,
+    handleSaveTransaction: (TransactionDto) -> Unit,
     context: Context
 ) {
     Column(
@@ -608,7 +609,7 @@ fun ResultSection(result: String) {
         textAlign = TextAlign.Start,
         fontWeight = FontWeight.Normal,
         style = customTextStyle.headlineLarge,
-        modifier = Modifier
+        modifier = Modifier.fillMaxWidth()
     )
     Spacer(modifier = Modifier.padding(8.dp))
     Box(
@@ -621,7 +622,7 @@ fun ResultSection(result: String) {
     ) {
         Text(
 //            text = "Output : {result : Success, litres_fueled : 120 litres}",
-            text = "Result : {$result}",
+            text = "{$result}",
             textAlign = TextAlign.Start,
             color = Color.Black,
             modifier = Modifier

@@ -29,7 +29,9 @@ class LoginRepositoryImpl @Inject constructor(
                     saveAuthToken(it.get("access_token").asString)
                     saveLoginState(true)
                 }
-
+//                if (it.has("user_id")) {
+//                    saveDriverId(it.get("user_id").asString)
+//                }
             },
             handleFailure = {
 
@@ -48,6 +50,14 @@ class LoginRepositoryImpl @Inject constructor(
 
     override fun getLoginState(): Boolean {
         return sessionManager.getLoggedIn()
+    }
+
+    override fun saveDriverId(asString: String) {
+        TODO("Not yet implemented")
+    }
+
+    override fun getDriverId(): String {
+        TODO("Not yet implemented")
     }
 
     override fun logOut() {

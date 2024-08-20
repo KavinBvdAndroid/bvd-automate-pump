@@ -1,4 +1,4 @@
-package com.example.loginactivity.feature.maps.presentation
+package com.example.loginactivity.feature.dashboard.presentation.ui
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -73,6 +73,8 @@ import com.example.loginactivity.core.base.generics.customTextStyle
 import com.example.loginactivity.core.base.utils.AppUtils
 import com.example.loginactivity.core.base.utils.AppUtils.hideSystemUI
 import com.example.loginactivity.feature.auth.presentation.LoginActivityCompose
+import com.example.loginactivity.feature.dashboard.presentation.viewmodel.DriverLocationViewModel
+import com.example.loginactivity.feature.maps.presentation.MapsSiteActivity
 import com.example.loginactivity.ui.theme.LoginActivityTheme
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -215,6 +217,7 @@ fun currentRoute(navController: NavController): String? {
 @Composable
 fun TransactionHistoryScreen(innerPadding: PaddingValues) {
 
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -231,6 +234,7 @@ fun TransactionHistoryScreen(innerPadding: PaddingValues) {
             alignment = Alignment.Center,
             modifier = Modifier.size(220.dp)
         )
+
         Spacer(modifier = Modifier.width(16.dp))
     }
 }
@@ -417,8 +421,6 @@ fun FetchUserLocation(locationCallback: (location: Location) -> Unit) {
 
     if (location != null) {
         locationCallback(location!!)
-    } else {
-        Text("Fetching location...")
     }
 }
 
