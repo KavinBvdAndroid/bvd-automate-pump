@@ -10,9 +10,9 @@ import com.example.loginactivity.core.base.generics.stopMockPumpResponse
 import com.example.loginactivity.feature.pumpoperation.data.model.PumpResponse
 import com.example.loginactivity.feature.pumpoperation.data.model.TransactionSaveResult
 import com.example.loginactivity.feature.pumpoperation.data.model.TransactionState
+import com.example.loginactivity.feature.pumpoperation.data.model.save.TransactionDto
 import com.example.loginactivity.feature.pumpoperation.domain.usecase.StartPumpUseCase
 import com.example.loginactivity.feature.pumpoperation.domain.usecase.StopPumpUseCase
-import com.example.loginactivity.feature.pumpoperation.data.model.save.TransactionDto
 import com.example.loginactivity.feature.transaction.domain.usecases.SaveTransactionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -42,10 +42,12 @@ class PumpOperationViewModel @Inject constructor(
             _saveTransactionLivedata.value = TransactionState.Loading
             val result = saveTransactionUseCase.saveTransactionRemote(request)
             _saveTransactionLivedata.value = when (result) {
-                is TransactionSaveResult.Success -> TransactionState.Success(
-                    "Transaction saved successfully",
-                    result.savedTransactionDto
-                )
+                is TransactionSaveResult.Success -> {
+                    TransactionState.Success(
+                        "Transaction saved successfully",
+                        result.savedTransactionDto
+                    )
+                }
 
                 is TransactionSaveResult.ApiFailureLocalSuccess -> TransactionState.PartialSuccess(
                     "Saved locally, but API sync failed: ${result.apiError}",

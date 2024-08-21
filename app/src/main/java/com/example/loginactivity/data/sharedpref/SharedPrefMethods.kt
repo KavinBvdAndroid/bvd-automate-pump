@@ -11,7 +11,7 @@ interface SharedPrefMethods : LoggingSharedPrefMethods {
     fun setIsBoardingCompleted(isBoardingShowed:Boolean)
     fun getIsBoardingCompleted():Boolean
     fun saveDriverId(driverId:String)
-    fun getDriverId(): Int
+    fun getDriverId(): String?
     fun saveTruckId(driverId:String)
-    fun getTruckId(): Int
+    fun getTruckId(): String?
 }

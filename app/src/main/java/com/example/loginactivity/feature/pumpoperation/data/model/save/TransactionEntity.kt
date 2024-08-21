@@ -25,6 +25,7 @@ data class TransactionEntity(
     var cardNumber: Int? = null,
 
     @ColumnInfo(name = "vin_number")
+
     var vinNumber: Int? = null,
 
     @ColumnInfo(name = "transaction_type")

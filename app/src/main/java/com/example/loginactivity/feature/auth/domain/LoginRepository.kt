@@ -9,6 +9,6 @@ interface LoginRepository {
     fun saveLoginState(isLoggedIn: Boolean)
     fun getLoginState(): Boolean
     fun saveDriverId(asString: String)
-    fun getDriverId():String
+    fun getDriverId():String?
     fun logOut()
 }

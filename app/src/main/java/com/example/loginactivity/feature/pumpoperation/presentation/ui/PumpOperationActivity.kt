@@ -77,6 +77,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.bvddriverfleetapp.data.sharedpref.SessionManager
 import com.example.loginactivity.R
 import com.example.loginactivity.core.base.generics.ErrorAlertDialog
 import com.example.loginactivity.core.base.generics.GenericProgressBar
@@ -99,9 +100,11 @@ import com.example.loginactivity.ui.theme.ColorSecondary
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class StartFuelingActivity : ComponentActivity() {
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -196,7 +199,8 @@ fun StartFuel(innerPadding: PaddingValues, onBackButtonDisabled: () -> Unit) {
     var isTransactionComplete by rememberSaveable { mutableStateOf(false) }
 
 
-//    var isStopEnabled by rememberSaveable { mutableStateOf(false) }
+
+//  var isStopEnabled by rememberSaveable { mutableStateOf(false) }
     var processStatus by rememberSaveable { mutableIntStateOf(-1) }
     var result by rememberSaveable {
         mutableStateOf("Note: Result will appear here at the end of the every Transaction")
@@ -218,6 +222,7 @@ fun StartFuel(innerPadding: PaddingValues, onBackButtonDisabled: () -> Unit) {
         derivedStateOf {
             if (isStartEnabled) {
                 "PUMP Activated"
+
             } else {
                 "PUMP De-Activated"
             }

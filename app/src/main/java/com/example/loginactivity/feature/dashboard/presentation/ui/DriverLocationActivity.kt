@@ -26,6 +26,8 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -68,6 +70,8 @@ import com.example.loginactivity.R
 import com.example.loginactivity.core.base.generics.GenericDetailRow
 import com.example.loginactivity.core.base.generics.GenericProgressBar
 import com.example.loginactivity.core.base.generics.GenericShadowHeader
+import com.example.loginactivity.core.base.generics.OutlinedButton
+import com.example.loginactivity.core.base.generics.ReusableElevatedButton
 import com.example.loginactivity.core.base.generics.TransparentTopBarWithBackButton
 import com.example.loginactivity.core.base.generics.customTextStyle
 import com.example.loginactivity.core.base.utils.AppUtils
@@ -254,7 +258,9 @@ fun ProfileScreen(innerPadding: PaddingValues) {
 
         GenericShadowHeader("Driver Profile", Modifier.fillMaxWidth(), TextAlign.Center)
         Spacer(modifier = Modifier.width(16.dp))
-        Column (modifier = Modifier.fillMaxWidth().padding(16.dp),
+        Column (modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
 
 
@@ -269,17 +275,42 @@ fun ProfileScreen(innerPadding: PaddingValues) {
 //            alignment = Alignment.Center,
 //            modifier = Modifier.size(220.dp),
 //        )
-        ElevatedButton(onClick = {
-            val isCleared = viewmodel.clearSharedPref()
-            if (isCleared) {
-                context.startActivity(Intent(context, LoginActivityCompose::class.java).apply {
-                    flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-                })
-                (context as? Activity)?.finish()
+//            ReusableElevatedButton(onClick = {
+//                val isCleared = viewmodel.clearSharedPref()
+//                if (isCleared) {
+//                    context.startActivity(Intent(context, LoginActivityCompose::class.java).apply {
+//                        flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+//                    })
+//                    (context as? Activity)?.finish()
+//                }
+//            }, text = "Log out", modifier = Modifier.wrapContentWidth(), isEnabled = true)
+            OutlinedButton(
+                onClick = {
+                    val isCleared = viewmodel.clearSharedPref()
+                if (isCleared) {
+                    context.startActivity(Intent(context, LoginActivityCompose::class.java).apply {
+                        flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+                    })
+                    (context as? Activity)?.finish()
+                }
+
+                },
+                modifier = Modifier.wrapContentSize(),
+                enabled = true
+            ) {
+                Text("Log out")
             }
-        }) {
-            Text(text = "Log out")
-        }
+//        ElevatedButton(onClick = {
+//            val isCleared = viewmodel.clearSharedPref()
+//            if (isCleared) {
+//                context.startActivity(Intent(context, LoginActivityCompose::class.java).apply {
+//                    flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+//                })
+//                (context as? Activity)?.finish()
+//            }
+//        }) {
+//            Text(text = "Log out")
+//        }
         Spacer(modifier = Modifier.width(16.dp))
         }
     }

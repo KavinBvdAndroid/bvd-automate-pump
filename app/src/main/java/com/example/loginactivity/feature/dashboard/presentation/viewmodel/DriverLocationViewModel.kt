@@ -36,7 +36,9 @@ class DriverLocationViewModel @Inject constructor(
         Resource.Loading
         viewModelScope.launch {
             _transactionsMutableLiveData.value =
-                getAllTransactionsUseCase.getAllTransactions(sessionManager.getDriverId(), sessionManager.getTruckId())
+                sessionManager.getDriverId()
+                    ?.let { getAllTransactionsUseCase.getAllTransactions(it.toInt(), sessionManager.getTruckId()!!
+                        .toInt()) }
         }
     }
 

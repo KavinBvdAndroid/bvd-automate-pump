@@ -33,19 +33,27 @@ class SessionManager @Inject constructor(private val sharedPreferences: SharedPr
     }
 
     override fun saveDriverId(driverId: String) {
-        sharedPreferences.edit().putInt(Constants.DRIVER_ID, 0).apply()
+        sharedPreferences.edit().putString(Constants.DRIVER_ID, driverId).apply()
     }
 
-    override fun getDriverId(): Int {
-        return sharedPreferences.getInt(Constants.DRIVER_ID, 0)
+    override fun getDriverId(): String? {
+        return sharedPreferences.getString(Constants.DRIVER_ID,null)
     }
+
 
     override fun saveTruckId(driverId: String) {
         sharedPreferences.edit().putInt(Constants.TRUCK_ID, 0).apply()
     }
 
-    override fun getTruckId(): Int {
-        return sharedPreferences.getInt(Constants.TRUCK_ID, 0)
+    override fun getTruckId(): String? {
+        return sharedPreferences.getString(Constants.TRUCK_ID, null)
+    }
+     fun setSwitchStateEnable(switchEnable: Boolean) {
+        sharedPreferences.edit().putBoolean(Constants.SWITCH_STATE, switchEnable).apply()
+    }
+
+     fun getSwitchStateEnable(): Boolean {
+        return sharedPreferences.getBoolean(Constants.SWITCH_STATE, false)
     }
 
     override fun clearSharedPref(): Boolean {

@@ -145,9 +145,10 @@ object NetworkDatabaseModule {
     @Provides
     fun providesVinNumberRepository(
         gson: Gson,
-        vinNumberApiService: LoginApiService
+        vinNumberApiService: LoginApiService,
+        sessionManager: SessionManager
     ): VinNumberRepository {
-        return VinNumberRepositoryImpl(gson, vinNumberApiService)
+        return VinNumberRepositoryImpl(gson, vinNumberApiService,sessionManager)
     }
 
     @Provides

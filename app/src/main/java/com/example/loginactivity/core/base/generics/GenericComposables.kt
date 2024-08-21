@@ -3,6 +3,7 @@ package com.example.loginactivity.core.base.generics
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,10 +13,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -74,7 +75,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
@@ -491,10 +491,12 @@ fun TransparentTopBarWithBackButton(
                 )
             )
             Box(
-                 modifier = Modifier.fillMaxWidth()
-                     .onGloballyPositioned { coordinates ->
-                         titleWidth = coordinates.size.width
-                     }.padding(start = 16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onGloballyPositioned { coordinates ->
+                        titleWidth = coordinates.size.width
+                    }
+                    .padding(start = 16.dp),
                 contentAlignment = Alignment.CenterStart
             ) {
                 Image(
@@ -521,6 +523,37 @@ fun TransparentTopBarWithBackButton(
         modifier = modifier.fillMaxWidth(),
         scrollBehavior = scrollBehavior
     )
+}
+
+@Composable
+fun OutlinedButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    content: @Composable () -> Unit
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier
+            .widthIn(LocalConfiguration.current.screenWidthDp.dp * 0.4f)
+            .padding(16.dp)
+            .border(
+                width = 2.dp,
+                color = if (enabled) colorResource(id = R.color.colorPrimaryVariant) else Color.Black.copy(
+                    alpha = 0.38f
+                ),
+                shape = RoundedCornerShape(8.dp)
+            ),
+        enabled = enabled,
+        colors = ButtonDefaults.outlinedButtonColors(
+            contentColor = Color.Black,
+            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+            containerColor = Color.Transparent,
+            disabledContainerColor = Color.Transparent
+        )
+    ) {
+        content()
+    }
 }
 
 @Composable
