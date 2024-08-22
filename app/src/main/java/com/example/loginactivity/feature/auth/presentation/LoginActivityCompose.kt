@@ -1,5 +1,6 @@
 package com.example.loginactivity.feature.auth.presentation
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -53,7 +55,7 @@ class LoginActivityCompose : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            LoginActivityTheme {
+            MaterialTheme {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     containerColor = colorResource(id = R.color.white)
@@ -69,10 +71,13 @@ class LoginActivityCompose : ComponentActivity() {
 @Preview(showBackground = true, showSystemUi = false)
 @Composable
 fun LoginContentDemo() {
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-    ) { innerPadding ->
-        LoginContent(innerPadding)
+    MaterialTheme {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            containerColor = colorResource(id = R.color.white)
+        ) { innerPadding ->
+            LoginContent(innerPadding)
+        }
     }
 
 }
@@ -175,6 +180,7 @@ fun ObserveLoginResult(loginResult: Resource<LoginResponse>) {
             GenericProgressBar(false)
             LaunchedEffect(Unit) {
                 context.startActivity(Intent(context, VinNumberActivityCompose::class.java))
+                (context as? Activity)?.finish()
             }
         }
 

@@ -13,6 +13,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -22,9 +23,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.TabRowDefaults.Divider
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -76,7 +79,6 @@ import com.example.loginactivity.feature.maps.data.model.MarkerData
 import com.example.loginactivity.feature.maps.domain.model.FuelSite
 import com.example.loginactivity.feature.pumpoperation.data.model.SiteDetails
 import com.example.loginactivity.feature.pumpoperation.presentation.ui.FuelSelectionActivity
-import com.example.loginactivity.feature.pumpoperation.presentation.ui.StartFuelingActivity
 import com.example.loginactivity.feature.pumpoperation.ui.theme.LoginActivityTheme
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
@@ -125,7 +127,10 @@ fun SiteLocationListDemo() {
         topBar = {
             TransparentTopBarWithBackButton(
                 onBackClick = { backDispatcher?.onBackPressed() },
-                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
+                topBarColor = Color.Transparent
+
+
             )
         }
     ) { innerPadding ->
@@ -189,7 +194,11 @@ fun ShowMapsMockData(innerPadding: PaddingValues, fuelSites: List<SiteDetails>) 
     Log.d("function Recompose", "Recomps")
     BottomSheetScaffold(
         sheetContent = {
-            Column {
+            Box(
+                modifier = Modifier
+                    .wrapContentSize()
+                    .background(Color.Transparent)
+            ) {
                 SiteListMockApi(
                     sites = sortedListOfSites,
                     selectedSiteId = selectedSite.siteId,
@@ -197,7 +206,6 @@ fun ShowMapsMockData(innerPadding: PaddingValues, fuelSites: List<SiteDetails>) 
                         selectedSite = site
                         Log.d("call back site list", site.siteId)
                     })
-
                 ReusableElevatedButton(
                     onClick = {
                         context.startActivity(
@@ -207,20 +215,43 @@ fun ShowMapsMockData(innerPadding: PaddingValues, fuelSites: List<SiteDetails>) 
                         )
                     },
                     text = "Continue",
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.BottomCenter),
                     isEnabled = true
+                )
+
+            }
+        },
+        sheetPeekHeight = 100.dp,
+
+        sheetShape = RoundedCornerShape(topEnd = 36.dp, topStart = 36.dp),
+        sheetContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
+        sheetDragHandle =
+        {
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .height(24.dp)
+                    .background(Color.Transparent)
+            ) {
+                Divider(
+                    color = MaterialTheme.colorScheme.onTertiary,
+                    thickness = 4.dp,
+                    modifier = Modifier
+                        .width(32.dp)
+                        .align(Alignment.Center)
                 )
             }
 
+        }
 
-        },
-        sheetPeekHeight = 100.dp,
     ) {
         GoogleMap(
             modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState,
             properties = MapProperties(mapType = MapType.TERRAIN),
-            uiSettings = MapUiSettings(zoomControlsEnabled = true),
+            uiSettings = MapUiSettings(zoomControlsEnabled = false),
             onMapClick = {
 
             }
@@ -619,7 +650,7 @@ fun CustomInfoWindowContent(site: SiteDetails) {
 @Composable
 fun ShowDriverLocationMarker(driverLocation: LatLng) {
     val context = LocalContext.current
-    val customBitmap = getBitmapFromVectorDrawable(context, R.drawable.pin)
+    val customBitmap = getBitmapFromVectorDrawable(context, R.drawable.truck)
     Marker(
         state = MarkerState(position = driverLocation),
         title = "BVD Driver Location",
@@ -654,7 +685,12 @@ fun SiteListMockApi(
 ) {
 
     var selectedId = selectedSiteId
-    LazyColumn(modifier = Modifier.padding(8.dp)) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.Transparent),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 56.dp)
+    ) {
         items(items = sites, key = { item ->
             item.siteId.toString()
         }) { site ->
@@ -662,12 +698,13 @@ fun SiteListMockApi(
             Card(
                 modifier = Modifier
                     .padding(top = 8.dp, bottom = 8.dp)
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    ,
                 shape = RoundedCornerShape(16.dp),
                 onClick = {
                     selectedId = site.siteId.toString()
                 },
-                colors = CardDefaults.cardColors(containerColor = Color.LightGray),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiary),
                 elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
             ) {
 
@@ -678,12 +715,13 @@ fun SiteListMockApi(
                         onSelect(site)
                     }
                 )
-
-
             }
 
+
         }
+
     }
+
 }
 
 
@@ -870,14 +908,15 @@ fun RadioButtonWithSiteMockData(site: SiteDetails, isSelected: Boolean, onSelect
     Row(
         modifier = Modifier
             .clickable { onSelect() }
-            .padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically
+            .padding(vertical = 8.dp)
+            .background(Color.Transparent), verticalAlignment = Alignment.CenterVertically
     ) {
         RadioButton(
             selected = isSelected,
             onClick = onSelect
         )
         Spacer(modifier = Modifier.width(8.dp))
-        Column {
+        Column(modifier = Modifier.background(Color.Transparent)) {
             GenericDetailRow(label = "Id :", value = site.siteId)
             site.name.let { GenericDetailRow(label = "Name :", value = it) }
             GenericDetailRow(
@@ -895,14 +934,15 @@ fun RadioButtonWithSite(site: FuelSite, isSelected: Boolean, onSelect: () -> Uni
     Row(
         modifier = Modifier
             .clickable { onSelect() }
-            .padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically
+            .padding(vertical = 8.dp)
+            .background(Color.Transparent), verticalAlignment = Alignment.CenterVertically
     ) {
         RadioButton(
             selected = isSelected,
             onClick = onSelect
         )
         Spacer(modifier = Modifier.width(8.dp))
-        Column {
+        Column (modifier = Modifier.background(Color.Transparent)){
             GenericDetailRow(label = "Id :", value = site.id.toString())
             site.name.let { GenericDetailRow(label = "Name :", value = it) }
             GenericDetailRow(

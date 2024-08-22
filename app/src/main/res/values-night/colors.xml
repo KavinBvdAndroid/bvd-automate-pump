@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="gray">#424242</color>
+
+    <color name="colorPrimary">#0F1D7F</color>
+    <color name="colorPrimaryVariant">#f6af2b</color>
+    <color name="colorOnPrimary">#0007C5</color>
+
+
+    <color name="colorPrimaryBlue">#000740</color>
+    <color name="colorSecondary">#282f77</color>
+    <color name="Transparent">#80BBDEFB</color>
+    <color name="colorError">#a6003d</color>
+
+    <color name="disabledStopButtonColor">#77a6003d</color>
+    <color name="disabledStartButtonColor">#77384bad</color>
+
+    <!--    button color-->
+    <color name="colorDisabled">#77F6AF2B</color>
+    <color name="colorEnabled">@color/colorPrimaryVariant</color>
+    <color name="textDisabled">@color/white</color>
+
+    <!--    Temprorary colors-->
+    <color name="colorOnBoard1">#c6f68d</color>
+    <color name="colorOnBoard2">#b794f6</color>
+    <color name="colorOnBoard3">#ffc77d</color>
+    <color name="colorOnBoard4">#B87A00</color>
+
+    <color name="colorOnText1">#008b00</color>
+    <color name="colorOnText2">#5c00d2</color>
+    <color name="colorOnText3">#e54304</color>
+    <color name="colorOnText4">#f5a506</color>
+</resources>

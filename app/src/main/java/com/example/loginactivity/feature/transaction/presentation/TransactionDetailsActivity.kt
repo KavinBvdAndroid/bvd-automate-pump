@@ -4,6 +4,8 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
@@ -21,9 +23,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,7 +35,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.loginactivity.R
 import com.example.loginactivity.core.base.generics.GenericDetailRow
@@ -39,10 +42,9 @@ import com.example.loginactivity.core.base.generics.ReusableElevatedButton
 import com.example.loginactivity.core.base.generics.customTextStyle
 import com.example.loginactivity.core.base.testdatas.SiteDetails2
 import com.example.loginactivity.core.base.utils.AppUtils.hideSystemUI
-import com.example.loginactivity.feature.maps.presentation.DriverLocationActivity
-import com.example.loginactivity.feature.pumpoperation.save.SaveTransactionDto
+import com.example.loginactivity.feature.dashboard.presentation.ui.DriverLocationActivity
+import com.example.loginactivity.feature.pumpoperation.data.model.save.TransactionDto
 import com.example.loginactivity.feature.pumpoperation.ui.theme.LoginActivityTheme
-import com.example.loginactivity.feature.transaction.presentation.ui.theme.Blue100
 
 class TransactionDetailsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,8 +52,12 @@ class TransactionDetailsActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             LoginActivityTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    ShowTransactionDemo(innerPadding = innerPadding,intent)
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer
+                )
+                { innerPadding ->
+                    ShowTransactionDemo(innerPadding = innerPadding, intent)
 //                    ShowTransactionDemo()
 
                 }
@@ -60,29 +66,41 @@ class TransactionDetailsActivity : ComponentActivity() {
         hideSystemUI()
     }
 
-    override fun onBackPressed() {
-        // Do nothing to disable the back button
-    }
 }
 
-@Preview(showBackground = true)
 @Composable
-fun ShowTransactionDemo(innerPadding: PaddingValues, intent: Intent,) {
-    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-        ShowTransaction(innerPadding = innerPadding, intentgit)
+fun ShowTransactionDemo(innerPadding: PaddingValues, intent: Intent) {
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        containerColor = MaterialTheme.colorScheme.surfaceContainer
+    ) { innerPadding ->
+        ShowTransaction(innerPadding = innerPadding, intent)
     }
 }
 
 @Composable
 fun ShowTransaction(innerPadding: PaddingValues, intent: Intent) {
     val context = LocalContext.current
-    val savedTransaction = intent.getParcelableExtra<SaveTransactionDto>("savedTransaction")
+    val savedTransaction = intent.getParcelableExtra<TransactionDto>("savedTransaction")
+    val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+    DisposableEffect(backDispatcher) {
+        val callback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
 
+            }
+        }
+
+        backDispatcher?.addCallback(callback)
+
+        onDispose {
+            callback.remove()
+        }
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(innerPadding)
-            .background(Blue100),
+            .background(Color.Transparent),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -91,9 +109,7 @@ fun ShowTransaction(innerPadding: PaddingValues, intent: Intent) {
                 .fillMaxWidth()
                 .wrapContentHeight(),
             horizontalAlignment = Alignment.CenterHorizontally,
-
-
-            ) {
+        ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -147,7 +163,7 @@ fun ShowTransaction(innerPadding: PaddingValues, intent: Intent) {
                                 context, DriverLocationActivity::class.java
                             ).apply {
                                 flags =
-                                    Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                    Intent.FLAG_ACTIVITY_CLEAR_TOP
                             }
                         )
                         (context as? Activity)?.finish()

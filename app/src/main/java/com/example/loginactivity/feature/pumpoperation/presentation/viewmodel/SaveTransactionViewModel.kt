@@ -6,10 +6,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.loginactivity.core.base.generics.GenericBaseResponse
 import com.example.loginactivity.core.base.generics.Resource
-import com.example.loginactivity.feature.pumpoperation.save.SaveTransactionDto
-import com.example.loginactivity.feature.pumpoperation.domain.usecase.SaveTransactionUseCase
+import com.example.loginactivity.feature.pumpoperation.data.model.save.TransactionDto
+import com.example.loginactivity.feature.transaction.domain.usecases.SaveTransactionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -19,7 +18,7 @@ class TransactionViewModel @Inject constructor(private val saveTransactionUseCas
     private val _saveTransactionResponse = MutableLiveData<Resource<GenericBaseResponse>>()
     val saveTransactionResponse : LiveData<Resource<GenericBaseResponse>> = _saveTransactionResponse
 
-    fun saveTransaction(request: SaveTransactionDto){
+    fun saveTransaction(request: TransactionDto){
         viewModelScope.launch {
 //            Resource.Loading
 //            val result = saveTransactionUseCase.saveTransactionRemote(request)
@@ -27,7 +26,7 @@ class TransactionViewModel @Inject constructor(private val saveTransactionUseCas
         }
     }
 
-    fun saveTransaction_MockData(request: SaveTransactionDto){
+    fun saveTransaction_MockData(request: TransactionDto){
 //        viewModelScope.launch {
 //            Resource.Loading
 //            delay(2000)

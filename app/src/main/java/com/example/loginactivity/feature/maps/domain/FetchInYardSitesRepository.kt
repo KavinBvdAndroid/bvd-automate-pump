@@ -6,5 +6,4 @@ import com.google.android.gms.maps.model.LatLng
 
 interface FetchInYardSitesRepository {
     suspend fun fetchNearestSites(driverLocation: LatLng? = null): Resource<FetchInYardSitesResponse>
-
 }

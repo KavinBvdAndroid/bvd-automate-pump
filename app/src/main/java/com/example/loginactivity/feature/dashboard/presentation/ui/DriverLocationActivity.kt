@@ -1,12 +1,12 @@
-package com.example.loginactivity.feature.maps.presentation
+package com.example.loginactivity.feature.dashboard.presentation.ui
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Intent
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -26,6 +26,8 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -46,7 +48,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -58,6 +59,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -65,13 +67,19 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.loginactivity.R
+import com.example.loginactivity.core.base.generics.GenericDetailRow
 import com.example.loginactivity.core.base.generics.GenericProgressBar
 import com.example.loginactivity.core.base.generics.GenericShadowHeader
+import com.example.loginactivity.core.base.generics.OutlinedButton
+import com.example.loginactivity.core.base.generics.ReusableElevatedButton
 import com.example.loginactivity.core.base.generics.TransparentTopBarWithBackButton
 import com.example.loginactivity.core.base.generics.customTextStyle
 import com.example.loginactivity.core.base.utils.AppUtils
 import com.example.loginactivity.core.base.utils.AppUtils.hideSystemUI
-import com.example.loginactivity.feature.ui.theme.LoginActivityTheme
+import com.example.loginactivity.feature.auth.presentation.LoginActivityCompose
+import com.example.loginactivity.feature.dashboard.presentation.viewmodel.DriverLocationViewModel
+import com.example.loginactivity.feature.maps.presentation.MapsSiteActivity
+import com.example.loginactivity.ui.theme.LoginActivityTheme
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
@@ -99,16 +107,18 @@ fun MainContentDemo() {
     val navController = rememberNavController()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
-
+      val context = LocalContext.current
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
             MyNavigationBar(navController = navController)
         }, topBar = {
             TransparentTopBarWithBackButton(
-                onBackClick = { backDispatcher?.onBackPressed() },
+                onBackClick = {
+                    (context as? Activity)?.finish()
+                },
                 scrollBehavior = scrollBehavior,
-
+                topBarColor = Color.Transparent
             )
         }
     ) {
@@ -181,8 +191,9 @@ fun MyNavigationBar(navController: NavHostController) {
                 onClick = {
                     selectedItem = index
                     navController.navigate(item.route) {
+                        // Pop up to the start destination and clear all entries above it
                         popUpTo(navController.graph.startDestinationId) {
-                            saveState = true
+                            inclusive = true // Optional: include the start destination in the pop
                         }
                         launchSingleTop = true
                         restoreState = true
@@ -210,6 +221,7 @@ fun currentRoute(navController: NavController): String? {
 @Composable
 fun TransactionHistoryScreen(innerPadding: PaddingValues) {
 
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -226,12 +238,15 @@ fun TransactionHistoryScreen(innerPadding: PaddingValues) {
             alignment = Alignment.Center,
             modifier = Modifier.size(220.dp)
         )
+
         Spacer(modifier = Modifier.width(16.dp))
     }
 }
 
 @Composable
 fun ProfileScreen(innerPadding: PaddingValues) {
+    val context = LocalContext.current
+    val viewmodel: DriverLocationViewModel = hiltViewModel()
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -239,18 +254,65 @@ fun ProfileScreen(innerPadding: PaddingValues) {
             .fillMaxSize()
             .padding(innerPadding)
     ) {
+
+
         GenericShadowHeader("Driver Profile", Modifier.fillMaxWidth(), TextAlign.Center)
-
         Spacer(modifier = Modifier.width(16.dp))
-        Image(
-            painter = painterResource(id = R.drawable.coming_soon),
-            contentDescription = "Your image description",
-            contentScale = ContentScale.Fit,
-            alignment = Alignment.Center,
-            modifier = Modifier.size(220.dp),
-        )
-        Spacer(modifier = Modifier.width(16.dp))
+        Column (modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
 
+
+        GenericDetailRow(label = "Name", value = "testUser")
+        GenericDetailRow(label = "Email", value = "testUser@gmail.com")
+        GenericDetailRow(label = "Driver Id", value = "1456")
+        Spacer(modifier = Modifier.width(16.dp))
+//        Image(
+//            painter = painterResource(id = R.drawable.coming_soon),
+//            contentDescription = "Your image description",
+//            contentScale = ContentScale.Fit,
+//            alignment = Alignment.Center,
+//            modifier = Modifier.size(220.dp),
+//        )
+//            ReusableElevatedButton(onClick = {
+//                val isCleared = viewmodel.clearSharedPref()
+//                if (isCleared) {
+//                    context.startActivity(Intent(context, LoginActivityCompose::class.java).apply {
+//                        flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+//                    })
+//                    (context as? Activity)?.finish()
+//                }
+//            }, text = "Log out", modifier = Modifier.wrapContentWidth(), isEnabled = true)
+            OutlinedButton(
+                onClick = {
+                    val isCleared = viewmodel.clearSharedPref()
+                if (isCleared) {
+                    context.startActivity(Intent(context, LoginActivityCompose::class.java).apply {
+                        flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+                    })
+                    (context as? Activity)?.finish()
+                }
+
+                },
+                modifier = Modifier.wrapContentSize(),
+                enabled = true
+            ) {
+                Text("Log out")
+            }
+//        ElevatedButton(onClick = {
+//            val isCleared = viewmodel.clearSharedPref()
+//            if (isCleared) {
+//                context.startActivity(Intent(context, LoginActivityCompose::class.java).apply {
+//                    flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+//                })
+//                (context as? Activity)?.finish()
+//            }
+//        }) {
+//            Text(text = "Log out")
+//        }
+        Spacer(modifier = Modifier.width(16.dp))
+        }
     }
 }
 
@@ -341,7 +403,10 @@ fun FetchLocationContent(paddingValues: PaddingValues) {
     if (driverLocation != null) {
         GenericProgressBar(false)
         LaunchedEffect(true) {
-            Log.d("driver location intent","${driverLocation?.latitude} and ${driverLocation?.longitude}")
+            Log.d(
+                "driver location intent",
+                "${driverLocation?.latitude} and ${driverLocation?.longitude}"
+            )
 
             context.startActivity(
                 Intent(context, MapsSiteActivity::class.java)
@@ -387,8 +452,6 @@ fun FetchUserLocation(locationCallback: (location: Location) -> Unit) {
 
     if (location != null) {
         locationCallback(location!!)
-    } else {
-        Text("Fetching location...")
     }
 }
 
@@ -410,7 +473,7 @@ fun fetchLocation(
         Priority.PRIORITY_HIGH_ACCURACY,
         CancellationTokenSource().token
     ).addOnSuccessListener { location ->
-        Log.d("driver location","${location.latitude} and ${location.longitude}")
+        Log.d("driver location", "${location.latitude} and ${location.longitude}")
         location?.let {
             onLocationFetched(location)
         }
