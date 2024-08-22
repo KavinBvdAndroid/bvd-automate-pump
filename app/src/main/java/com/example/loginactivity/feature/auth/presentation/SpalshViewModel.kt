@@ -12,4 +12,12 @@ class SplashViewModel @Inject constructor(private val sessionManager: SessionMan
         return sessionManager.getLoggedIn()
     }
 
+    fun isBoardingShown(): Boolean{
+        return sessionManager.getIsBoardingCompleted()
+    }
+
+    fun setIsBoardingCompleted(isBoardingShown: Boolean){
+        sessionManager.setIsBoardingCompleted(isBoardingShown)
+    }
+
 }

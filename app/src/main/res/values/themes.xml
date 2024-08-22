@@ -1,8 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Splash Screen Theme -->
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <!-- Set the splash screen background to transparent -->
+        <item name="windowSplashScreenBackground">@android:color/transparent</item>
+
+        <!-- Set the duration of the splash screen animation in milliseconds -->
+        <item name="windowSplashScreenAnimationDuration">50</item>
+
+        <!-- Set the theme for the Activity that follows the splash screen -->
+        <item name="postSplashScreenTheme">@style/Theme.LoginActivity</item>
+    </style>
+
 
     <style name="Theme.LoginActivity" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:statusBarColor">@color/colorPrimary</item>
         <item name="android:navigationBarColor">@color/colorPrimary</item>
+        <item name="android:windowBackground">@color/white</item>
+
     </style>
 </resources>

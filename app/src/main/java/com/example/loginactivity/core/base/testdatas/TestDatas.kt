@@ -3,7 +3,7 @@ package com.example.loginactivity.core.base.testdatas
 import com.example.loginactivity.feature.pumpoperation.data.model.InyardTanksItem
 import com.example.loginactivity.feature.pumpoperation.data.model.SiteDetails
 import com.example.loginactivity.feature.pumpoperation.data.model.TankSite
-import com.example.loginactivity.feature.pumpoperation.save.SaveTransactionDto
+import com.example.loginactivity.feature.pumpoperation.data.model.save.TransactionDto
 import com.google.android.gms.maps.model.LatLng
 
 
@@ -192,7 +192,7 @@ val testInyardTanksItem5 = InyardTanksItem(
 
 )
 
-val requestTransaction = SaveTransactionDto(
+val requestTransaction = TransactionDto(
     vinNumber = 1234,
     transactionType = "bulk",
     inyardSiteId = 1234,
@@ -201,7 +201,7 @@ val requestTransaction = SaveTransactionDto(
     cardNumber = 123454
 )
 
-val requestTransaction1 = SaveTransactionDto(
+val requestTransaction1 = TransactionDto(
     vinNumber = 2345,
     transactionType = "bulk",
     inyardSiteId = 3333,
@@ -210,7 +210,7 @@ val requestTransaction1 = SaveTransactionDto(
     cardNumber = 8383838
 )
 
-val requestTransaction2 = SaveTransactionDto(
+val requestTransaction2 = TransactionDto(
     vinNumber = 3344,
     transactionType = "bulk",
     inyardSiteId = 2222,

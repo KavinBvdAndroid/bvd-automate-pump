@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -26,6 +27,7 @@ import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -34,6 +36,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.RemoveCircleOutline
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -44,6 +47,7 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -73,6 +77,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.bvddriverfleetapp.data.sharedpref.SessionManager
 import com.example.loginactivity.R
 import com.example.loginactivity.core.base.generics.ErrorAlertDialog
 import com.example.loginactivity.core.base.generics.GenericProgressBar
@@ -87,15 +92,19 @@ import com.example.loginactivity.feature.pumpoperation.data.model.PumpParams
 import com.example.loginactivity.feature.pumpoperation.data.model.PumpResponse
 import com.example.loginactivity.feature.pumpoperation.data.model.TransactionState
 import com.example.loginactivity.feature.pumpoperation.presentation.viewmodel.PumpOperationViewModel
-import com.example.loginactivity.feature.pumpoperation.save.SaveTransactionDto
+import com.example.loginactivity.feature.pumpoperation.data.model.save.TransactionDto
 import com.example.loginactivity.feature.pumpoperation.ui.theme.LoginActivityTheme
 import com.example.loginactivity.feature.transaction.presentation.TransactionDetailsActivity
+import com.example.loginactivity.feature.transaction.presentation.ui.theme.Blue700
+import com.example.loginactivity.ui.theme.ColorSecondary
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class StartFuelingActivity : ComponentActivity() {
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -108,30 +117,79 @@ class StartFuelingActivity : ComponentActivity() {
         hideSystemUI()
     }
 
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
 @Composable
 fun StartFuelingDemo() {
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    val scrollState = rememberLazyListState()
+    val context = LocalContext.current
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    var isBackButtonEnabled by rememberSaveable { mutableStateOf(true) }
     val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+    DisposableEffect(backDispatcher) {
+        val callback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (isBackButtonEnabled) {
+                    val intent = Intent(context, FuelSelectionActivity::class.java)
+                    intent.flags =
+                        Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    context.startActivity(intent)
+                }
+            }
+        }
+
+        backDispatcher?.addCallback(callback)
+
+        onDispose {
+            callback.remove()
+        }
+    }
+
+
+    val topBarColor by remember {
+        derivedStateOf {
+            // Change color based on scroll position
+            if (scrollState.firstVisibleItemScrollOffset > 100) {
+                Blue700 // Replace with your desired color
+            } else {
+                Color.Transparent // Initial color when at the top
+            }
+        }
+    }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             TransparentTopBarWithBackButton(
-                onBackClick = { backDispatcher?.onBackPressed() },
-                scrollBehavior = scrollBehavior
+                onBackClick = {
+                    if (isBackButtonEnabled) {
+                        val intent = Intent(context, FuelSelectionActivity::class.java)
+                        intent.flags =
+                            Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                        context.startActivity(intent)
+                    }
+
+                },
+                scrollBehavior = scrollBehavior,
+                topBarColor = topBarColor
             )
         }
     ) { innerPadding ->
-        StartFuel(innerPadding)
+        StartFuel(innerPadding) {
+            isBackButtonEnabled = false
+        }
     }
 
 }
 
+
+
 @Composable
-fun StartFuel(innerPadding: PaddingValues) {
+fun StartFuel(innerPadding: PaddingValues, onBackButtonDisabled: () -> Unit) {
     val viewModel: PumpOperationViewModel = hiltViewModel()
     val pumpStartLivedata by viewModel.pumpStartLivedata.observeAsState(null)
     val pumpStopLivedata by viewModel.pumpStopLivedata.observeAsState(null)
@@ -141,7 +199,8 @@ fun StartFuel(innerPadding: PaddingValues) {
     var isTransactionComplete by rememberSaveable { mutableStateOf(false) }
 
 
-//    var isStopEnabled by rememberSaveable { mutableStateOf(false) }
+
+//  var isStopEnabled by rememberSaveable { mutableStateOf(false) }
     var processStatus by rememberSaveable { mutableIntStateOf(-1) }
     var result by rememberSaveable {
         mutableStateOf("Note: Result will appear here at the end of the every Transaction")
@@ -163,6 +222,7 @@ fun StartFuel(innerPadding: PaddingValues) {
         derivedStateOf {
             if (isStartEnabled) {
                 "PUMP Activated"
+
             } else {
                 "PUMP De-Activated"
             }
@@ -170,48 +230,28 @@ fun StartFuel(innerPadding: PaddingValues) {
     }
 
 
-    val handleSaveTransaction: (SaveTransactionDto) -> Unit = { requestTransaction ->
+    val handleSaveTransaction: (TransactionDto) -> Unit = { requestTransaction ->
         viewModel.saveTransaction(requestTransaction)
     }
 
-
     Column(
         modifier = Modifier
-            .padding(innerPadding)
-            .padding(start = 16.dp, end = 16.dp)
             .fillMaxSize()
+            .padding(innerPadding)
+            .background(Color.Transparent)
             .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
-
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-
         Column(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
         ) {
             HeaderSection()
-//        ActionButtons(isStartEnabled = isStartEnabled, isStopEnabled = isStopEnabled, onStartClick = {
-//            isStartEnabled = false
-//            processStatus = 1
-//            isStopEnabled = true
-//        }, onStopClick = {
-//            isStopEnabled = false
-//            processStatus = 0
-//            isStartEnabled = true
-//        })
-//        CustomSwitch(
-//            isChecked = isStartEnabled,
-//            onCheckedChange = { isChecked ->
-//                isStartEnabled = isChecked
-//            },
-//            switchWidth = 100.dp, // Adjust width as needed
-//            switchHeight = 50.dp, // Adjust height as needed
-//            modifier = Modifier.padding(top = 16.dp)
-//        )
-
             Spacer(modifier = Modifier.height(LocalConfiguration.current.screenHeightDp.dp * 0.1f))
             SwitchButton(isPumpEnabled = isStartEnabled, onSwitchClick = {
                 if (it) {
@@ -224,8 +264,6 @@ fun StartFuel(innerPadding: PaddingValues) {
 
             StatusTextSection(processStatusText, textColor)
             Spacer(modifier = Modifier.height(LocalConfiguration.current.screenHeightDp.dp * 0.1f))
-        }
-        Column(modifier = Modifier.fillMaxSize()) {
             ResultSection(result)
 
             AgreementSection(
@@ -236,15 +274,19 @@ fun StartFuel(innerPadding: PaddingValues) {
                 context
             )
         }
+
     }
+
+
     pumpStartLivedata?.let {
         GenericProgressBar(isLoading = false)
         ObservePumpData(pumpResponseData = it) { code, data, message ->
             if (code == 1) {
                 isStartEnabled = true
-                result = data.toString()
+                result = data?.msg.toString()
                 isTransactionComplete = false
                 checked = false
+                onBackButtonDisabled()
             } else {
                 isStartEnabled = false
                 if (message != null) {
@@ -261,7 +303,7 @@ fun StartFuel(innerPadding: PaddingValues) {
             if (code == 1) {
                 isStartEnabled = false
                 isTransactionComplete = true
-                result = data.toString()
+                result = data?.msg.toString()
             } else {
                 isStartEnabled = true
                 if (message != null) {
@@ -354,7 +396,7 @@ fun AgreementSection(
     isTransactionComplete: Boolean,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
-    handleSaveTransaction: (SaveTransactionDto) -> Unit,
+    handleSaveTransaction: (TransactionDto) -> Unit,
     context: Context
 ) {
     Column(
@@ -368,6 +410,11 @@ fun AgreementSection(
             horizontalArrangement = Arrangement.Center
         ) {
             Checkbox(
+                colors = CheckboxDefaults.colors(
+                    checkedColor = ColorSecondary,
+                    checkmarkColor = Color.White
+
+                ),
                 checked = checked,
                 onCheckedChange = onCheckedChange,
                 enabled = isTransactionComplete
@@ -567,7 +614,7 @@ fun ResultSection(result: String) {
         textAlign = TextAlign.Start,
         fontWeight = FontWeight.Normal,
         style = customTextStyle.headlineLarge,
-        modifier = Modifier
+        modifier = Modifier.fillMaxWidth()
     )
     Spacer(modifier = Modifier.padding(8.dp))
     Box(
@@ -580,7 +627,7 @@ fun ResultSection(result: String) {
     ) {
         Text(
 //            text = "Output : {result : Success, litres_fueled : 120 litres}",
-            text = "Result : {$result}",
+            text = "{$result}",
             textAlign = TextAlign.Start,
             color = Color.Black,
             modifier = Modifier

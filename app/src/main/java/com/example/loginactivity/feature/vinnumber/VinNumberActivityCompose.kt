@@ -28,7 +28,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -50,7 +52,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.loginactivity.R
 import com.example.loginactivity.core.base.generics.ErrorAlertDialog
-import com.example.loginactivity.core.base.generics.GenericBaseResponse
 import com.example.loginactivity.core.base.generics.GenericDetailRow
 import com.example.loginactivity.core.base.generics.GenericProgressBar
 import com.example.loginactivity.core.base.generics.GenericShadowHeader
@@ -60,12 +61,12 @@ import com.example.loginactivity.core.base.generics.ReusableTextInput
 import com.example.loginactivity.core.base.generics.TransparentTopBarWithBackButton
 import com.example.loginactivity.core.base.generics.customTextStyle
 import com.example.loginactivity.core.base.generics.isValidVinNumber
-import com.example.loginactivity.core.base.utils.AppUtils
 import com.example.loginactivity.core.base.utils.AppUtils.hideSystemUI
 import com.example.loginactivity.core.base.utils.Constants
-import com.example.loginactivity.feature.auth.ui.theme.LoginActivityTheme
-import com.example.loginactivity.feature.maps.presentation.DriverLocationActivity
+import com.example.loginactivity.feature.dashboard.presentation.ui.DriverLocationActivity
 import com.example.loginactivity.feature.pumpoperation.data.model.VehicleDetail
+import com.example.loginactivity.ui.theme.ColorPrimary
+import com.example.loginactivity.ui.theme.LoginActivityTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -94,7 +95,8 @@ fun VinDemo() {
         topBar = {
             TransparentTopBarWithBackButton(
                 onBackClick = { backDispatcher?.onBackPressed() },
-                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
+                topBarColor = Color.Transparent
             )
         },
         content =
@@ -206,7 +208,7 @@ fun VinContent(innerPadding: PaddingValues) {
                         message = "No Records Found, Please make sure the vin number is correct",
                         buttonText = "OK",
                         onDismiss = { showVehicleDetails = false },
-                        titleBackgroundColor = Color.Red, // Custom title background color
+                        titleBackgroundColor = MaterialTheme.colorScheme.error, // Custom title background color
                         titleCornerRadius = 16 // Rounded corner radius
                     )
                 }
@@ -326,7 +328,11 @@ fun VehicleDetails(showVehicleDetails: Boolean, vehicleDataItem: DataItem) {
                         .padding(end = 12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Checkbox(checked = checked, onCheckedChange = {
+                    Checkbox( colors = CheckboxDefaults.colors(
+                        checkedColor = ColorPrimary,  // Color when checked
+                        checkmarkColor = Color.White // Color of the checkmark icon
+                    ),
+                         checked = checked, onCheckedChange = {
                         checked = it
 
                     })

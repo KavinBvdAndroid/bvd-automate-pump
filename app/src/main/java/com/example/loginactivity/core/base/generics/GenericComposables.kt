@@ -3,6 +3,7 @@ package com.example.loginactivity.core.base.generics
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,14 +16,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBackIosNew
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.lightColors
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -37,6 +40,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -55,7 +59,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -73,11 +79,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import com.example.loginactivity.R
-import com.example.loginactivity.feature.pumpoperation.data.model.PumpResponse
 import com.example.loginactivity.feature.maps.data.model.DataItem
 import com.example.loginactivity.feature.maps.data.model.InyardSiteAccessDetails
 import com.example.loginactivity.feature.maps.data.model.State
 import com.example.loginactivity.feature.maps.domain.model.FuelSite
+import com.example.loginactivity.feature.pumpoperation.data.model.PumpResponse
+import com.example.loginactivity.feature.transaction.presentation.ui.theme.Blue500
+import com.example.loginactivity.ui.theme.LabelTextColor
+import com.example.loginactivity.ui.theme.LabelValueColor
 
 @Composable
 fun GenericProgressBar(
@@ -138,6 +147,45 @@ val poppinsFontFamily = FontFamily(
     Font(R.font.poppins_semibold, FontWeight.SemiBold)
 )
 
+val Colors = lightColors(
+    primary = Color(0xFF6200EE),
+    secondary = Color(0xFF03DAC5),
+    // Define other colors as needed
+)
+
+//@Composable
+//fun myAppColorScheme(): ColorScheme {
+//    return lightColorScheme(
+//        primary = colorResource(id = R.color.colorPrimary),
+//        onPrimary =  colorResource(id = R.color.colorOnPrimary),
+//        primaryContainer = Color(0xFFF6AF2B),
+//        onPrimaryContainer = Color(0xFF282F77),
+//        secondary = Color(0xFF000740),
+//        onSecondary = Color(0xFFFFFFFF),
+//        secondaryContainer = Color(0xFF424242),
+//        onSecondaryContainer = Color(0xFFFFFFFF),
+//        background = Color.White,
+//        onBackground = Color.Black,
+//        surface = Color.White,
+//        onSurface = Color.Black,
+//        error = Color(0xFFA6003D),
+//        onError = Color.White,
+//        outline = Color(0xFF77A6003D)
+//
+//    )
+//}
+//
+//@Composable
+//fun MyAppTheme(content: @Composable () -> Unit) {
+//    val colorScheme = myAppColorScheme()
+//
+//    MaterialTheme(
+//        colorScheme = colorScheme,
+//        typography = customTextStyle,
+//        content = content
+//    )
+//}
+
 
 val customTextStyle = Typography(
     titleLarge = TextStyle(
@@ -185,12 +233,12 @@ val customTextStyle = Typography(
 )
 
 val startMockPumpResponse = PumpResponse(
-    msg = "Successfully started",
-    params = "SuccessParams"
+    msg = "Success - Pump On",
+    params = ""
 )
 
 val stopMockPumpResponse = PumpResponse(
-    msg = "Stopped successfully",
+    msg = "Success - 1.036 litres pumped",
     params = "SuccessParams"
 )
 
@@ -243,7 +291,7 @@ fun ReusableTextInput(
     onPasswordVisibilityChange: (Boolean) -> Unit = {},
     trailingIcon: (@Composable () -> Unit)? = null,
     errorMessage: String = "",
-    errorIndicatorColor: Color = colorResource(R.color.colorError),
+    errorIndicatorColor: Color = MaterialTheme.colorScheme.error,
     focusedIndicatorColor: Color = colorResource(R.color.colorPrimaryVariant),
     unfocusedIndicatorColor: Color = colorResource(R.color.black),
     textStyle: TextStyle = customTextStyle.labelLarge,
@@ -312,7 +360,11 @@ fun ReusableElevatedButton(
 
     Column(modifier = modifier) {
         ElevatedButton(
-            onClick = onClick,
+            onClick = {
+                onClick()
+                keyboardController?.hide()
+
+            },
             enabled = isEnabled,
             colors = ButtonDefaults.elevatedButtonColors(
                 containerColor = backgroundColor,
@@ -364,7 +416,11 @@ fun LoginLogo() {
 }
 
 @Composable
-fun GenericShadowHeader(label: String, modifier: Modifier, textAlign: TextAlign = TextAlign.Center){
+fun GenericShadowHeader(
+    label: String,
+    modifier: Modifier,
+    textAlign: TextAlign = TextAlign.Center
+) {
     Text(
         label, modifier = modifier
             .fillMaxWidth()
@@ -381,6 +437,7 @@ fun GenericShadowHeader(label: String, modifier: Modifier, textAlign: TextAlign 
         )
     )
 }
+
 @Composable
 fun ElevatedCircleButton(
     onClick: () -> Unit,
@@ -411,21 +468,44 @@ fun TransparentTopBarWithBackButton(
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
     scrollBehavior: TopAppBarScrollBehavior? = null,
-    title:String=""
+    title: String = "",
+    topBarColor: Color
 ) {
-
+    var titleWidth = 0
+    val offsetX = with(LocalDensity.current) {
+        (0 / 2).toDp().roundToPx()
+    }
     TopAppBar(
+
         title = {
-            Text(text = title,
-                modifier=Modifier.fillMaxWidth(),
+            Text(
+                text = title,
+                modifier = Modifier.fillMaxWidth(),
                 style = TextStyle(
                     fontSize = 30.sp,
                     color = colorResource(id = R.color.colorSecondary),
                     textAlign = TextAlign.Center,
                     shadow = Shadow(
-                        color = Color.LightGray, offset = offset, blurRadius = 3f)
-            ))
-
+                        color = Color.LightGray, offset = offset, blurRadius = 3f
+                    )
+                )
+            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onGloballyPositioned { coordinates ->
+                        titleWidth = coordinates.size.width
+                    }
+                    .padding(start = 16.dp),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.bvd_logo2),
+                    contentDescription = null, // Add content description for accessibility
+                    modifier = Modifier.size(50.dp), // Adjust size as needed
+                    contentScale = ContentScale.Fit
+                )
+            }
         },
         navigationIcon = {
             IconButton(onClick = onBackClick) {
@@ -437,12 +517,43 @@ fun TransparentTopBarWithBackButton(
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.Transparent, // Transparent background
-            scrolledContainerColor = Color.LightGray
+            containerColor = topBarColor,
+            scrolledContainerColor = Blue500// Transparent background
         ),
         modifier = modifier.fillMaxWidth(),
-         scrollBehavior = scrollBehavior
+        scrollBehavior = scrollBehavior
     )
+}
+
+@Composable
+fun OutlinedButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    content: @Composable () -> Unit
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier
+            .widthIn(LocalConfiguration.current.screenWidthDp.dp * 0.4f)
+            .padding(16.dp)
+            .border(
+                width = 2.dp,
+                color = if (enabled) colorResource(id = R.color.colorPrimaryVariant) else Color.Black.copy(
+                    alpha = 0.38f
+                ),
+                shape = RoundedCornerShape(8.dp)
+            ),
+        enabled = enabled,
+        colors = ButtonDefaults.outlinedButtonColors(
+            contentColor = Color.Black,
+            disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+            containerColor = Color.Transparent,
+            disabledContainerColor = Color.Transparent
+        )
+    ) {
+        content()
+    }
 }
 
 @Composable
@@ -517,7 +628,9 @@ fun ErrorAlertDialog(
                     showDialog = false
                     onDismiss()
                 }) {
-                    Text(text = buttonText)
+                    Text(
+                        text = buttonText, color = Color.White
+                    )
                 }
             },
             properties = DialogProperties(dismissOnClickOutside = false)
@@ -525,6 +638,35 @@ fun ErrorAlertDialog(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun RoundSearchBox(
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    TextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(50)),
+        placeholder = { Text("Search...") },
+        leadingIcon = {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = "Search icon"
+            )
+        },
+        singleLine = true,
+        colors = TextFieldDefaults.colors(
+            unfocusedContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            disabledIndicatorColor = Color.Transparent
+        )
+    )
+}
 
 @Composable
 fun GenericDetailRow(label: String, value: String) {
@@ -532,14 +674,17 @@ fun GenericDetailRow(label: String, value: String) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
+            .background(Color.Transparent)
     ) {
         Text(
-            text = "$label : ",
+            text = "$label  ",
+            color = LabelTextColor,
             style = customTextStyle.labelLarge,
             modifier = Modifier.weight(1f)
         )
         Text(
             text = value,
+            color = LabelValueColor,
             style = customTextStyle.labelLarge,
             modifier = Modifier.weight(1f)
         )
@@ -570,7 +715,8 @@ fun transferToFuelSites(dtoList: List<DataItem?>): List<FuelSite> {
             state = dto?.state ?: State(), // Ensure State class has a default constructor
             longitude = dto?.longitude ?: 0.0,
             zip = dto?.zip ?: "N/A",
-            inyardSiteAccessDetails = dto?.inyardSiteAccessDetails ?: InyardSiteAccessDetails(), // Ensure this class has a default constructor
+            inyardSiteAccessDetails = dto?.inyardSiteAccessDetails
+                ?: InyardSiteAccessDetails(), // Ensure this class has a default constructor
             hours = dto?.hours ?: "N/A",
             address = dto?.address ?: "N/A",
             inyardSiteType = dto?.inyardSiteType ?: "N/A",
@@ -587,19 +733,21 @@ fun transferToFuelSites(dtoList: List<DataItem?>): List<FuelSite> {
 }
 
 
-fun formatLatitude( latitude:Double, latitudeDirection:String) : Double{
-    val formattedLatitude =  if (latitudeDirection == "S") {
+fun formatLatitude(latitude: Double, latitudeDirection: String): Double {
+    val formattedLatitude = if (latitudeDirection == "S") {
         "-${"%.4f".format(latitude)}"
     } else {
         "+${"%.4f".format(latitude)}"
     }
     return formattedLatitude.toDouble()
 }
-fun formatLongitude( latitude:Double, longitudeDirection:String) : Double{
-    val formattedLongitude =  if (longitudeDirection == "W") {
+
+fun formatLongitude(latitude: Double, longitudeDirection: String): Double {
+    val formattedLongitude = if (longitudeDirection == "W") {
         "-${"%.4f".format(latitude)}"
     } else {
         "+${"%.4f".format(latitude)}"
     }
     return formattedLongitude.toDouble()
 }
+
