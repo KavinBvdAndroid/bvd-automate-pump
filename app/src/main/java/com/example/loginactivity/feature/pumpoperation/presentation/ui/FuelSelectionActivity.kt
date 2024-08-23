@@ -49,6 +49,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.loginactivity.R
 import com.example.loginactivity.core.base.generics.GenericDetailRow
 import com.example.loginactivity.core.base.generics.GenericShadowHeader
@@ -59,6 +60,7 @@ import com.example.loginactivity.core.base.generics.customTextStyle
 import com.example.loginactivity.core.base.generics.poppinsFontFamily
 import com.example.loginactivity.core.base.utils.AppUtils.hideSystemUI
 import com.example.loginactivity.feature.maps.data.model.DataItem
+import com.example.loginactivity.feature.pumpoperation.presentation.viewmodel.FuelSelectionViewModel
 import com.example.loginactivity.feature.pumpoperation.ui.theme.LoginActivityTheme
 import com.example.loginactivity.feature.transaction.presentation.ui.theme.Blue50
 
@@ -212,6 +214,7 @@ fun ShowYardDetails(dataItem: DataItem) {
     }
     val offset = Offset(15.0f, 10.0f)
 
+    val viewmodel :FuelSelectionViewModel = hiltViewModel()
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -339,7 +342,13 @@ fun ShowYardDetails(dataItem: DataItem) {
             }
             ReusableElevatedButton(
                 onClick = {
-                    context.startActivity(Intent(context, StartFuelingActivity::class.java))
+//                    viewmodel.storeTransactionDetails(newSelectedSite)
+                    context.startActivity(
+                        Intent(context, StartFuelingActivity::class.java).putExtra(
+                            "selected_yard",
+                            newSelectedSite
+                        )
+                    )
                 },
                 text = "Continue",
                 isEnabled = true,
@@ -347,8 +356,6 @@ fun ShowYardDetails(dataItem: DataItem) {
                     .fillMaxWidth()
                     .padding(0.dp)
                     .align(Alignment.BottomCenter),
-
-
                 )
 
         }

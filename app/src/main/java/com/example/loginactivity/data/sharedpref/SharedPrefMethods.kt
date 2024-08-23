@@ -14,4 +14,6 @@ interface SharedPrefMethods : LoggingSharedPrefMethods {
     fun getDriverId(): String?
     fun saveTruckId(driverId:String)
     fun getTruckId(): String?
+
+
 }

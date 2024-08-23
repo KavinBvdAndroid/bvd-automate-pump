@@ -48,6 +48,9 @@ class SessionManager @Inject constructor(private val sharedPreferences: SharedPr
     override fun getTruckId(): String? {
         return sharedPreferences.getString(Constants.TRUCK_ID, null)
     }
+
+
+
      fun setSwitchStateEnable(switchEnable: Boolean) {
         sharedPreferences.edit().putBoolean(Constants.SWITCH_STATE, switchEnable).apply()
     }
@@ -61,4 +64,34 @@ class SessionManager @Inject constructor(private val sharedPreferences: SharedPr
         setIsBoardingCompleted(true)
         return true
     }
+
+    fun saveString(key: String, value: String) {
+        sharedPreferences.edit().putString(key, value).apply()
+    }
+
+    fun saveDouble(key: String, value: Double) {
+        sharedPreferences.edit().putLong(key, java.lang.Double.doubleToRawLongBits(value)).apply()
+    }
+
+    fun saveInt(key: String, value: Int) {
+        sharedPreferences.edit().putInt(key, value).apply()
+    }
+
+    fun saveTransactionDto(userJson: String) {
+        sharedPreferences.edit().putString("transaction_dto",userJson).apply()
+    }
+    fun getString(key: String, defaultValue: String = ""): String {
+        return sharedPreferences.getString(key, defaultValue) ?: defaultValue
+    }
+
+    fun getDouble(key: String, defaultValue: Double = 0.0): Double {
+        return java.lang.Double.longBitsToDouble(
+            sharedPreferences.getLong(key, java.lang.Double.doubleToRawLongBits(defaultValue))
+        )
+    }
+
+    fun getInt(key: String, defaultValue: Int = 0): Int {
+        return sharedPreferences.getInt(key, defaultValue)
+    }
+
 }

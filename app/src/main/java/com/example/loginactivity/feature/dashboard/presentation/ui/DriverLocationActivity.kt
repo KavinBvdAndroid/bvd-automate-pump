@@ -27,14 +27,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -43,6 +48,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -67,18 +73,20 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.loginactivity.R
+import com.example.loginactivity.core.base.generics.ErrorAlertDialog
 import com.example.loginactivity.core.base.generics.GenericDetailRow
 import com.example.loginactivity.core.base.generics.GenericProgressBar
 import com.example.loginactivity.core.base.generics.GenericShadowHeader
 import com.example.loginactivity.core.base.generics.OutlinedButton
-import com.example.loginactivity.core.base.generics.ReusableElevatedButton
+import com.example.loginactivity.core.base.generics.Resource
 import com.example.loginactivity.core.base.generics.TransparentTopBarWithBackButton
 import com.example.loginactivity.core.base.generics.customTextStyle
 import com.example.loginactivity.core.base.utils.AppUtils
 import com.example.loginactivity.core.base.utils.AppUtils.hideSystemUI
 import com.example.loginactivity.feature.auth.presentation.LoginActivityCompose
-import com.example.loginactivity.feature.dashboard.presentation.viewmodel.DriverLocationViewModel
+import com.example.loginactivity.feature.dashboard.domain.DriverLocationViewModel
 import com.example.loginactivity.feature.maps.presentation.MapsSiteActivity
+import com.example.loginactivity.feature.pumpoperation.data.model.save.TransactionDto
 import com.example.loginactivity.ui.theme.LoginActivityTheme
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -107,7 +115,7 @@ fun MainContentDemo() {
     val navController = rememberNavController()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
-      val context = LocalContext.current
+    val context = LocalContext.current
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
@@ -160,7 +168,7 @@ fun BottomNavGraph(navController: NavHostController, paddingValues: PaddingValue
             FetchLocationContent(paddingValues)
         }
         composable(BottomNavItem.TransactionHistory.route) {
-            TransactionHistoryScreen(paddingValues)
+            FetchAllTransactions(paddingValues)
         }
         composable(BottomNavItem.Profile.route) {
             ProfileScreen(paddingValues)
@@ -217,9 +225,39 @@ fun currentRoute(navController: NavController): String? {
     return navBackStackEntry?.destination?.route
 }
 
+@Composable
+fun FetchAllTransactions(innerPadding: PaddingValues) {
+    val viewModel: DriverLocationViewModel = hiltViewModel()
+    viewModel.getAllTransactions()
+
+    val savedTransactions by viewModel.savedTransactions.collectAsState()
+
+    when (savedTransactions) {
+        is Resource.Loading -> {
+            GenericProgressBar(isLoading = true)
+        }
+
+        is Resource.Success -> {
+            TransactionHistoryScreen(
+                innerPadding = innerPadding,
+                (savedTransactions as Resource.Success<List<TransactionDto>>).data
+            )
+        }
+
+        is Resource.Failure -> {
+            ErrorAlertDialog(
+                title = "Error",
+                message = (savedTransactions as Resource.Failure).message,
+                buttonText = "Ok",
+                onDismiss = { })
+        }
+
+        else -> {}
+    }
+}
 
 @Composable
-fun TransactionHistoryScreen(innerPadding: PaddingValues) {
+fun TransactionHistoryScreen(innerPadding: PaddingValues, transactionsList: List<TransactionDto>?) {
 
 
     Column(
@@ -231,16 +269,54 @@ fun TransactionHistoryScreen(innerPadding: PaddingValues) {
     ) {
         GenericShadowHeader("Transaction History", Modifier.fillMaxWidth(), TextAlign.Center)
         Spacer(modifier = Modifier.width(16.dp))
-        Image(
-            painter = painterResource(id = R.drawable.coming_soon),
-            contentDescription = "Your image description",
-            contentScale = ContentScale.Fit,
-            alignment = Alignment.Center,
-            modifier = Modifier.size(220.dp)
-        )
+//        Image(
+//            painter = painterResource(id = R.drawable.coming_soon),
+//            contentDescription = "Your image description",
+//            contentScale = ContentScale.Fit,
+//            alignment = Alignment.Center,
+//            modifier = Modifier.size(220.dp)
+//        )
 
+        if (transactionsList.isNullOrEmpty()) {
+            Image(
+                painter = painterResource(id = R.drawable.coming_soon),
+                contentDescription = "Your image description",
+                contentScale = ContentScale.Fit,
+                alignment = Alignment.Center,
+                modifier = Modifier.size(220.dp)
+            )
+
+        } else {
+            LazyColumn {
+                items(items = transactionsList, key = { item ->
+                    item.driverId.toString()
+                }) {
+                    Card(
+                        modifier = Modifier
+                            .padding(top = 8.dp, bottom = 8.dp)
+                            .fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        onClick = {
+                        },
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiary),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                    ) {
+
+                        GenericDetailRow(label = "Driver Id", value = it.driverId.toString())
+                        GenericDetailRow(label = "Vin Number", value = it.vinNumber.toString())
+                        GenericDetailRow(label = "Yard Id", value = it.inyardSiteId.toString())
+                        GenericDetailRow(label = "Fuel Code", value = it.fuelCode.toString())
+                        GenericDetailRow(
+                            label = "Transaction Type",
+                            value = it.transactionType.toString()
+                        )
+                    }
+                }
+            }
+        }
         Spacer(modifier = Modifier.width(16.dp))
     }
+    Log.d("transaction records", "${transactionsList.toString()}")
 }
 
 @Composable
@@ -258,16 +334,19 @@ fun ProfileScreen(innerPadding: PaddingValues) {
 
         GenericShadowHeader("Driver Profile", Modifier.fillMaxWidth(), TextAlign.Center)
         Spacer(modifier = Modifier.width(16.dp))
-        Column (modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
 
 
-        GenericDetailRow(label = "Name", value = "testUser")
-        GenericDetailRow(label = "Email", value = "testUser@gmail.com")
-        GenericDetailRow(label = "Driver Id", value = "1456")
-        Spacer(modifier = Modifier.width(16.dp))
+            GenericDetailRow(label = "Name", value = "testUser")
+            GenericDetailRow(label = "Email", value = "testUser@gmail.com")
+            GenericDetailRow(label = "Driver Id", value = "1456")
+            Spacer(modifier = Modifier.width(16.dp))
 //        Image(
 //            painter = painterResource(id = R.drawable.coming_soon),
 //            contentDescription = "Your image description",
@@ -287,12 +366,17 @@ fun ProfileScreen(innerPadding: PaddingValues) {
             OutlinedButton(
                 onClick = {
                     val isCleared = viewmodel.clearSharedPref()
-                if (isCleared) {
-                    context.startActivity(Intent(context, LoginActivityCompose::class.java).apply {
-                        flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-                    })
-                    (context as? Activity)?.finish()
-                }
+                    if (isCleared) {
+                        context.startActivity(
+                            Intent(
+                                context,
+                                LoginActivityCompose::class.java
+                            ).apply {
+                                flags =
+                                    Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+                            })
+                        (context as? Activity)?.finish()
+                    }
 
                 },
                 modifier = Modifier.wrapContentSize(),
@@ -311,7 +395,7 @@ fun ProfileScreen(innerPadding: PaddingValues) {
 //        }) {
 //            Text(text = "Log out")
 //        }
-        Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(16.dp))
         }
     }
 }

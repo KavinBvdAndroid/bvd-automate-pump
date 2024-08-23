@@ -12,6 +12,9 @@ class ValidateUserEmailUseCase @Inject constructor(private val loginRepository: 
         return loginRepository.loginUser(email,password)
     }
 
+    fun getDriverId(): String?{
+        return loginRepository.getDriverId()
+    }
     fun setLoggedIn(){
         loginRepository.saveLoginState(true)
     }

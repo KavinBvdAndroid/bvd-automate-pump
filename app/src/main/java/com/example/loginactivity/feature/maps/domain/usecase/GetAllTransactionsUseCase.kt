@@ -9,7 +9,5 @@ import javax.inject.Inject
 
 class GetAllTransactionsUseCase @Inject constructor(private val transactionRepository: TransactionRepository){
 
-    suspend fun getAllTransactions(truckId:Int, driverId: Int): Resource<List<TransactionDto>> {
-        return transactionRepository.getAllTransactions(truckId,driverId)
-    }
+
 }

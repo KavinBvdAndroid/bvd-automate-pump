@@ -17,7 +17,7 @@ class TransactionRepositoryImpl @Inject constructor(
     private val gson: Gson
 ) : TransactionRepository, BaseRepository(gson) {
     override suspend fun getAllTransactions(
-        truckId: Int,
+
         driverId: Int
     ): Resource<List<TransactionDto>> {
 
@@ -34,7 +34,7 @@ class TransactionRepositoryImpl @Inject constructor(
 //        )
 
         return try {
-            val entities = localDataSource.getAllTransactions(truckId,driverId)
+            val entities = localDataSource.getAllTransactions(driverId)
             val dto = entities.map { it.toDto() }
             Resource.Success(dto)
         }catch (e:Exception){

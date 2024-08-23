@@ -26,7 +26,7 @@ import com.example.loginactivity.feature.transaction.data.TransactionRepositoryI
 import com.example.loginactivity.feature.transaction.data.datasource.LocalTransactionDataSource
 import com.example.loginactivity.feature.transaction.data.datasource.RemoteTransactionDataSource
 import com.example.loginactivity.feature.transaction.domain.TransactionRepository
-import com.example.loginactivity.feature.transaction.domain.usecases.SaveTransactionUseCase
+import com.example.loginactivity.feature.transaction.domain.usecases.GetSavedTransactionUseCase
 import com.example.loginactivity.feature.vinnumber.VinNumberRepository
 import com.example.loginactivity.feature.vinnumber.VinNumberRepositoryImpl
 import com.google.gson.Gson
@@ -96,11 +96,15 @@ object NetworkDatabaseModule {
         return StopPumpUseCase((pumpOperationRepository))
     }
 
-    @Provides
-    fun provideSaveTransactionUseCase(transactionRepository: TransactionRepository): SaveTransactionUseCase {
-        return SaveTransactionUseCase((transactionRepository))
-    }
+//    @Provides
+//    fun provideSaveTransactionUseCase(transactionRepository: TransactionRepository): SaveTransactionUseCase {
+//        return SaveTransactionUseCase((transactionRepository))
+//    }
 
+    @Provides
+    fun provideGetSavedTransactionUSeCase(transactionRepository: TransactionRepository): GetSavedTransactionUseCase {
+        return GetSavedTransactionUseCase((transactionRepository))
+    }
 
     @Provides
     fun providesLoginApiService(sessionManager: SessionManager): LoginApiService {

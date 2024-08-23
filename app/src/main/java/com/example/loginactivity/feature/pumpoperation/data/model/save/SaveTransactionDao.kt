@@ -14,6 +14,6 @@ interface SaveTransactionDao {
     @Query("SELECT * FROM transactions where id = :id")
     suspend fun getTransactionById(id: Int): TransactionEntity
 
-    @Query("SELECT * FROM Transactions WHERE truck_id = :truckId AND driver_id = :driverId")
-    suspend fun getAllTransactions(truckId:Int,driverId:Int): List<TransactionEntity>
+    @Query("SELECT * FROM Transactions WHERE driver_id = :driverId")
+    suspend fun getAllTransactions(driverId:Int): List<TransactionEntity>
 }

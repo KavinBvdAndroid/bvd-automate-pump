@@ -15,6 +15,13 @@ class Constants {
         const val IS_BOARDING_SHOWN = "is_boarding_shown"
         const val DRIVER_ID = "driver_id"
         const val TRUCK_ID = "truck_id"
+        const val FUEL_CODE = "fuel_code"
+        const val QUANTITY = "quantity"
+        const val CARD_NUMBER = "card_number"
+        const val TRANSACTION_TYPE = "trans_type"
+        const val YARD_ID = "yard_id"
+        const val VIN_NUMBER = "vin_number"
+
         const val SWITCH_STATE = "Switch_state"
 
 

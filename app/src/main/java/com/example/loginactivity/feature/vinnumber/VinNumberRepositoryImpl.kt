@@ -23,7 +23,7 @@ class VinNumberRepositoryImpl @Inject constructor(
             successType = VinNumberResponse::class.java,
             handleSuccess = {
                 Log.d("vin number", "" + it.toString())
-                if (it.has("user_id")) {
+                if (it.has("vin_number")) {
                     saveTruckID(it.get("vin_number").asString)
                 }
             },

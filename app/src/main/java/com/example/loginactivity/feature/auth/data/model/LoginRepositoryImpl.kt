@@ -4,6 +4,7 @@ import android.util.Log
 import com.example.bvddriverfleetapp.data.sharedpref.SessionManager
 import com.example.loginactivity.core.base.BaseRepository
 import com.example.loginactivity.core.base.generics.Resource
+import com.example.loginactivity.core.base.utils.Constants
 import com.example.loginactivity.data.retrofit.LoginApiService
 import com.example.loginactivity.feature.auth.domain.LoginRepository
 import com.google.gson.Gson
@@ -30,7 +31,7 @@ class LoginRepositoryImpl @Inject constructor(
                     saveLoginState(true)
                 }
                 if (it.has("user_id")) {
-                    saveDriverId(it.get("user_id").asString)
+                    saveDriverId(it.get(Constants.DRIVER_ID).asString)
                 }
             },
             handleFailure = {
@@ -57,7 +58,7 @@ class LoginRepositoryImpl @Inject constructor(
     }
 
     override fun getDriverId(): String? {
-       return sessionManager.getDriverId()
+        return sessionManager.getDriverId()
     }
 
     override fun logOut() {

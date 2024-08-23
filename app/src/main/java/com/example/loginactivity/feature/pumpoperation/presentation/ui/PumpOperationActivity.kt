@@ -73,11 +73,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.bvddriverfleetapp.data.sharedpref.SessionManager
 import com.example.loginactivity.R
 import com.example.loginactivity.core.base.generics.ErrorAlertDialog
 import com.example.loginactivity.core.base.generics.GenericProgressBar
@@ -88,11 +86,12 @@ import com.example.loginactivity.core.base.generics.customTextStyle
 import com.example.loginactivity.core.base.testdatas.requestTransaction
 import com.example.loginactivity.core.base.utils.AppUtils
 import com.example.loginactivity.core.base.utils.AppUtils.hideSystemUI
+import com.example.loginactivity.feature.maps.data.model.DataItem
 import com.example.loginactivity.feature.pumpoperation.data.model.PumpParams
 import com.example.loginactivity.feature.pumpoperation.data.model.PumpResponse
 import com.example.loginactivity.feature.pumpoperation.data.model.TransactionState
-import com.example.loginactivity.feature.pumpoperation.presentation.viewmodel.PumpOperationViewModel
 import com.example.loginactivity.feature.pumpoperation.data.model.save.TransactionDto
+import com.example.loginactivity.feature.pumpoperation.presentation.viewmodel.PumpOperationViewModel
 import com.example.loginactivity.feature.pumpoperation.ui.theme.LoginActivityTheme
 import com.example.loginactivity.feature.transaction.presentation.TransactionDetailsActivity
 import com.example.loginactivity.feature.transaction.presentation.ui.theme.Blue700
@@ -100,7 +99,6 @@ import com.example.loginactivity.ui.theme.ColorSecondary
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class StartFuelingActivity : ComponentActivity() {
@@ -109,9 +107,10 @@ class StartFuelingActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        val selected_yard = intent?.getParcelableExtra<DataItem>("selected_yard")
         setContent {
             LoginActivityTheme {
-                StartFuelingDemo()
+                StartFuelingDemo(selected_yard)
             }
         }
         hideSystemUI()
@@ -121,9 +120,8 @@ class StartFuelingActivity : ComponentActivity() {
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview(showBackground = true)
 @Composable
-fun StartFuelingDemo() {
+fun StartFuelingDemo(selected_yard: DataItem?) {
     val scrollState = rememberLazyListState()
     val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -179,8 +177,10 @@ fun StartFuelingDemo() {
             )
         }
     ) { innerPadding ->
-        StartFuel(innerPadding) {
-            isBackButtonEnabled = false
+        selected_yard?.let {
+            StartFuel(innerPadding, {
+                isBackButtonEnabled = false
+            }, it)
         }
     }
 
@@ -189,7 +189,7 @@ fun StartFuelingDemo() {
 
 
 @Composable
-fun StartFuel(innerPadding: PaddingValues, onBackButtonDisabled: () -> Unit) {
+fun StartFuel(innerPadding: PaddingValues, onBackButtonDisabled: () -> Unit,selected_yard:DataItem) {
     val viewModel: PumpOperationViewModel = hiltViewModel()
     val pumpStartLivedata by viewModel.pumpStartLivedata.observeAsState(null)
     val pumpStopLivedata by viewModel.pumpStopLivedata.observeAsState(null)
@@ -230,8 +230,8 @@ fun StartFuel(innerPadding: PaddingValues, onBackButtonDisabled: () -> Unit) {
     }
 
 
-    val handleSaveTransaction: (TransactionDto) -> Unit = { requestTransaction ->
-        viewModel.saveTransaction(requestTransaction)
+    val handleSaveTransaction:(TransactionDto) -> Unit = {transactionDto->
+        viewModel.saveTransaction(transactionDto)
     }
 
     Column(
@@ -304,6 +304,7 @@ fun StartFuel(innerPadding: PaddingValues, onBackButtonDisabled: () -> Unit) {
                 isStartEnabled = false
                 isTransactionComplete = true
                 result = data?.msg.toString()
+                handleSaveTransaction
             } else {
                 isStartEnabled = true
                 if (message != null) {
@@ -396,7 +397,7 @@ fun AgreementSection(
     isTransactionComplete: Boolean,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
-    handleSaveTransaction: (TransactionDto) -> Unit,
+    handleSaveTransaction:(TransactionDto) -> Unit,
     context: Context
 ) {
     Column(

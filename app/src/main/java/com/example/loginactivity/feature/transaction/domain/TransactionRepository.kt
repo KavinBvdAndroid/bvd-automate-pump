@@ -6,7 +6,9 @@ import com.example.loginactivity.feature.pumpoperation.data.model.save.Transacti
 
 interface TransactionRepository {
 
-    suspend fun getAllTransactions(truckId:Int, driverId:Int) : Resource<List<TransactionDto>>
+    suspend fun getAllTransactions(driverId:Int) : Resource<List<TransactionDto>>
     suspend fun saveAllTransactions(transactionDto: List<TransactionDto>)
     suspend fun saveTransaction(transactionDto: TransactionDto): TransactionSaveResult
+
+
 }
