@@ -3,6 +3,7 @@ package com.example.loginactivity.feature.maps.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.loginactivity.core.base.generics.Resource
+import com.example.loginactivity.core.base.testdatas.mockFetchInYardSitesResponse
 import com.example.loginactivity.feature.maps.data.model.DriverLocation
 import com.example.loginactivity.feature.pumpoperation.data.model.SiteDetails
 import com.example.loginactivity.feature.maps.data.model.FetchInYardSitesResponse
@@ -40,10 +41,12 @@ class FuelSitesViewModel @Inject constructor(private val fetchInYardSiteUseCase:
         _mutableDriverLocation.value = DriverLocation(latitude,longitude)
     }
 
-    fun fetchNearBySites(latLng: LatLng? = null){
+    fun fetchNearBySites(latitude: String, longitude:String){
         viewModelScope.launch {
-//            val result = fetchInYardSiteUseCase.fetchInYardSites(latLng)
-//            _fuelSiteDetails.value = result
+            val result = fetchInYardSiteUseCase.fetchInYardSites(latitude,longitude)
+//            _fuelSiteDetails.value =result
+
+            _fuelSiteDetails.value = Resource.Success(mockFetchInYardSitesResponse)
             delay(3000)
         }
     }

@@ -47,31 +47,30 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.loginactivity.R
 import com.example.loginactivity.core.base.generics.GenericDetailRow
+import com.example.loginactivity.core.base.generics.GenericShadowHeader
 import com.example.loginactivity.core.base.generics.ReusableElevatedButton
 import com.example.loginactivity.core.base.generics.RoundSearchBox
 import com.example.loginactivity.core.base.generics.TransparentTopBarWithBackButton
 import com.example.loginactivity.core.base.generics.customTextStyle
 import com.example.loginactivity.core.base.generics.poppinsFontFamily
-import com.example.loginactivity.core.base.testdatas.listOfInYardItems
 import com.example.loginactivity.core.base.utils.AppUtils.hideSystemUI
-import com.example.loginactivity.feature.pumpoperation.data.model.InyardTanksItem
+import com.example.loginactivity.feature.maps.data.model.DataItem
 import com.example.loginactivity.feature.pumpoperation.ui.theme.LoginActivityTheme
-import com.example.loginactivity.feature.transaction.presentation.ui.theme.Blue100
 import com.example.loginactivity.feature.transaction.presentation.ui.theme.Blue50
-import com.example.loginactivity.feature.transaction.presentation.ui.theme.Blue500
 
 class FuelSelectionActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        val dataItem = intent?.getParcelableExtra<DataItem>("selectedSite")
+
         setContent {
             LoginActivityTheme {
-                SelectFuelDemo()
+                SelectFuelDemo(dataItem)
             }
         }
         hideSystemUI()
@@ -84,9 +83,8 @@ enum class Option {
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview(showBackground = true)
 @Composable
-fun SelectFuelDemo() {
+fun SelectFuelDemo(dataItem: DataItem?) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
 
@@ -102,22 +100,24 @@ fun SelectFuelDemo() {
             )
         }
     ) { innerPadding ->
-        SelectFuel(innerPadding)
+        SelectFuel(innerPadding, dataItem)
     }
 }
 
 
 @Composable
-fun SelectFuel(innerPadding: PaddingValues) {
+fun SelectFuel(innerPadding: PaddingValues, dataItem: DataItem?) {
     val context = LocalContext.current
     val offset = Offset(15.0f, 10.0f)
 
     var selectedOption by rememberSaveable { mutableStateOf<Option?>(null) }
     var showYardDetails by rememberSaveable { mutableStateOf<Boolean>(false) }
 
-    Column(modifier = Modifier
-        .padding(innerPadding)
-        .background(Color.Transparent)) {
+    Column(
+        modifier = Modifier
+            .padding(innerPadding)
+            .background(Color.Transparent)
+    ) {
         Text(
             "Select the transaction", modifier = Modifier
                 .fillMaxWidth(),
@@ -184,18 +184,27 @@ fun SelectFuel(innerPadding: PaddingValues) {
 
         Column(modifier = Modifier.background(Blue50)) {
             if (showYardDetails) {
-                ShowYardDetails()
+                if (dataItem != null) {
+                    var a = dataItem.inyardTanks
+                    if (dataItem.inyardTanks.isNotEmpty()) {
+                        ShowYardDetails(dataItem)
+                    } else (
+                            GenericShadowHeader(
+                                label = ("No tanks found"),
+                                modifier = Modifier.align(Alignment.CenterHorizontally)
+                            )
+                            )
+                }
             }
 
         }
     }
-
-
 }
 
 @Composable
-fun ShowYardDetails() {
-    var newSelectedSite by rememberSaveable { mutableStateOf<InyardTanksItem?>(listOfInYardItems.first()) }
+fun ShowYardDetails(dataItem: DataItem) {
+    val listOfInYardItems by rememberSaveable { mutableStateOf(dataItem.inyardTanks) }
+    var newSelectedSite by rememberSaveable { mutableStateOf(listOfInYardItems.first()) }
     val context = LocalContext.current
     var query by rememberSaveable { mutableStateOf("") }
     val filteredItems = listOfInYardItems.filter {
@@ -333,7 +342,7 @@ fun ShowYardDetails() {
                     context.startActivity(Intent(context, StartFuelingActivity::class.java))
                 },
                 text = "Continue",
-                isEnabled = newSelectedSite != null,
+                isEnabled = true,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(0.dp)

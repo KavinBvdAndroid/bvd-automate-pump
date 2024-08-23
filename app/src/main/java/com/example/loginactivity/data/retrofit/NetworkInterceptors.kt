@@ -18,7 +18,7 @@ class NetworkInterceptors @Inject constructor(private val sessionManager: Shared
 
 
         if (authToken != null) {
-            requestBuilder.header("Authorization", "Bearer $authToken")
+            requestBuilder.header("Authorization", "Bearer $mockToken")
         }
 
 //        requestBuilder.header("Authorization", "Bearer $sessionManager.")

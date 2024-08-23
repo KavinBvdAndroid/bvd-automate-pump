@@ -11,18 +11,21 @@ import retrofit2.http.Query
 interface LoginApiService {
     @POST("api/verifyUser")
     suspend fun loginUser(
-        @Query("username") userName:String,
-        @Query("password") password:String
-    ) : Response<ResponseBody>
+        @Query("username") userName: String,
+        @Query("password") password: String
+    ): Response<ResponseBody>
 
     @GET("api/getTankerDetails")
     suspend fun validateVinNumber(
-        @Query("vin_number") vinNumber:String,
-    ) : Response<ResponseBody>
+        @Query("vin_number") vinNumber: String,
+    ): Response<ResponseBody>
 
 
     @POST("api/fetchInyardSites")
-    suspend fun fetchInYardItems(): Response<ResponseBody>
+    suspend fun fetchInYardItems(
+        @Query("latitude") latitude: String,
+        @Query("longitude") longitude: String
+    ): Response<ResponseBody>
 
 
     @POST("api/saveInyardTransaction")

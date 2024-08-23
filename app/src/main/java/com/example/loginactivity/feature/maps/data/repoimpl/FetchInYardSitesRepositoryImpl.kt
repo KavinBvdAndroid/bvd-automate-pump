@@ -11,9 +11,9 @@ import com.google.gson.Gson
 import javax.inject.Inject
 
 class FetchInYardSitesRepositoryImpl @Inject constructor(private val gson: Gson, private val apiService: LoginApiService) : FetchInYardSitesRepository, BaseRepository(gson) {
-    override suspend fun fetchNearestSites(driverLocation: LatLng?): Resource<FetchInYardSitesResponse> {
+    override suspend fun fetchNearestSites(latitude: String, longitude:String): Resource<FetchInYardSitesResponse> {
         return safeApiCall(
-            apiCall = { apiService.fetchInYardItems() },
+            apiCall = { apiService.fetchInYardItems(latitude,longitude) },
             successType = FetchInYardSitesResponse::class.java,
             handleSuccess = {
                 Log.d("Api Success Response"," FetchInYardResponse ${it}")

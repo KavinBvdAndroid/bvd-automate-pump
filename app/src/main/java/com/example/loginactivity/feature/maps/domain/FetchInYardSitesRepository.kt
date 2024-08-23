@@ -5,5 +5,5 @@ import com.example.loginactivity.feature.maps.data.model.FetchInYardSitesRespons
 import com.google.android.gms.maps.model.LatLng
 
 interface FetchInYardSitesRepository {
-    suspend fun fetchNearestSites(driverLocation: LatLng? = null): Resource<FetchInYardSitesResponse>
+    suspend fun fetchNearestSites(latitude: String, longitude:String): Resource<FetchInYardSitesResponse>
 }

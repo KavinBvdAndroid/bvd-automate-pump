@@ -697,40 +697,40 @@ fun GenericDetailRow(label: String, value: String) {
 //    return (pixels / density).sp // Convert pixels to sp
 //}
 
-fun transferToFuelSites(dtoList: List<DataItem?>): List<FuelSite> {
-    return dtoList.map { dto ->
-        FuelSite(
-            longitudeDirection = dto?.longitudeDirection ?: "N/A",
-            inyardTanks = dto?.inyardTanks?.filterNotNull() ?: emptyList(),
-            inYard = dto?.inYard ?: 0,
-            city = dto?.city ?: "N/A",
-            latitude = dto?.latitude ?: 0.0,
-            createdAt = dto?.createdAt ?: "N/A",
-            latitudeDirection = dto?.latitudeDirection ?: "N/A",
-            number = dto?.number ?: "N/A",
-            updatedAt = dto?.updatedAt ?: "N/A",
-            timings = dto?.timings?.filterNotNull() ?: emptyList(),
-            id = dto?.id ?: 0,
-            stateId = dto?.stateId ?: 0,
-            state = dto?.state ?: State(), // Ensure State class has a default constructor
-            longitude = dto?.longitude ?: 0.0,
-            zip = dto?.zip ?: "N/A",
-            inyardSiteAccessDetails = dto?.inyardSiteAccessDetails
-                ?: InyardSiteAccessDetails(), // Ensure this class has a default constructor
-            hours = dto?.hours ?: "N/A",
-            address = dto?.address ?: "N/A",
-            inyardSiteType = dto?.inyardSiteType ?: "N/A",
-            deleted = dto?.deleted ?: 0,
-            groupNumber = dto?.groupNumber ?: "N/A",
-            phone = dto?.phone ?: "N/A",
-            name = dto?.name ?: "N/A",
-            manned = dto?.manned ?: 0,
-            countryId = dto?.countryId ?: 0,
-            contacts = dto?.contacts?.filterNotNull() ?: emptyList(),
-            status = dto?.status ?: 0
-        )
-    }
-}
+//fun transferToFuelSites(dtoList: List<DataItem?>): List<FuelSite> {
+//    return dtoList.map { dto ->
+//        FuelSite(
+//            longitudeDirection = dto?.longitudeDirection ?: "N/A",
+//            inyardTanks = dto?.inyardTanks?.filterNotNull() ?: emptyList(),
+//            inYard = dto?.inYard ?: 0,
+//            city = dto?.city ?: "N/A",
+//            latitude = dto?.latitude ?: 0.0,
+//            createdAt = dto?.createdAt ?: "N/A",
+//            latitudeDirection = dto?.latitudeDirection ?: "N/A",
+//            number = dto?.number ?: "N/A",
+//            updatedAt = dto?.updatedAt ?: "N/A",
+//            timings = dto?.timings?.filterNotNull() ?: emptyList(),
+//            id = dto?.id ?: 0,
+//            stateId = dto?.stateId ?: 0,
+//            state = dto?.state ?: State(), // Ensure State class has a default constructor
+//            longitude = dto?.longitude ?: 0.0,
+//            zip = dto?.zip ?: "N/A",
+//            inyardSiteAccessDetails = dto?.inyardSiteAccessDetails
+//                ?: InyardSiteAccessDetails(), // Ensure this class has a default constructor
+//            hours = dto?.hours ?: "N/A",
+//            address = dto?.address ?: "N/A",
+//            inyardSiteType = dto?.inyardSiteType ?: "N/A",
+//            deleted = dto?.deleted ?: 0,
+//            groupNumber = dto?.groupNumber ?: "N/A",
+//            phone = dto?.phone ?: "N/A",
+//            name = dto?.name ?: "N/A",
+//            manned = dto?.manned ?: 0,
+//            countryId = dto?.countryId ?: 0,
+//            contacts = dto?.contacts?.filterNotNull() ?: emptyList(),
+//            status = dto?.status ?: 0
+//        )
+//    }
+//}
 
 
 fun formatLatitude(latitude: Double, latitudeDirection: String): Double {

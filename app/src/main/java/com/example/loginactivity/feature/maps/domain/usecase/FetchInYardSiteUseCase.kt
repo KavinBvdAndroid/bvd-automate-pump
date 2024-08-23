@@ -8,7 +8,7 @@ import javax.inject.Inject
 
 class FetchInYardSiteUseCase @Inject constructor(private val fetchInYardSitesRepository: FetchInYardSitesRepository) {
 
-    suspend fun fetchInYardSites(driverLocation: LatLng? = null) : Resource<FetchInYardSitesResponse>{
-       return fetchInYardSitesRepository.fetchNearestSites(driverLocation)
+    suspend fun fetchInYardSites(latitude: String,longitude:String) : Resource<FetchInYardSitesResponse>{
+       return fetchInYardSitesRepository.fetchNearestSites(latitude,longitude)
     }
 }
